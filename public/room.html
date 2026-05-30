@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bidhaus — Auction Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<script src="/socket.io/socket.io.js"></script>
+<style>
+.room-header{padding:14px 20px 0;border-bottom:1px solid var(--line)}
+.room-house{font-size:11px;color:var(--ink4);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.room-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:12px}
+.layout{display:grid;grid-template-columns:1fr 280px;min-height:calc(100vh - 148px)}
+.main{padding:20px;border-right:1px solid var(--line)}
+.lot-thumb{width:100%;aspect-ratio:16/9;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:16px}
+.lot-badge-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.lot-num-label{font-size:10px;letter-spacing:2px;color:var(--ink4);text-transform:uppercase}
+.lot-name{font-size:16px;font-weight:500;color:var(--ink);line-height:1.4;margin-bottom:5px}
+.lot-desc{font-size:12px;color:var(--ink3);line-height:1.7;margin-bottom:16px}
+.sidebar{padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg2)}
+.price-big{font-size:24px;font-weight:500;color:var(--ink);transition:color .3s}
+.price-leader{font-size:11px;color:var(--ink4);margin-top:3px}
+.price-leader span{color:var(--green);font-weight:500}
+.ended-block{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:20px;text-align:center}
+.ended-title{font-size:18px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.ended-sub{font-size:13px;color:var(--ink3)}
+.ended-sub strong{color:var(--green)}
+.login-prompt{width:100%;padding:10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);cursor:pointer;transition:background .15s;text-align:center}
+.login-prompt:hover{background:var(--bg2)}
+.bid-error{font-size:12px;color:var(--red);min-height:16px;margin-top:4px}
+.h-list{display:flex;flex-direction:column;max-height:180px;overflow-y:auto}
+@media(max-width:680px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+    <div class="logo">Bidhaus</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="live-pill"><div class="live-dot"></div>Live</div>
+    <span style="font-size:12px;color:var(--ink4)"><span id="viewer-count">0</span> คน</span>
+    <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+  </div>
+</nav>
+
+<div class="room-header">
+  <div class="room-house" id="room-house">กำลังโหลด...</div>
+  <div class="room-title" id="room-title"></div>
+  <div class="lot-tabs" id="lot-tabs"></div>
+</div>
+
+<div class="layout">
+  <div class="main" id="main"></div>
+  <div class="sidebar">
+    <div class="s-block">
+      <div class="s-block-label">เวลาที่เหลือ</div>
+      <div class="timer-val" id="timer">--:--</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
+    </div>
+    <div class="notice" id="ext-notice">⏱ ขยายเวลาเพิ่ม 30 วินาที!</div>
+    <div class="s-block">
+      <div class="s-block-label">ราคาปัจจุบัน</div>
+      <div class="price-big" id="price-val">฿—</div>
+      <div class="price-leader" id="price-leader">ยังไม่มีการประมูล</div>
+    </div>
+    <div id="bid-section"></div>
+    <div class="s-block">
+      <div class="s-block-label">ประวัติ</div>
+      <div class="h-list" id="history-list"><div class="h-empty">ยังไม่มีการประมูล</div></div>
+    </div>
+    <div class="viewer-row"><div class="viewer-dot"></div><span id="viewer-count2">0</span> คนดูอยู่</div>
+  </div>
+</div>
+
+<script>
+const ROOM_ID=new URLSearchParams(location.search).get('id');
+if(!ROOM_ID) location.href='/';
+const token=localStorage.getItem('token');
+const user=JSON.parse(localStorage.getItem('user')||'null');
+if(user) document.getElementById('nav-user').textContent=user.name;
+const socket=io({auth:{token:token||''}});
+let roomData=null,activeLotId=null;
+const LOT_DUR=30*60*1000;
+
+socket.on('connect',()=>socket.emit('room:join',ROOM_ID));
+socket.on('room:init',d=>{
+  roomData=d;
+  document.getElementById('room-house').textContent=d.house;
+  document.getElementById('room-title').textContent=d.title;
+  renderTabs(d.lots);
+  const first=d.lots.find(l=>l.isActive)||d.lots[0];
+  if(first) switchLot(first._id);
+});
+socket.on('room:viewers',({count})=>{document.getElementById('viewer-count').textContent=count;document.getElementById('viewer-count2').textContent=count;});
+socket.on('bid:new',({lotId,bid,currentPrice,highestBidder})=>{
+  const lot=roomData?.lots.find(l=>l._id===lotId);
+  if(lot){lot.currentPrice=currentPrice;lot.highestBidder=highestBidder;lot.bids.unshift(bid);}
+  if(lotId===activeLotId){updatePrice(currentPrice,highestBidder);updateQuickBids(currentPrice);prependHistory(bid);flashPrice();updateStats();}
+});
+socket.on('lot:tick',({lotId,timeLeft})=>{if(lotId===activeLotId) renderTimer(timeLeft);});
+socket.on('lot:extended',({lotId})=>{
+  if(lotId!==activeLotId) return;
+  const n=document.getElementById('ext-notice');n.classList.add('show');setTimeout(()=>n.classList.remove('show'),4000);
+});
+socket.on('lot:ended',({lotId,winner,finalPrice})=>{
+  const lot=roomData?.lots.find(l=>l._id===lotId);
+  if(lot) lot.isActive=false;
+  renderTabs(roomData?.lots||[]);
+  if(lotId===activeLotId) showEnded(winner,finalPrice);
+});
+socket.on('bid:error',({message})=>showError(message));
+
+function renderTabs(lots){
+  document.getElementById('lot-tabs').innerHTML=lots.map(l=>
+    `<div class="lot-tab${l._id===activeLotId?' active':''}" onclick="switchLot('${l._id}')">
+      ${l.isActive?'<span class="dot"></span>':'<span class="dot ended"></span>'}Lot ${l.num}
+    </div>`).join('');
+}
+
+function switchLot(lotId){
+  activeLotId=lotId;
+  const lot=roomData?.lots.find(l=>l._id===lotId);
+  if(!lot) return;
+  renderTabs(roomData.lots);
+  document.getElementById('main').innerHTML=`
+    <div class="lot-thumb">${lotIcon(lot.name)}</div>
+    <div class="lot-badge-row">
+      <span class="lot-num-label">Lot ${String(lot.num).padStart(3,'0')}</span>
+      <span class="badge ${lot.isActive?'badge-live':'badge-ended'}">${lot.isActive?'● กำลัง Live':'สิ้นสุดแล้ว'}</span>
+    </div>
+    <div class="lot-name">${lot.name}</div>
+    <div class="lot-desc">${lot.desc||''}</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-label">ราคาปัจจุบัน</div><div class="stat-val" id="s-price">฿${lot.currentPrice.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Bids</div><div class="stat-val muted" id="s-bids">${lot.bids?.length||0}</div></div>
+      <div class="stat-box"><div class="stat-label">ผู้นำ</div><div class="stat-val muted" id="s-leader">${lot.highestBidder?mask(lot.highestBidder):'—'}</div></div>
+    </div>`;
+  updatePrice(lot.currentPrice,lot.highestBidder);
+  updateQuickBids(lot.currentPrice);
+  renderHistoryFull(lot.bids||[]);
+  lot.isActive?renderBidSection():showEnded(lot.highestBidder,lot.currentPrice);
+}
+
+function renderBidSection(){
+  const sec=document.getElementById('bid-section');
+  if(!token){sec.innerHTML=`<button class="login-prompt" onclick="location.href='/login.html?redirect=/room.html?id=${ROOM_ID}'">เข้าสู่ระบบเพื่อประมูล →</button>`;return;}
+  sec.innerHTML=`<div class="s-block"><div class="s-block-label">ประมูล</div><div class="quick-grid" id="quick-grid"></div><input class="bid-amount-input" id="bid-amount" type="number" placeholder="ระบุจำนวนเงิน (฿)" style="width:100%;margin-bottom:6px"><button class="btn primary btn-full" onclick="placeBid()">ประมูลเลย</button><div class="bid-error" id="bid-error"></div></div>`;
+  const lot=roomData?.lots.find(l=>l._id===activeLotId);
+  if(lot) updateQuickBids(lot.currentPrice);
+}
+
+function updateQuickBids(price){
+  const g=document.getElementById('quick-grid');if(!g) return;
+  g.innerHTML=[1000,5000,10000,50000].map(inc=>{const val=price+inc;return`<button class="quick-btn" onclick="setAmount(${val})">+฿${inc.toLocaleString()}<br><span style="font-size:10px;color:var(--ink4)">฿${val.toLocaleString()}</span></button>`;}).join('');
+}
+
+function setAmount(val){const el=document.getElementById('bid-amount');if(el){el.value=val;const e=document.getElementById('bid-error');if(e)e.textContent='';}}
+function updatePrice(price,bidder){
+  document.getElementById('price-val').textContent='฿'+price.toLocaleString();
+  const isMe=user&&bidder===user.name;
+  document.getElementById('price-leader').innerHTML=bidder?`ผู้นำ: <span>${mask(bidder)}${isMe?' <span class="you-badge">คุณ</span>':''}</span>`:'ยังไม่มีการประมูล';
+  const sp=document.getElementById('s-price');if(sp) sp.textContent='฿'+price.toLocaleString();
+}
+function updateStats(){
+  const lot=roomData?.lots.find(l=>l._id===activeLotId);if(!lot) return;
+  const sb=document.getElementById('s-bids');const sl=document.getElementById('s-leader');
+  if(sb) sb.textContent=lot.bids?.length||0;
+  if(sl) sl.textContent=lot.highestBidder?mask(lot.highestBidder):'—';
+}
+function flashPrice(){const el=document.getElementById('price-val');el.style.color='var(--green)';setTimeout(()=>el.style.color='',500);}
+function renderTimer(ms){
+  const s=Math.max(0,Math.ceil(ms/1000));
+  const tv=document.getElementById('timer');const tb=document.getElementById('timer-bar');
+  tv.textContent=`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+  tb.style.width=Math.min(100,(ms/LOT_DUR)*100)+'%';
+  const u=ms<30000;tv.className='timer-val'+(u?' urgent':'');tb.className='timer-bar'+(u?' urgent':'');
+}
+function mask(name){if(!name||name.length<3) return name;return name[0]+'***'+name.slice(-1);}
+function lotIcon(name){const n=name.toLowerCase();if(n.includes('rolex')||n.includes('patek')||n.includes('นาฬิกา')) return'⌚';if(n.includes('nike')||n.includes('jordan')) return'👟';if(n.includes('ภาพ')||n.includes('ศิลป')) return'🖼';if(n.includes('hoodie')||n.includes('supreme')) return'👕';return'📦';}
+function prependHistory(bid){
+  const list=document.getElementById('history-list');
+  const empty=list.querySelector('.h-empty');if(empty) empty.remove();
+  const isMe=user&&bid.bidderName===user.name;
+  const t=new Date(bid.createdAt||bid.timestamp||Date.now());
+  const div=document.createElement('div');div.className='h-item';
+  div.innerHTML=`<div><div class="h-name">${mask(bid.bidderName)}${isMe?'<span class="you-badge">คุณ</span>':''}</div><div class="h-time">${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}</div></div><div class="h-amount">฿${bid.amount.toLocaleString()}</div>`;
+  list.prepend(div);
+}
+function renderHistoryFull(bids){
+  const list=document.getElementById('history-list');
+  if(!bids.length){list.innerHTML='<div class="h-empty">ยังไม่มีการประมูล</div>';return;}
+  list.innerHTML='';[...bids].reverse().forEach(b=>prependHistory(b));
+}
+function showEnded(winner,price){
+  document.getElementById('bid-section').innerHTML=`<div class="ended-block"><div class="ended-title">Lot สิ้นสุดแล้ว</div><div class="ended-sub">ผู้ชนะ: <strong>${winner?mask(winner):'ไม่มีผู้ประมูล'}</strong><br>฿${price.toLocaleString()}</div></div>`;
+  document.getElementById('timer').textContent='00:00';
+}
+function showError(msg){const el=document.getElementById('bid-error');if(el){el.textContent=msg;setTimeout(()=>el.textContent='',3000);}}
+function placeBid(){
+  const amount=parseInt(document.getElementById('bid-amount')?.value,10);
+  if(!amount||isNaN(amount)) return showError('กรุณาระบุจำนวนเงิน');
+  socket.emit('bid:place',{roomId:ROOM_ID,lotId:activeLotId,amount});
+  document.getElementById('bid-amount').value='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter') placeBid();});
+</script>
+</body>
+</html>
