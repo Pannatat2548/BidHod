@@ -1,91 +1,136 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidmai — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
-<style>
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg2)}
-.card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:28px;width:100%;max-width:360px}
-.tabs{display:flex;margin-bottom:22px;border-bottom:1px solid var(--line)}
-.tab{flex:1;padding:9px;text-align:center;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
-.role-note{font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bidmai — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      background: var(--bg2)
+    }
+
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 360px
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--ink3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s
+    }
+
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--ink)
+    }
+
+    .role-note {
+      font-size: 11px;
+      color: var(--ink4);
+      margin-top: 4px;
+      line-height: 1.5
+    }
+  </style>
 </head>
+
 <body>
-<div style="font-size:15px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px">Bidmai</div>
-<div class="card">
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('login')">เข้าสู่ระบบ</div>
-    <div class="tab" onclick="switchTab('register')">สมัครสมาชิก</div>
+  <div style="font-size:15px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px">Bidmai
   </div>
-
-  <div id="login-form">
-    <div class="field"><label>อีเมล</label><input id="l-email" type="email" placeholder="your@email.com"></div>
-    <div class="field"><label>รหัสผ่าน</label><input id="l-pass" type="password" placeholder="••••••••"></div>
-    <button class="btn primary btn-full" onclick="doLogin()">เข้าสู่ระบบ</button>
-    <div class="msg" id="login-msg"></div>
-  </div>
-
-  <div id="register-form" style="display:none">
-    <div class="field"><label>ชื่อ</label><input id="r-name" type="text" placeholder="ชื่อของคุณ"></div>
-    <div class="field"><label>อีเมล</label><input id="r-email" type="email" placeholder="your@email.com"></div>
-    <div class="field"><label>รหัสผ่าน</label><input id="r-pass" type="password" placeholder="อย่างน้อย 6 ตัว"></div>
-    <div class="field">
-      <label>ประเภทบัญชี</label>
-      <select id="r-role" onchange="updateNote()">
-        <option value="buyer">Buyer — ผู้ประมูล</option>
-        <option value="seller">Seller — ผู้ลงของ</option>
-      </select>
-      <div class="role-note" id="role-note">สมัครแล้วเข้าใช้งานได้ทันที</div>
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">เข้าสู่ระบบ</div>
+      <div class="tab" onclick="switchTab('register')">สมัครสมาชิก</div>
     </div>
-    <button class="btn primary btn-full" onclick="doRegister()">สมัครสมาชิก</button>
-    <div class="msg" id="register-msg"></div>
-  </div>
-</div>
 
-<script>
-if(localStorage.getItem('token')) location.href='/';
-function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='register')));
-  document.getElementById('login-form').style.display=t==='login'?'block':'none';
-  document.getElementById('register-form').style.display=t==='register'?'block':'none';
-}
-function updateNote(){
-  document.getElementById('role-note').textContent=document.getElementById('r-role').value==='seller'
-    ?'บัญชี Seller ต้องรอ admin อนุมัติก่อนถึงจะลงของได้':'สมัครแล้วเข้าใช้งานได้ทันที';
-}
-async function doLogin(){
-  const email=document.getElementById('l-email').value.trim();
-  const password=document.getElementById('l-pass').value;
-  const msg=document.getElementById('login-msg');
-  try {
-    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-    const d=await r.json();
-    if(!r.ok){msg.className='msg err';msg.textContent=d.error;return;}
-    localStorage.setItem('token',d.token);
-    localStorage.setItem('user',JSON.stringify(d.user));
-    location.href=new URLSearchParams(location.search).get('redirect')||'/';
-  } catch{msg.className='msg err';msg.textContent='เกิดข้อผิดพลาด';}
-}
-async function doRegister(){
-  const name=document.getElementById('r-name').value.trim();
-  const email=document.getElementById('r-email').value.trim();
-  const password=document.getElementById('r-pass').value;
-  const role=document.getElementById('r-role').value;
-  const msg=document.getElementById('register-msg');
-  try {
-    const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password,role})});
-    const d=await r.json();
-    if(!r.ok){msg.className='msg err';msg.textContent=d.error;return;}
-    if(d.token){localStorage.setItem('token',d.token);localStorage.setItem('user',JSON.stringify(d.user));location.href='/';}
-    else{msg.className='msg ok';msg.textContent=d.message;}
-  } catch{msg.className='msg err';msg.textContent='เกิดข้อผิดพลาด';}
-}
-document.addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('login-form').style.display!=='none'?doLogin():doRegister();});
-</script>
+    <div id="login-form">
+      <div class="field"><label>อีเมล</label><input id="l-email" type="email" placeholder="your@email.com"></div>
+      <div class="field"><label>รหัสผ่าน</label><input id="l-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn primary btn-full" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <div id="register-form" style="display:none">
+      <div class="field"><label>ชื่อ</label><input id="r-name" type="text" placeholder="ชื่อของคุณ"></div>
+      <div class="field"><label>อีเมล</label><input id="r-email" type="email" placeholder="your@email.com"></div>
+      <div class="field"><label>รหัสผ่าน</label><input id="r-pass" type="password" placeholder="อย่างน้อย 6 ตัว"></div>
+      <div class="field">
+        <label>ประเภทบัญชี</label>
+        <select id="r-role" onchange="updateNote()">
+          <option value="buyer">Buyer — ผู้ประมูล</option>
+          <option value="seller">Seller — ผู้ลงของ</option>
+        </select>
+        <div class="role-note" id="role-note">สมัครแล้วเข้าใช้งานได้ทันที</div>
+      </div>
+      <button class="btn primary btn-full" onclick="doRegister()">สมัครสมาชิก</button>
+      <div class="msg" id="register-msg"></div>
+    </div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('token')) location.href = '/';
+    function switchTab(t) {
+      document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register')));
+      document.getElementById('login-form').style.display = t === 'login' ? 'block' : 'none';
+      document.getElementById('register-form').style.display = t === 'register' ? 'block' : 'none';
+    }
+    function updateNote() {
+      document.getElementById('role-note').textContent = document.getElementById('r-role').value === 'seller'
+        ? 'บัญชี Seller ต้องรอ admin อนุมัติก่อนถึงจะลงของได้' : 'สมัครแล้วเข้าใช้งานได้ทันที';
+    }
+    async function doLogin() {
+      const email = document.getElementById('l-email').value.trim();
+      const password = document.getElementById('l-pass').value;
+      const msg = document.getElementById('login-msg');
+      try {
+        const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        const d = await r.json();
+        if (!r.ok) { msg.className = 'msg err'; msg.textContent = d.error; return; }
+        localStorage.setItem('token', d.token);
+        localStorage.setItem('user', JSON.stringify(d.user));
+        location.href = new URLSearchParams(location.search).get('redirect') || '/';
+      } catch { msg.className = 'msg err'; msg.textContent = 'เกิดข้อผิดพลาด'; }
+    }
+    async function doRegister() {
+      const name = document.getElementById('r-name').value.trim();
+      const email = document.getElementById('r-email').value.trim();
+      const password = document.getElementById('r-pass').value;
+      const role = document.getElementById('r-role').value;
+      const msg = document.getElementById('register-msg');
+      try {
+        const r = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, role }) });
+        const d = await r.json();
+        if (!r.ok) { msg.className = 'msg err'; msg.textContent = d.error; return; }
+        if (d.token) { localStorage.setItem('token', d.token); localStorage.setItem('user', JSON.stringify(d.user)); location.href = '/'; }
+        else { msg.className = 'msg ok'; msg.textContent = d.message; }
+      } catch { msg.className = 'msg err'; msg.textContent = 'เกิดข้อผิดพลาด'; }
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').style.display !== 'none' ? doLogin() : doRegister(); });
+  </script>
 </body>
+
 </html>

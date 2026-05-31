@@ -1,98 +1,104 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidmai</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bidmai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-<nav>
-  <div class="logo">Bidmai</div>
-  <div class="nav-right">
-    <div class="live-pill"><div class="live-dot"></div><span id="live-count">0</span> live</div>
-    <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
-    <button class="nav-btn" id="admin-btn" style="display:none" onclick="location.href='/admin.html'">Admin</button>
-    <button class="nav-btn" id="sell-btn" style="display:none" onclick="location.href='/create-room.html'">+ ลงของ</button>
-    <button class="nav-btn" id="logout-btn" style="display:none" onclick="logout()">ออกจากระบบ</button>
-    <button class="nav-btn primary" id="login-btn" onclick="location.href='/login.html'">เข้าสู่ระบบ</button>
-  </div>
-</nav>
+  <nav>
+    <div class="logo">Bidmai</div>
+    <div class="nav-right">
+      <div class="live-pill">
+        <div class="live-dot"></div><span id="live-count">0</span> live
+      </div>
+      <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+      <button class="nav-btn" id="admin-btn" style="display:none" onclick="location.href='/admin.html'">Admin</button>
+      <button class="nav-btn" id="sell-btn" style="display:none" onclick="location.href='/create-room.html'">+
+        ลงของ</button>
+      <button class="nav-btn" id="logout-btn" style="display:none" onclick="logout()">ออกจากระบบ</button>
+      <button class="nav-btn primary" id="login-btn" onclick="location.href='/login.html'">เข้าสู่ระบบ</button>
+    </div>
+  </nav>
 
-<div class="container">
-  <div class="page-label">Auctions</div>
-  <h1>รายการประมูลทั้งหมด</h1>
-  <div class="filter-bar">
-    <button class="filter-btn on" onclick="filterRooms('all',this)">ทั้งหมด</button>
-    <button class="filter-btn" onclick="filterRooms('live',this)">กำลัง Live</button>
-    <button class="filter-btn" onclick="filterRooms('ended',this)">สิ้นสุดแล้ว</button>
+  <div class="container">
+    <div class="page-label">Auctions</div>
+    <h1>รายการประมูลทั้งหมด</h1>
+    <div class="filter-bar">
+      <button class="filter-btn on" onclick="filterRooms('all',this)">ทั้งหมด</button>
+      <button class="filter-btn" onclick="filterRooms('live',this)">กำลัง Live</button>
+      <button class="filter-btn" onclick="filterRooms('ended',this)">สิ้นสุดแล้ว</button>
+    </div>
+    <div class="feed-grid" id="rooms-grid">
+      <div class="empty">กำลังโหลด...</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;font-size:12px;color:var(--ink4)">
+      <span>แสดง <span id="showing">0</span> รายการ</span>
+      <span><span id="live-rooms">0</span> ห้อง live อยู่ตอนนี้</span>
+    </div>
   </div>
-  <div class="feed-grid" id="rooms-grid">
-    <div class="empty">กำลังโหลด...</div>
-  </div>
-  <div style="display:flex;justify-content:space-between;padding:12px 0;font-size:12px;color:var(--ink4)">
-    <span>แสดง <span id="showing">0</span> รายการ</span>
-    <span><span id="live-rooms">0</span> ห้อง live อยู่ตอนนี้</span>
-  </div>
-</div>
 
-<script>
-let allRooms = [];
-const user = JSON.parse(localStorage.getItem('user')||'null');
-if (user) {
-  document.getElementById('nav-user').textContent = user.name;
-  document.getElementById('login-btn').style.display = 'none';
-  document.getElementById('logout-btn').style.display = 'block';
-  if (user.role==='admin') document.getElementById('admin-btn').style.display='block';
-  if (['admin','seller'].includes(user.role)) document.getElementById('sell-btn').style.display='block';
-}
-function logout(){ localStorage.clear(); location.reload(); }
+  <script>
+    let allRooms = [];
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (user) {
+      document.getElementById('nav-user').textContent = user.name;
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'block';
+      if (user.role === 'admin') document.getElementById('admin-btn').style.display = 'block';
+      if (['admin', 'seller'].includes(user.role)) document.getElementById('sell-btn').style.display = 'block';
+    }
+    function logout() { localStorage.clear(); location.reload(); }
 
-async function loadRooms(){
-  try {
-    const r = await fetch('/api/rooms');
-    allRooms = await r.json();
-    renderRooms(allRooms);
-  } catch { document.getElementById('rooms-grid').innerHTML='<div class="empty">โหลดไม่ได้</div>'; }
-}
+    async function loadRooms() {
+      try {
+        const r = await fetch('/api/rooms');
+        allRooms = await r.json();
+        renderRooms(allRooms);
+      } catch { document.getElementById('rooms-grid').innerHTML = '<div class="empty">โหลดไม่ได้</div>'; }
+    }
 
-function renderRooms(rooms){
-  const live = rooms.filter(r=>r.activeLots>0).length;
-  document.getElementById('live-count').textContent=live;
-  document.getElementById('showing').textContent=rooms.length;
-  document.getElementById('live-rooms').textContent=live;
-  if(!rooms.length){ document.getElementById('rooms-grid').innerHTML='<div class="empty">ไม่พบรายการ</div>'; return; }
-  document.getElementById('rooms-grid').innerHTML=rooms.map(r=>{
-    const isLive=r.activeLots>0;
-    const thumb=r.coverImage ? '<img src="'+r.coverImage+'" alt="'+r.title+'">' : '🏛';
-    return `<a class="feed-card" href="/room.html?id=${r._id}">
+    function renderRooms(rooms) {
+      const live = rooms.filter(r => r.activeLots > 0).length;
+      document.getElementById('live-count').textContent = live;
+      document.getElementById('showing').textContent = rooms.length;
+      document.getElementById('live-rooms').textContent = live;
+      if (!rooms.length) { document.getElementById('rooms-grid').innerHTML = '<div class="empty">ไม่พบรายการ</div>'; return; }
+      document.getElementById('rooms-grid').innerHTML = rooms.map(r => {
+        const isLive = r.activeLots > 0;
+        const thumb = r.coverImage ? '<img src="' + r.coverImage + '" alt="' + r.title + '">' : '🏛';
+        return `<a class="feed-card" href="/room.html?id=${r._id}">
       <div class="feed-thumb">${thumb}</div>
       <div class="feed-body">
         <div class="feed-top">
-          <span class="badge ${isLive?'badge-live':'badge-ended'}">${isLive?'● LIVE':'สิ้นสุด'}</span>
+          <span class="badge ${isLive ? 'badge-live' : 'badge-ended'}">${isLive ? '● LIVE' : 'สิ้นสุด'}</span>
           <span style="font-size:11px;color:var(--ink4)">${r.totalLots} lots</span>
         </div>
         <div class="feed-house">${r.house}</div>
         <div class="feed-title">${r.title}</div>
         <div class="feed-bottom">
-          <div><div class="price-label">ราคาเริ่มจาก</div><div class="price-val">฿${(r.lowestPrice||0).toLocaleString()}</div></div>
-          <div style="font-size:11px;color:var(--ink4)">โดย ${r.sellerName||'—'}</div>
+          <div><div class="price-label">ราคาเริ่มจาก</div><div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div></div>
+          <div style="font-size:11px;color:var(--ink4)">โดย ${r.sellerName || '—'}</div>
         </div>
       </div>
     </a>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function filterRooms(type,btn){
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  if(type==='all') renderRooms(allRooms);
-  else if(type==='live') renderRooms(allRooms.filter(r=>r.activeLots>0));
-  else renderRooms(allRooms.filter(r=>r.activeLots===0));
-}
-loadRooms();
-setInterval(loadRooms,15000);
-</script>
+    function filterRooms(type, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      if (type === 'all') renderRooms(allRooms);
+      else if (type === 'live') renderRooms(allRooms.filter(r => r.activeLots > 0));
+      else renderRooms(allRooms.filter(r => r.activeLots === 0));
+    }
+    loadRooms();
+    setInterval(loadRooms, 15000);
+  </script>
 </body>
+
 </html>

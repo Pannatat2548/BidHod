@@ -1,69 +1,147 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidmai — สร้างห้องประมูล</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
-<style>
-body { background: var(--bg2); }
-.card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
-.card-title { font-size: 10px; letter-spacing: 2px; color: var(--ink4); text-transform: uppercase; margin-bottom: 16px; font-weight: 500; }
-.lot-card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; position: relative; }
-.lot-num-label { font-size: 10px; letter-spacing: 2px; color: var(--ink4); text-transform: uppercase; margin-bottom: 12px; }
-.lot-remove { position: absolute; top: 12px; right: 12px; font-size: 12px; color: var(--ink4); cursor: pointer; background: none; border: none; font-family: inherit; transition: color .15s; }
-.lot-remove:hover { color: var(--red); }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.add-lot-btn { width: 100%; padding: 10px; font-size: 13px; font-family: inherit; background: transparent; border: 1px dashed var(--line2); border-radius: var(--radius-sm); color: var(--ink3); cursor: pointer; transition: all .15s; }
-.add-lot-btn:hover { border-color: var(--ink2); color: var(--ink); }
-.upload-spinner { display: none; font-size: 11px; color: var(--ink4); margin-top: 4px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bidmai — สร้างห้องประมูล</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background: var(--bg2);
+    }
+
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .lot-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .lot-num-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .lot-remove {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 12px;
+      color: var(--ink4);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      transition: color .15s;
+    }
+
+    .lot-remove:hover {
+      color: var(--red);
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .add-lot-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      background: transparent;
+      border: 1px dashed var(--line2);
+      border-radius: var(--radius-sm);
+      color: var(--ink3);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .add-lot-btn:hover {
+      border-color: var(--ink2);
+      color: var(--ink);
+    }
+
+    .upload-spinner {
+      display: none;
+      font-size: 11px;
+      color: var(--ink4);
+      margin-top: 4px;
+    }
+  </style>
 </head>
+
 <body>
-<nav>
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
-    <div class="logo">Bidmai</div>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+      <div class="logo">Bidmai</div>
+    </div>
+  </nav>
+
+  <div class="container-narrow">
+    <div class="page-label">Seller</div>
+    <h1>สร้างห้องประมูล</h1>
+
+    <div class="card">
+      <div class="card-title">ข้อมูลห้องประมูล</div>
+      <div class="field"><label>ชื่อห้องประมูล</label><input id="room-title" type="text"
+          placeholder="เช่น Fine Watches — พฤษภาคม 2026"></div>
+      <div class="field"><label>ชื่อ House / เจ้าของ</label><input id="room-house" type="text"
+          placeholder="เช่น Christie's Bangkok"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">รายการสินค้า (Lots)</div>
+      <div id="lots-container"></div>
+      <button class="add-lot-btn" onclick="addLot()">+ เพิ่ม Lot</button>
+    </div>
+
+    <button class="btn primary btn-full" onclick="createRoom()">สร้างห้องประมูล</button>
+    <div class="msg" id="msg"></div>
   </div>
-</nav>
 
-<div class="container-narrow">
-  <div class="page-label">Seller</div>
-  <h1>สร้างห้องประมูล</h1>
+  <script>
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    if (!token || !user || !['admin', 'seller'].includes(user.role))
+      location.href = '/login.html?redirect=/create-room.html';
 
-  <div class="card">
-    <div class="card-title">ข้อมูลห้องประมูล</div>
-    <div class="field"><label>ชื่อห้องประมูล</label><input id="room-title" type="text" placeholder="เช่น Fine Watches — พฤษภาคม 2026"></div>
-    <div class="field"><label>ชื่อ House / เจ้าของ</label><input id="room-house" type="text" placeholder="เช่น Christie's Bangkok"></div>
-  </div>
+    let lotCount = 0;
 
-  <div class="card">
-    <div class="card-title">รายการสินค้า (Lots)</div>
-    <div id="lots-container"></div>
-    <button class="add-lot-btn" onclick="addLot()">+ เพิ่ม Lot</button>
-  </div>
-
-  <button class="btn primary btn-full" onclick="createRoom()">สร้างห้องประมูล</button>
-  <div class="msg" id="msg"></div>
-</div>
-
-<script>
-const user = JSON.parse(localStorage.getItem('user') || 'null');
-const token = localStorage.getItem('token');
-if (!token || !user || !['admin','seller'].includes(user.role))
-  location.href = '/login.html?redirect=/create-room.html';
-
-let lotCount = 0;
-
-function addLot() {
-  lotCount++;
-  const id = lotCount;
-  const div = document.createElement('div');
-  div.className = 'lot-card';
-  div.id = `lot-${id}`;
-  div.innerHTML = `
-    <div class="lot-num-label">Lot ${String(id).padStart(3,'0')}</div>
+    function addLot() {
+      lotCount++;
+      const id = lotCount;
+      const div = document.createElement('div');
+      div.className = 'lot-card';
+      div.id = `lot-${id}`;
+      div.innerHTML = `
+    <div class="lot-num-label">Lot ${String(id).padStart(3, '0')}</div>
     <button class="lot-remove" onclick="removeLot(${id})">✕ ลบ</button>
 
     <div class="field">
@@ -84,80 +162,81 @@ function addLot() {
       <div class="field"><label>ราคาเริ่มต้น (฿)</label><input type="number" id="lot-price-${id}" placeholder="0"></div>
       <div class="field"><label>ระยะเวลา (นาที)</label><input type="number" id="lot-dur-${id}" value="30"></div>
     </div>`;
-  document.getElementById('lots-container').appendChild(div);
-}
+      document.getElementById('lots-container').appendChild(div);
+    }
 
-async function uploadImage(id, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const spinner = document.getElementById(`spinner-${id}`);
-  spinner.style.display = 'block';
+    async function uploadImage(id, input) {
+      const file = input.files[0];
+      if (!file) return;
+      const spinner = document.getElementById(`spinner-${id}`);
+      spinner.style.display = 'block';
 
-  try {
-    const formData = new FormData();
-    formData.append('image', file);
-    const r = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
-      body: formData
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        const r = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
 
-    // แสดงรูป preview
-    document.getElementById(`lot-img-${id}`).value = d.url;
-    const area = document.getElementById(`upload-area-${id}`);
-    area.classList.add('has-img');
-    area.innerHTML = `<img src="${d.url}" alt="preview"><div style="padding:6px;text-align:center;font-size:11px;color:var(--ink4);cursor:pointer" onclick="document.getElementById('img-input-${id}').click()">คลิกเพื่อเปลี่ยนรูป</div>`;
-  } catch(e) {
-    showMsg(e.message || 'อัปโหลดไม่สำเร็จ', 'err');
-  } finally {
-    spinner.style.display = 'none';
-  }
-}
+        // แสดงรูป preview
+        document.getElementById(`lot-img-${id}`).value = d.url;
+        const area = document.getElementById(`upload-area-${id}`);
+        area.classList.add('has-img');
+        area.innerHTML = `<img src="${d.url}" alt="preview"><div style="padding:6px;text-align:center;font-size:11px;color:var(--ink4);cursor:pointer" onclick="document.getElementById('img-input-${id}').click()">คลิกเพื่อเปลี่ยนรูป</div>`;
+      } catch (e) {
+        showMsg(e.message || 'อัปโหลดไม่สำเร็จ', 'err');
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
 
-function removeLot(n) { document.getElementById(`lot-${n}`)?.remove(); }
+    function removeLot(n) { document.getElementById(`lot-${n}`)?.remove(); }
 
-async function createRoom() {
-  const title = document.getElementById('room-title').value.trim();
-  const house = document.getElementById('room-house').value.trim();
-  if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ house', 'err');
+    async function createRoom() {
+      const title = document.getElementById('room-title').value.trim();
+      const house = document.getElementById('room-house').value.trim();
+      if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ house', 'err');
 
-  const lots = [];
-  document.querySelectorAll('.lot-card').forEach(card => {
-    const n = card.id.split('-')[1];
-    const name = document.getElementById(`lot-name-${n}`)?.value.trim();
-    if (!name) return;
-    lots.push({
-      name,
-      desc: document.getElementById(`lot-desc-${n}`)?.value.trim() || '',
-      image: document.getElementById(`lot-img-${n}`)?.value || '',
-      startingPrice: parseInt(document.getElementById(`lot-price-${n}`)?.value) || 0,
-      durationMin: parseInt(document.getElementById(`lot-dur-${n}`)?.value) || 30,
-    });
-  });
+      const lots = [];
+      document.querySelectorAll('.lot-card').forEach(card => {
+        const n = card.id.split('-')[1];
+        const name = document.getElementById(`lot-name-${n}`)?.value.trim();
+        if (!name) return;
+        lots.push({
+          name,
+          desc: document.getElementById(`lot-desc-${n}`)?.value.trim() || '',
+          image: document.getElementById(`lot-img-${n}`)?.value || '',
+          startingPrice: parseInt(document.getElementById(`lot-price-${n}`)?.value) || 0,
+          durationMin: parseInt(document.getElementById(`lot-dur-${n}`)?.value) || 30,
+        });
+      });
 
-  if (!lots.length) return showMsg('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการ', 'err');
+      if (!lots.length) return showMsg('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการ', 'err');
 
-  try {
-    const r = await fetch('/api/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ title, house, lots })
-    });
-    const d = await r.json();
-    if (!r.ok) return showMsg(d.error, 'err');
-    showMsg('สร้างสำเร็จ! กำลังพาไป...', 'ok');
-    setTimeout(() => location.href = '/room.html?id=' + d.roomId, 1200);
-  } catch { showMsg('เกิดข้อผิดพลาด', 'err'); }
-}
+      try {
+        const r = await fetch('/api/rooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ title, house, lots })
+        });
+        const d = await r.json();
+        if (!r.ok) return showMsg(d.error, 'err');
+        showMsg('สร้างสำเร็จ! กำลังพาไป...', 'ok');
+        setTimeout(() => location.href = '/room.html?id=' + d.roomId, 1200);
+      } catch { showMsg('เกิดข้อผิดพลาด', 'err'); }
+    }
 
-function showMsg(text, type) {
-  const el = document.getElementById('msg');
-  el.textContent = text; el.className = 'msg ' + type;
-}
+    function showMsg(text, type) {
+      const el = document.getElementById('msg');
+      el.textContent = text; el.className = 'msg ' + type;
+    }
 
-addLot();
-</script>
+    addLot();
+  </script>
 </body>
+
 </html>

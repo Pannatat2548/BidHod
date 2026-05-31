@@ -1,107 +1,217 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidmai — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
-<style>
-.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px}
-.stat-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
-.stat-card-label{font-size:10px;letter-spacing:1px;color:var(--ink4);text-transform:uppercase;margin-bottom:4px}
-.stat-card-val{font-size:24px;font-weight:500;color:var(--ink)}
-.page-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
-.page-tab{padding:10px 18px;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-.page-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
-.section{display:none}.section.active{display:block}
-.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-.action-row{display:flex;gap:4px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bidmai — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px
+    }
+
+    .stat-card-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 4px
+    }
+
+    .stat-card-val {
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--ink)
+    }
+
+    .page-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px
+    }
+
+    .page-tab {
+      padding: 10px 18px;
+      font-size: 13px;
+      color: var(--ink3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s
+    }
+
+    .page-tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--ink)
+    }
+
+    .section {
+      display: none
+    }
+
+    .section.active {
+      display: block
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden
+    }
+
+    .action-row {
+      display: flex;
+      gap: 4px
+    }
+  </style>
 </head>
+
 <body>
-<nav>
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
-    <div class="logo">Admin</div>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+      <div class="logo">Admin</div>
+    </div>
+    <span style="font-size:12px;color:var(--ink3)" id="nav-name"></span>
+  </nav>
+
+  <div class="container">
+    <div class="page-label">Dashboard</div>
+    <h1>Admin Panel</h1>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-card-label">Users ทั้งหมด</div>
+        <div class="stat-card-val" id="s-users">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">รออนุมัติ</div>
+        <div class="stat-card-val" id="s-pending" style="color:var(--red)">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">ห้องประมูล</div>
+        <div class="stat-card-val" id="s-rooms">—</div>
+      </div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab active" onclick="switchTab('sellers')">Seller รออนุมัติ</div>
+      <div class="page-tab" onclick="switchTab('users')">Users ทั้งหมด</div>
+      <div class="page-tab" onclick="switchTab('rooms')">ห้องประมูล</div>
+    </div>
+
+    <div class="section active" id="tab-sellers">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อ</th>
+              <th>อีเมล</th>
+              <th>วันที่สมัคร</th>
+              <th>การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="pending-tbody">
+            <tr>
+              <td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="tab-users">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อ</th>
+              <th>อีเมล</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr>
+              <td colspan="5" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="tab-rooms">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อห้อง</th>
+              <th>House</th>
+              <th>โดย</th>
+              <th>การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="rooms-tbody">
+            <tr>
+              <td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <span style="font-size:12px;color:var(--ink3)" id="nav-name"></span>
-</nav>
 
-<div class="container">
-  <div class="page-label">Dashboard</div>
-  <h1>Admin Panel</h1>
+  <script>
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    if (!token || user?.role !== 'admin') location.href = '/';
+    document.getElementById('nav-name').textContent = user?.name || '';
+    const H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
-  <div class="stat-row">
-    <div class="stat-card"><div class="stat-card-label">Users ทั้งหมด</div><div class="stat-card-val" id="s-users">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">รออนุมัติ</div><div class="stat-card-val" id="s-pending" style="color:var(--red)">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">ห้องประมูล</div><div class="stat-card-val" id="s-rooms">—</div></div>
-  </div>
+    async function loadAll() {
+      const [uR, pR, rR] = await Promise.all([fetch('/api/admin/users', { headers: H }), fetch('/api/admin/pending', { headers: H }), fetch('/api/admin/rooms', { headers: H })]);
+      const users = await uR.json(), pending = await pR.json(), rooms = await rR.json();
+      document.getElementById('s-users').textContent = users.length;
+      document.getElementById('s-pending').textContent = pending.length;
+      document.getElementById('s-rooms').textContent = rooms.length;
 
-  <div class="page-tabs">
-    <div class="page-tab active" onclick="switchTab('sellers')">Seller รออนุมัติ</div>
-    <div class="page-tab" onclick="switchTab('users')">Users ทั้งหมด</div>
-    <div class="page-tab" onclick="switchTab('rooms')">ห้องประมูล</div>
-  </div>
+      document.getElementById('pending-tbody').innerHTML = pending.length
+        ? pending.map(u => `<tr><td style="font-weight:500">${u.name}</td><td style="color:var(--ink3)">${u.email}</td><td style="color:var(--ink4);font-size:12px">${new Date(u.createdAt).toLocaleDateString('th')}</td><td><div class="action-row"><button class="btn success" onclick="setStatus('${u._id}','approved')">อนุมัติ</button><button class="btn danger" onclick="setStatus('${u._id}','rejected')">ปฏิเสธ</button></div></td></tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">ไม่มี seller รออนุมัติ</td></tr>';
 
-  <div class="section active" id="tab-sellers">
-    <div class="table-wrap"><table>
-      <thead><tr><th>ชื่อ</th><th>อีเมล</th><th>วันที่สมัคร</th><th>การจัดการ</th></tr></thead>
-      <tbody id="pending-tbody"><tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td></tr></tbody>
-    </table></div>
-  </div>
+      document.getElementById('users-tbody').innerHTML = users.map(u => `<tr><td style="font-weight:500">${u.name}</td><td style="color:var(--ink3)">${u.email}</td><td><span class="badge badge-${u.role}">${u.role}</span></td><td><span class="badge badge-${u.status}">${u.status}</span></td><td><div class="action-row">${u.role === 'seller' && u.status === 'pending' ? `<button class="btn success" onclick="setStatus('${u._id}','approved')">อนุมัติ</button>` : ''}${u.role !== 'admin' ? `<button class="btn danger" onclick="deleteUser('${u._id}')">ลบ</button>` : ''}</div></td></tr>`).join('');
 
-  <div class="section" id="tab-users">
-    <div class="table-wrap"><table>
-      <thead><tr><th>ชื่อ</th><th>อีเมล</th><th>Role</th><th>Status</th><th>การจัดการ</th></tr></thead>
-      <tbody id="users-tbody"><tr><td colspan="5" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td></tr></tbody>
-    </table></div>
-  </div>
+      document.getElementById('rooms-tbody').innerHTML = rooms.length
+        ? rooms.map(r => `<tr><td style="font-weight:500">${r.title}</td><td style="color:var(--ink3)">${r.house}</td><td style="color:var(--ink4)">${r.sellerName || '—'}</td><td><button class="btn danger" onclick="deleteRoom('${r._id}')">ลบ</button></td></tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">ยังไม่มีห้องประมูล</td></tr>';
+    }
 
-  <div class="section" id="tab-rooms">
-    <div class="table-wrap"><table>
-      <thead><tr><th>ชื่อห้อง</th><th>House</th><th>โดย</th><th>การจัดการ</th></tr></thead>
-      <tbody id="rooms-tbody"><tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">กำลังโหลด...</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
+    async function setStatus(id, status) { await fetch(`/api/admin/users/${id}/status`, { method: 'PATCH', headers: H, body: JSON.stringify({ status }) }); loadAll(); }
+    async function deleteUser(id) { if (!confirm('ลบ user นี้?')) return; await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: H }); loadAll(); }
+    async function deleteRoom(id) { if (!confirm('ลบห้องประมูลนี้?')) return; await fetch(`/api/admin/rooms/${id}`, { method: 'DELETE', headers: H }); loadAll(); }
 
-<script>
-const user=JSON.parse(localStorage.getItem('user')||'null');
-const token=localStorage.getItem('token');
-if(!token||user?.role!=='admin') location.href='/';
-document.getElementById('nav-name').textContent=user?.name||'';
-const H={'Content-Type':'application/json','Authorization':'Bearer '+token};
-
-async function loadAll(){
-  const [uR,pR,rR]=await Promise.all([fetch('/api/admin/users',{headers:H}),fetch('/api/admin/pending',{headers:H}),fetch('/api/admin/rooms',{headers:H})]);
-  const users=await uR.json(),pending=await pR.json(),rooms=await rR.json();
-  document.getElementById('s-users').textContent=users.length;
-  document.getElementById('s-pending').textContent=pending.length;
-  document.getElementById('s-rooms').textContent=rooms.length;
-
-  document.getElementById('pending-tbody').innerHTML=pending.length
-    ?pending.map(u=>`<tr><td style="font-weight:500">${u.name}</td><td style="color:var(--ink3)">${u.email}</td><td style="color:var(--ink4);font-size:12px">${new Date(u.createdAt).toLocaleDateString('th')}</td><td><div class="action-row"><button class="btn success" onclick="setStatus('${u._id}','approved')">อนุมัติ</button><button class="btn danger" onclick="setStatus('${u._id}','rejected')">ปฏิเสธ</button></div></td></tr>`).join('')
-    :'<tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">ไม่มี seller รออนุมัติ</td></tr>';
-
-  document.getElementById('users-tbody').innerHTML=users.map(u=>`<tr><td style="font-weight:500">${u.name}</td><td style="color:var(--ink3)">${u.email}</td><td><span class="badge badge-${u.role}">${u.role}</span></td><td><span class="badge badge-${u.status}">${u.status}</span></td><td><div class="action-row">${u.role==='seller'&&u.status==='pending'?`<button class="btn success" onclick="setStatus('${u._id}','approved')">อนุมัติ</button>`:''}${u.role!=='admin'?`<button class="btn danger" onclick="deleteUser('${u._id}')">ลบ</button>`:''}</div></td></tr>`).join('');
-
-  document.getElementById('rooms-tbody').innerHTML=rooms.length
-    ?rooms.map(r=>`<tr><td style="font-weight:500">${r.title}</td><td style="color:var(--ink3)">${r.house}</td><td style="color:var(--ink4)">${r.sellerName||'—'}</td><td><button class="btn danger" onclick="deleteRoom('${r._id}')">ลบ</button></td></tr>`).join('')
-    :'<tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:32px">ยังไม่มีห้องประมูล</td></tr>';
-}
-
-async function setStatus(id,status){await fetch(`/api/admin/users/${id}/status`,{method:'PATCH',headers:H,body:JSON.stringify({status})});loadAll();}
-async function deleteUser(id){if(!confirm('ลบ user นี้?')) return;await fetch(`/api/admin/users/${id}`,{method:'DELETE',headers:H});loadAll();}
-async function deleteRoom(id){if(!confirm('ลบห้องประมูลนี้?')) return;await fetch(`/api/admin/rooms/${id}`,{method:'DELETE',headers:H});loadAll();}
-
-function switchTab(name){
-  const names=['sellers','users','rooms'];
-  document.querySelectorAll('.page-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-}
-loadAll();
-</script>
+    function switchTab(name) {
+      const names = ['sellers', 'users', 'rooms'];
+      document.querySelectorAll('.page-tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+    loadAll();
+  </script>
 </body>
+
 </html>
