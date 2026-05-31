@@ -4,8 +4,9 @@ const { Server } = require("socket.io");
 const path = require("path");
 const fs = require("fs");
 
-// ensure data dir
+// ensure dirs
 fs.mkdirSync(path.join(__dirname, "data"), { recursive: true });
+fs.mkdirSync(path.join(__dirname, "public/uploads"), { recursive: true });
 
 const { find, findOne, insert, update } = require("./db");
 const { authSocket } = require("./middleware/auth");
@@ -18,9 +19,15 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ── Routes ──────────────────────────────────────
-app.use("/api/auth",  require("./routes/auth"));
-app.use("/api/rooms", require("./routes/rooms"));
-app.use("/api/admin", require("./routes/admin"));
+const authRoutes   = require("./routes/auth");
+const roomRoutes   = require("./routes/rooms");
+const adminRoutes  = require("./routes/admin");
+const uploadRoutes = require("./routes/upload");
+
+app.use("/api/auth",   authRoutes);
+app.use("/api/rooms",  roomRoutes);
+app.use("/api/admin",  adminRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // SPA fallback
 app.get("*", (req, res) => {

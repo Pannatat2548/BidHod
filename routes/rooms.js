@@ -10,6 +10,7 @@ router.get("/", async (req, res) => {
     return {
       ...r,
       totalLots: lots.length,
+      coverImage: lots[0]?.image || null,
       activeLots: lots.filter(l => l.isActive).length,
       lowestPrice: lots.length ? Math.min(...lots.map(l => l.currentPrice)) : 0,
     };
@@ -47,6 +48,7 @@ router.post("/", requireSeller, async (req, res) => {
       num: i + 1,
       name: l.name,
       desc: l.desc || "",
+      image: l.image || "",
       startingPrice: l.startingPrice || 0,
       currentPrice: l.startingPrice || 0,
       highestBidder: null,

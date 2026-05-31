@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidhaus — Auction Room</title>
+<title>Bidmai — Auction Room</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 <script src="/socket.io/socket.io.js"></script>
@@ -13,7 +13,7 @@
 .room-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:12px}
 .layout{display:grid;grid-template-columns:1fr 280px;min-height:calc(100vh - 148px)}
 .main{padding:20px;border-right:1px solid var(--line)}
-.lot-thumb{width:100%;aspect-ratio:16/9;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:16px}
+.lot-thumb{width:100%;max-height:340px;aspect-ratio:16/9;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:16px;overflow:hidden}
 .lot-badge-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .lot-num-label{font-size:10px;letter-spacing:2px;color:var(--ink4);text-transform:uppercase}
 .lot-name{font-size:16px;font-weight:500;color:var(--ink);line-height:1.4;margin-bottom:5px}
@@ -37,7 +37,7 @@
 <nav>
   <div style="display:flex;align-items:center;gap:12px">
     <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
-    <div class="logo">Bidhaus</div>
+    <div class="logo">Bidmai</div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="live-pill"><div class="live-dot"></div>Live</div>
@@ -126,7 +126,7 @@ function switchLot(lotId){
   if(!lot) return;
   renderTabs(roomData.lots);
   document.getElementById('main').innerHTML=`
-    <div class="lot-thumb">${lotIcon(lot.name)}</div>
+    <div class="lot-thumb">${lot.image ? `<img src="${lot.image}" alt="${lot.name}">` : lotIcon(lot.name)}</div>
     <div class="lot-badge-row">
       <span class="lot-num-label">Lot ${String(lot.num).padStart(3,'0')}</span>
       <span class="badge ${lot.isActive?'badge-live':'badge-ended'}">${lot.isActive?'● กำลัง Live':'สิ้นสุดแล้ว'}</span>
@@ -174,7 +174,17 @@ function flashPrice(){const el=document.getElementById('price-val');el.style.col
 function renderTimer(ms){
   const s=Math.max(0,Math.ceil(ms/1000));
   const tv=document.getElementById('timer');const tb=document.getElementById('timer-bar');
-  tv.textContent=`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+  const days=Math.floor(s/86400);
+  const hrs=Math.floor((s%86400)/3600);
+  const min=Math.floor((s%3600)/60);
+  const sec=s%60;
+  if(days>0){
+    tv.textContent=days+'ว '+hrs.toString().padStart(2,'0')+':'+min.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');
+  } else if(hrs>0){
+    tv.textContent=hrs.toString().padStart(2,'0')+':'+min.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');
+  } else {
+    tv.textContent=min.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');
+  }
   tb.style.width=Math.min(100,(ms/LOT_DUR)*100)+'%';
   const u=ms<30000;tv.className='timer-val'+(u?' urgent':'');tb.className='timer-bar'+(u?' urgent':'');
 }

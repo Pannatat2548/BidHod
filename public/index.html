@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bidhaus</title>
+<title>Bidmai</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <nav>
-  <div class="logo">Bidhaus</div>
+  <div class="logo">Bidmai</div>
   <div class="nav-right">
     <div class="live-pill"><div class="live-dot"></div><span id="live-count">0</span> live</div>
     <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
@@ -65,8 +65,9 @@ function renderRooms(rooms){
   if(!rooms.length){ document.getElementById('rooms-grid').innerHTML='<div class="empty">ไม่พบรายการ</div>'; return; }
   document.getElementById('rooms-grid').innerHTML=rooms.map(r=>{
     const isLive=r.activeLots>0;
+    const thumb=r.coverImage ? '<img src="'+r.coverImage+'" alt="'+r.title+'">' : '🏛';
     return `<a class="feed-card" href="/room.html?id=${r._id}">
-      <div class="feed-thumb">🏛</div>
+      <div class="feed-thumb">${thumb}</div>
       <div class="feed-body">
         <div class="feed-top">
           <span class="badge ${isLive?'badge-live':'badge-ended'}">${isLive?'● LIVE':'สิ้นสุด'}</span>
