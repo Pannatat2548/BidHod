@@ -1,242 +1,314 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Bidmai — สร้างห้องประมูล</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <style>
-    body {
-      background: var(--bg2);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bidmai — สร้างห้องประมูล</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+body{background:var(--bg2)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.card-title{font-size:10px;letter-spacing:2px;color:var(--ink4);text-transform:uppercase;margin-bottom:16px;font-weight:500}
 
-    .card {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 14px;
-    }
+/* ── Cover image upload ── */
+.cover-upload{border:2px dashed var(--line2);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg2);position:relative}
+.cover-upload:hover{border-color:var(--ink2);background:var(--bg3)}
+.cover-upload.has-img{padding:0;border-style:solid;border-color:var(--line);overflow:hidden}
+.cover-upload img{width:100%;max-height:320px;object-fit:contain;background:var(--bg2);display:block}
+.cover-upload-icon{font-size:36px;margin-bottom:8px}
+.cover-upload-label{font-size:13px;color:var(--ink2);font-weight:500;margin-bottom:4px}
+.cover-upload-hint{font-size:11px;color:var(--ink4)}
+.cover-change-btn{display:block;padding:8px;text-align:center;font-size:12px;color:var(--ink4);cursor:pointer;border-top:1px solid var(--line);background:var(--bg);transition:background .15s}
+.cover-change-btn:hover{background:var(--bg2);color:var(--ink)}
 
-    .card-title {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      margin-bottom: 16px;
-      font-weight: 500;
-    }
+/* ── Lot count & default price ── */
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-    .lot-card {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 10px;
-      position: relative;
-    }
+/* ── Lot table ── */
+.lot-table-wrap{overflow-x:auto}
+table.lot-table{width:100%;border-collapse:collapse;font-size:13px}
+table.lot-table th{text-align:left;padding:8px 10px;font-size:10px;letter-spacing:1px;color:var(--ink4);text-transform:uppercase;border-bottom:1px solid var(--line);font-weight:500;white-space:nowrap}
+table.lot-table td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.lot-table tr:last-child td{border-bottom:none}
+table.lot-table tr:hover td{background:var(--bg2)}
+.lot-num-cell{font-size:12px;font-weight:500;color:var(--ink2);width:50px;text-align:center}
+.lot-price-input{width:100%;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none;transition:border-color .15s}
+.lot-price-input:focus{border-color:var(--ink2)}
+.lot-dur-input{width:70px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none}
+.lot-desc-input{width:100%;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none}
 
-    .lot-num-label {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
+/* ── Bulk actions ── */
+.bulk-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.bulk-label{font-size:12px;color:var(--ink3)}
+.bulk-input{padding:6px 10px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none;width:120px}
+.bulk-input:focus{border-color:var(--ink2)}
 
-    .lot-remove {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 12px;
-      color: var(--ink4);
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: inherit;
-      transition: color .15s;
-    }
-
-    .lot-remove:hover {
-      color: var(--red);
-    }
-
-    .row2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .add-lot-btn {
-      width: 100%;
-      padding: 10px;
-      font-size: 13px;
-      font-family: inherit;
-      background: transparent;
-      border: 1px dashed var(--line2);
-      border-radius: var(--radius-sm);
-      color: var(--ink3);
-      cursor: pointer;
-      transition: all .15s;
-    }
-
-    .add-lot-btn:hover {
-      border-color: var(--ink2);
-      color: var(--ink);
-    }
-
-    .upload-spinner {
-      display: none;
-      font-size: 11px;
-      color: var(--ink4);
-      margin-top: 4px;
-    }
-  </style>
+/* ── Spinner ── */
+.spinner{display:none;font-size:11px;color:var(--ink4);margin-top:6px}
+.spinner.show{display:block}
+</style>
 </head>
-
 <body>
-  <nav>
-    <div style="display:flex;align-items:center;gap:12px">
-      <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
-      <div class="logo">Bidmai</div>
-    </div>
-  </nav>
+<nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+    <div class="logo">Bidmai</div>
+  </div>
+</nav>
 
-  <div class="container-narrow">
-    <div class="page-label">Seller</div>
-    <h1>สร้างห้องประมูล</h1>
+<div class="container-narrow">
+  <div class="page-label">Seller</div>
+  <h1>สร้างห้องประมูล</h1>
 
-    <div class="card">
-      <div class="card-title">ข้อมูลห้องประมูล</div>
-      <div class="field"><label>ชื่อห้องประมูล</label><input id="room-title" type="text"
-          placeholder="เช่น Fine Watches — พฤษภาคม 2026"></div>
-      <div class="field"><label>ชื่อ House / เจ้าของ</label><input id="room-house" type="text"
-          placeholder="เช่น Christie's Bangkok"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">รายการสินค้า (Lots)</div>
-      <div id="lots-container"></div>
-      <button class="add-lot-btn" onclick="addLot()">+ เพิ่ม Lot</button>
-    </div>
-
-    <button class="btn primary btn-full" onclick="createRoom()">สร้างห้องประมูล</button>
-    <div class="msg" id="msg"></div>
+  <!-- ข้อมูลห้อง -->
+  <div class="card">
+    <div class="card-title">ข้อมูลห้องประมูล</div>
+    <div class="field"><label>ชื่อห้องประมูล</label><input id="room-title" type="text" placeholder="เช่น การ์ด Cardfight!! Vanguard Batch มีนา 2026"></div>
+    <div class="field"><label>ชื่อ House / เจ้าของ</label><input id="room-house" type="text" placeholder="เช่น ร้าน CardShop TH"></div>
   </div>
 
-  <script>
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    const token = localStorage.getItem('token');
-    if (!token || !user || !['admin', 'seller'].includes(user.role))
-      location.href = '/login.html?redirect=/create-room.html';
+  <!-- รูปหลัก -->
+  <div class="card">
+    <div class="card-title">รูปสินค้า (1 รูป ใช้กับทุกเบอร์)</div>
+    <div class="cover-upload" id="cover-upload" onclick="document.getElementById('cover-input').click()">
+      <div class="cover-upload-icon">🖼</div>
+      <div class="cover-upload-label">คลิกเพื่ออัปโหลดรูป</div>
+      <div class="cover-upload-hint">JPG, PNG, WEBP ขนาดไม่เกิน 5MB<br>ใช้รูปที่มีทุกชิ้นอยู่ในรูปเดียว</div>
+    </div>
+    <input type="file" id="cover-input" accept="image/*" style="display:none" onchange="uploadCover(this)">
+    <div class="spinner" id="cover-spinner">⏳ กำลังอัปโหลด...</div>
+    <input type="hidden" id="cover-img">
+  </div>
 
-    let lotCount = 0;
-
-    function addLot() {
-      lotCount++;
-      const id = lotCount;
-      const div = document.createElement('div');
-      div.className = 'lot-card';
-      div.id = `lot-${id}`;
-      div.innerHTML = `
-    <div class="lot-num-label">Lot ${String(id).padStart(3, '0')}</div>
-    <button class="lot-remove" onclick="removeLot(${id})">✕ ลบ</button>
-
-    <div class="field">
-      <label>รูปสินค้า</label>
-      <div class="img-upload-area" id="upload-area-${id}" onclick="document.getElementById('img-input-${id}').click()">
-        <div style="font-size:28px;color:var(--ink4)">📷</div>
-        <div class="img-upload-label">คลิกเพื่ออัปโหลดรูป</div>
-        <div class="img-upload-hint">JPG, PNG, WEBP ขนาดไม่เกิน 5MB</div>
+  <!-- ตั้งค่าเบอร์ -->
+  <div class="card">
+    <div class="card-title">ตั้งค่าเบอร์และราคา</div>
+    <div class="row3" style="margin-bottom:14px">
+      <div class="field" style="margin:0">
+        <label>จำนวนเบอร์ทั้งหมด</label>
+        <input id="lot-count" type="number" min="1" max="200" placeholder="เช่น 12" oninput="generateTable()">
       </div>
-      <input type="file" id="img-input-${id}" accept="image/*" style="display:none" onchange="uploadImage(${id}, this)">
-      <div class="upload-spinner" id="spinner-${id}">⏳ กำลังอัปโหลด...</div>
-      <input type="hidden" id="lot-img-${id}">
+      <div class="field" style="margin:0">
+        <label>เบอร์เริ่มต้น</label>
+        <input id="lot-start" type="number" min="1" value="1" oninput="generateTable()">
+      </div>
+      <div class="field" style="margin:0">
+        <label>ระยะเวลา (นาที)</label>
+        <input id="default-dur" type="number" value="30" oninput="applyDefaultDur()">
+      </div>
     </div>
 
-    <div class="field"><label>ชื่อสินค้า</label><input type="text" id="lot-name-${id}" placeholder="เช่น Rolex Submariner ปี 1969"></div>
-    <div class="field"><label>รายละเอียด</label><textarea id="lot-desc-${id}" rows="2" placeholder="คำอธิบายสินค้า"></textarea></div>
-    <div class="row2">
-      <div class="field"><label>ราคาเริ่มต้น (฿)</label><input type="number" id="lot-price-${id}" placeholder="0"></div>
-      <div class="field"><label>ระยะเวลา (นาที)</label><input type="number" id="lot-dur-${id}" value="30"></div>
-    </div>`;
-      document.getElementById('lots-container').appendChild(div);
-    }
+    <!-- Range price -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;letter-spacing:1px;color:var(--ink4);text-transform:uppercase;margin-bottom:8px;font-weight:500">กำหนดราคาเป็นกลุ่ม</div>
+      <div class="bulk-row" id="range-rows">
+        <div class="range-row" id="rr-0" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+          <span class="bulk-label">เบอร์</span>
+          <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-0" min="1">
+          <span class="bulk-label">ถึง</span>
+          <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-0" min="1">
+          <span class="bulk-label">ราคา ฿</span>
+          <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-0">
+          <button class="btn" onclick="applyRange(0)">ใช้ราคานี้</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn" onclick="addRangeRow()">+ เพิ่มกลุ่ม</button>
+        <button class="btn" onclick="clearAllPrices()" style="color:var(--ink4)">ล้างราคาทั้งหมด</button>
+      </div>
+    </div>
 
-    async function uploadImage(id, input) {
-      const file = input.files[0];
-      if (!file) return;
-      const spinner = document.getElementById(`spinner-${id}`);
-      spinner.style.display = 'block';
+    <!-- Lot table -->
+    <div class="lot-table-wrap" id="lot-table-wrap">
+      <div style="text-align:center;padding:24px;font-size:13px;color:var(--ink4)">
+        กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง
+      </div>
+    </div>
+  </div>
 
-      try {
-        const formData = new FormData();
-        formData.append('image', file);
-        const r = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
-          body: formData
-        });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error);
+  <button class="btn primary btn-full" onclick="createRoom()">สร้างห้องประมูล</button>
+  <div class="msg" id="msg"></div>
+  <div style="height:40px"></div>
+</div>
 
-        // แสดงรูป preview
-        document.getElementById(`lot-img-${id}`).value = d.url;
-        const area = document.getElementById(`upload-area-${id}`);
-        area.classList.add('has-img');
-        area.innerHTML = `<img src="${d.url}" alt="preview"><div style="padding:6px;text-align:center;font-size:11px;color:var(--ink4);cursor:pointer" onclick="document.getElementById('img-input-${id}').click()">คลิกเพื่อเปลี่ยนรูป</div>`;
-      } catch (e) {
-        showMsg(e.message || 'อัปโหลดไม่สำเร็จ', 'err');
-      } finally {
-        spinner.style.display = 'none';
-      }
-    }
+<script>
+const user = JSON.parse(localStorage.getItem('user') || 'null');
+const token = localStorage.getItem('token');
+if (!token || !user || !['admin','seller'].includes(user.role))
+  location.href = '/login.html?redirect=/create-room.html';
 
-    function removeLot(n) { document.getElementById(`lot-${n}`)?.remove(); }
+let coverUrl = '';
+let tableGenerated = false;
 
-    async function createRoom() {
-      const title = document.getElementById('room-title').value.trim();
-      const house = document.getElementById('room-house').value.trim();
-      if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ house', 'err');
+// ── Upload cover ─────────────────────────────
+async function uploadCover(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const spinner = document.getElementById('cover-spinner');
+  spinner.classList.add('show');
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    const r = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    coverUrl = d.url;
+    document.getElementById('cover-img').value = d.url;
 
-      const lots = [];
-      document.querySelectorAll('.lot-card').forEach(card => {
-        const n = card.id.split('-')[1];
-        const name = document.getElementById(`lot-name-${n}`)?.value.trim();
-        if (!name) return;
-        lots.push({
-          name,
-          desc: document.getElementById(`lot-desc-${n}`)?.value.trim() || '',
-          image: document.getElementById(`lot-img-${n}`)?.value || '',
-          startingPrice: parseInt(document.getElementById(`lot-price-${n}`)?.value) || 0,
-          durationMin: parseInt(document.getElementById(`lot-dur-${n}`)?.value) || 30,
-        });
-      });
+    const area = document.getElementById('cover-upload');
+    area.classList.add('has-img');
+    area.onclick = null;
+    area.innerHTML = `
+      <img src="${d.url}" alt="cover">
+      <div class="cover-change-btn" onclick="document.getElementById('cover-input').click()">
+        🔄 เปลี่ยนรูป
+      </div>`;
+  } catch(e) {
+    showMsg(e.message || 'อัปโหลดไม่สำเร็จ', 'err');
+  } finally {
+    spinner.classList.remove('show');
+  }
+}
 
-      if (!lots.length) return showMsg('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการ', 'err');
+// ── Generate lot table ────────────────────────
+function generateTable() {
+  const count = parseInt(document.getElementById('lot-count').value) || 0;
+  const start = parseInt(document.getElementById('lot-start').value) || 1;
+  const defPrice = '';
+  const defDur = document.getElementById('default-dur').value || 30;
+  const wrap = document.getElementById('lot-table-wrap');
 
-      try {
-        const r = await fetch('/api/rooms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ title, house, lots })
-        });
-        const d = await r.json();
-        if (!r.ok) return showMsg(d.error, 'err');
-        showMsg('สร้างสำเร็จ! กำลังพาไป...', 'ok');
-        setTimeout(() => location.href = '/room.html?id=' + d.roomId, 1200);
-      } catch { showMsg('เกิดข้อผิดพลาด', 'err'); }
-    }
+  if (!count || count < 1) {
+    wrap.innerHTML = '<div style="text-align:center;padding:24px;font-size:13px;color:var(--ink4)">กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง</div>';
+    return;
+  }
+  if (count > 200) {
+    showMsg('จำนวนเบอร์สูงสุด 200 เบอร์', 'err');
+    return;
+  }
 
-    function showMsg(text, type) {
-      const el = document.getElementById('msg');
-      el.textContent = text; el.className = 'msg ' + type;
-    }
+  const rows = Array.from({ length: count }, (_, i) => {
+    const num = start + i;
+    return `<tr>
+      <td class="lot-num-cell">${num}</td>
+      <td><input class="lot-price-input" id="p-${num}" type="number" placeholder="ราคาเริ่มต้น (฿)" value="${defPrice || ''}"></td>
+      <td><input class="lot-desc-input" id="d-${num}" type="text" placeholder="หมายเหตุ (ถ้ามี)"></td>
+      <td><input class="lot-dur-input" id="dur-${num}" type="number" value="${defDur}" min="1"></td>
+    </tr>`;
+  }).join('');
 
-    addLot();
-  </script>
+  wrap.innerHTML = `<table class="lot-table">
+    <thead><tr>
+      <th style="text-align:center">เบอร์</th>
+      <th>ราคาเริ่มต้น (฿)</th>
+      <th>หมายเหตุ</th>
+      <th>เวลา (นาที)</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+  tableGenerated = true;
+}
+
+// ── Bulk actions ──────────────────────────────
+let rangeCount = 1;
+
+function addRangeRow() {
+  const id = rangeCount++;
+  const div = document.createElement('div');
+  div.className = 'range-row';
+  div.id = 'rr-' + id;
+  div.style = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap';
+  div.innerHTML = `
+    <span class="bulk-label">เบอร์</span>
+    <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-${id}" min="1">
+    <span class="bulk-label">ถึง</span>
+    <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-${id}" min="1">
+    <span class="bulk-label">ราคา ฿</span>
+    <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-${id}">
+    <button class="btn" onclick="applyRange(${id})">ใช้ราคานี้</button>
+    <button class="btn" onclick="removeRange(${id})" style="color:var(--red);border-color:rgba(209,48,48,.2)">✕</button>
+  `;
+  document.getElementById('range-rows').appendChild(div);
+}
+
+function removeRange(id) {
+  document.getElementById('rr-' + id)?.remove();
+}
+
+function applyRange(id) {
+  const from = parseInt(document.getElementById('rf-' + id)?.value);
+  const to   = parseInt(document.getElementById('rt-' + id)?.value);
+  const price = document.getElementById('rp-' + id)?.value;
+  if (!from || !to || !price) return;
+  if (from > to) return showMsg('เบอร์เริ่มต้นต้องน้อยกว่าเบอร์สุดท้าย', 'err');
+  for (let n = from; n <= to; n++) {
+    const el = document.getElementById('p-' + n);
+    if (el) el.value = price;
+  }
+}
+
+function applyDefaultDur() {
+  const dur = document.getElementById('default-dur').value;
+  document.querySelectorAll('[id^="dur-"]').forEach(el => el.value = dur);
+}
+
+function clearAllPrices() {
+  document.querySelectorAll('[id^="p-"]').forEach(el => el.value = '');
+}
+
+// ── Create room ───────────────────────────────
+async function createRoom() {
+  const title = document.getElementById('room-title').value.trim();
+  const house = document.getElementById('room-house').value.trim();
+  if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ house', 'err');
+  if (!tableGenerated) return showMsg('กรุณากรอกจำนวนเบอร์', 'err');
+
+  const count = parseInt(document.getElementById('lot-count').value) || 0;
+  const start = parseInt(document.getElementById('lot-start').value) || 1;
+  const img = document.getElementById('cover-img').value;
+
+  const lots = [];
+  for (let i = 0; i < count; i++) {
+    const num = start + i;
+    const price = parseInt(document.getElementById('p-' + num)?.value) || 0;
+    const desc = document.getElementById('d-' + num)?.value.trim() || '';
+    const dur = parseInt(document.getElementById('dur-' + num)?.value) || 30;
+    lots.push({
+      name: String(num),   // ชื่อ = เบอร์
+      desc,
+      image: img,          // ทุกเบอร์ใช้รูปเดียวกัน
+      startingPrice: price,
+      durationMin: dur,
+    });
+  }
+
+  if (!lots.length) return showMsg('ไม่พบรายการ', 'err');
+
+  try {
+    showMsg('กำลังสร้างห้อง...', 'ok');
+    const r = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ title, house, lots })
+    });
+    const d = await r.json();
+    if (!r.ok) return showMsg(d.error, 'err');
+    showMsg('สร้างสำเร็จ! กำลังพาไป...', 'ok');
+    setTimeout(() => location.href = '/room.html?id=' + d.roomId, 1200);
+  } catch { showMsg('เกิดข้อผิดพลาด', 'err'); }
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+</script>
 </body>
-
 </html>
