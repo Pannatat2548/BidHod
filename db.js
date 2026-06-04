@@ -9,6 +9,7 @@ const db = {
   rooms: new Datastore({ filename: path.join(DB_DIR, "rooms.db"), autoload: true }),
   lots:  new Datastore({ filename: path.join(DB_DIR, "lots.db"),  autoload: true }),
   bids:  new Datastore({ filename: path.join(DB_DIR, "bids.db"),  autoload: true }),
+  messages: new Datastore({ filename: path.join(__dirname, 'data/messages.db'), autoload: true })
 };
 
 // indexes

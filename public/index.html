@@ -7,6 +7,39 @@
   <title>Bidmai</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <style>
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(17, 17, 17, 0.95);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 999;
+      max-width: 280px;
+    }
+    #toast.show { opacity: 1; }
+    .nav-badge {
+      margin-left: 8px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 0 6px;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -18,6 +51,8 @@
       </div>
       <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
       <button class="nav-btn" id="admin-btn" style="display:none" onclick="location.href='/admin.html'">Admin</button>
+      <button class="nav-btn" id="messages-btn" style="display:none" onclick="location.href='/messages.html'">ข้อความ<span id="messages-badge" class="nav-badge"></span></button>
+      <button class="nav-btn" id="contact-admin-btn" style="display:none" onclick="openAdminChat()">ติดต่อ Admin</button>
       <button class="nav-btn" id="sell-btn" style="display:none" onclick="location.href='/create-room.html'">+
         ลงของ</button>
       <button class="nav-btn" id="logout-btn" style="display:none" onclick="logout()">ออกจากระบบ</button>
@@ -49,10 +84,70 @@
       document.getElementById('nav-user').textContent = user.name;
       document.getElementById('login-btn').style.display = 'none';
       document.getElementById('logout-btn').style.display = 'block';
-      if (user.role === 'admin') document.getElementById('admin-btn').style.display = 'block';
+      document.getElementById('messages-btn').style.display = 'inline-block';
+      if (user.role === 'admin') {
+        document.getElementById('admin-btn').style.display = 'block';
+      } else {
+        document.getElementById('contact-admin-btn').style.display = 'inline-block';
+      }
       if (['admin', 'seller'].includes(user.role)) document.getElementById('sell-btn').style.display = 'block';
     }
     function logout() { localStorage.clear(); location.reload(); }
+
+    let unreadMessages = 0;
+
+    function showToast(msg) {
+      let el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function updateMessagesBadge() {
+      const badge = document.getElementById('messages-badge');
+      if (!badge) return;
+      if (unreadMessages > 0) {
+        badge.textContent = unreadMessages > 9 ? '9+' : unreadMessages;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    async function loadUnreadCount() {
+      if (!localStorage.getItem('token')) return;
+      try {
+        const res = await fetch('/api/messages/conversations', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (!res.ok) return;
+        const conv = await res.json();
+        unreadMessages = conv.reduce((sum, c) => sum + (c.unread || 0), 0);
+        updateMessagesBadge();
+      } catch (err) {
+        console.warn('Unread load failed', err);
+      }
+    }
+
+    function openAdminChat() {
+      if (!localStorage.getItem('token')) return location.href = '/login.html';
+      location.href = '/messages.html?with=admin';
+    }
+
+    async function initIndexNotifications() {
+      if (!user || (!user.id && !user._id)) return;
+      const socket = io();
+      socket.on('connect', () => {
+        socket.emit('user:join', user.id || user._id);
+      });
+      socket.on('chat:notification', ({ fromId, preview }) => {
+        unreadMessages += 1;
+        updateMessagesBadge();
+        showToast(`ข้อความใหม่: ${preview}`);
+      });
+      socket.on('disconnect', () => {});
+    }
 
     async function loadRooms() {
       try {
@@ -97,8 +192,11 @@
       else renderRooms(allRooms.filter(r => r.activeLots === 0));
     }
     loadRooms();
+    loadUnreadCount();
+    initIndexNotifications();
     setInterval(loadRooms, 15000);
   </script>
+  <div id="toast"></div>
 </body>
 
 </html>

@@ -186,6 +186,11 @@
       </div>
       <span style="font-size:12px;color:var(--ink4)"><span id="viewer-count">0</span> คน</span>
       <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+      <a href="/messages.html" style="font-size:13px;color:var(--ink3);text-decoration:none;position:relative"
+        id="msg-btn">
+        💬<span id="msg-badge"
+          style="display:none;position:absolute;top:-4px;right:-6px;background:#ef4444;color:#fff;border-radius:999px;font-size:9px;padding:1px 4px;font-weight:600">!</span>
+      </a>
     </div>
   </nav>
 
@@ -282,6 +287,7 @@
     </div>
     <div class="lot-name">${lot.name}</div>
     <div class="lot-desc">${lot.desc || ''}</div>
+    ${roomData.sellerId ? `<a href="/messages.html?room=${roomData._id}&with=${roomData.sellerId}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink3);text-decoration:none;margin-bottom:16px;padding:6px 12px;border:1px solid var(--line);border-radius:var(--radius-sm)">💬 ติดต่อ Seller</a>` : ''}
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-label">ราคาปัจจุบัน</div><div class="stat-val" id="s-price">฿${lot.currentPrice.toLocaleString()}</div></div>
       <div class="stat-box"><div class="stat-label">Bids</div><div class="stat-val muted" id="s-bids">${lot.bids?.length || 0}</div></div>
@@ -365,6 +371,13 @@
       document.getElementById('bid-amount').value = '';
     }
     document.addEventListener('keydown', e => { if (e.key === 'Enter') placeBid(); });
+
+    if (token && user) {
+      socket.emit('user:join', user._id);
+      socket.on('chat:notification', () => {
+        document.getElementById('msg-badge').style.display = 'block';
+      });
+    }
   </script>
 </body>
 

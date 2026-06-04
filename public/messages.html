@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Messages — Bidmai</title>
+<link rel="stylesheet" href="/style.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .msg-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+  }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    border-right: 1px solid #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .sidebar-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  .search-box {
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 13px;
+    background: #f7f7f7;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .search-box input:focus {
+    border-color: #4f46e5;
+    background: #fff;
+  }
+
+  .search-box .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 15px;
+  }
+
+  .conv-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .conv-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f3f3f3;
+  }
+
+  .conv-item:hover,
+  .conv-item.active {
+    background: #f0efff;
+  }
+
+  .conv-item.active {
+    border-left: 3px solid #4f46e5;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .conv-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .conv-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .conv-time {
+    font-size: 11px;
+    color: #aaa;
+    font-weight: 400;
+  }
+
+  .conv-preview {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .unread-badge {
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .conv-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+  }
+
+  /* ---- CHAT AREA ---- */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 14px 20px 14px 56px;
+    position: relative;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+  }
+
+  .chat-header .avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .chat-header-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  .back-btn {
+    position: absolute;
+    left: 14px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .back-btn:hover {
+    background: rgba(79,70,229,0.06);
+    color: #4f46e5;
+  }
+
+  /* Navbar back button */
+  #navbar-back-btn {
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    display: none;
+    align-items: center;
+    z-index: 50;
+  }
+
+  #navbar-back-btn.show {
+    display: inline-flex;
+    background: rgba(79,70,229,0.06);
+    color: #4f46e5;
+  }
+
+  .chat-header-info span {
+    font-size: 12px;
+    color: #4caf50;
+  }
+
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fafafa;
+  }
+
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .msg-row.me {
+    flex-direction: row-reverse;
+  }
+
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4f46e5;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .msg-row.me .msg-avatar {
+    background: #4f46e5;
+    color: #fff;
+  }
+
+  .bubble {
+    display: inline-block;
+    width: auto;
+    max-width: 150%;
+    min-width: 160px;
+    max-height: 80px;
+    padding: 5px 14px;
+    border-radius: 18px;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    vertical-align: top;
+  }
+
+  .msg-row.them .bubble {
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e5e5;
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg-row.me .bubble {
+    background: #4f46e5;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble-time {
+    font-size: 10px;
+    color: #bbb;
+    margin-top: 2px;
+    text-align: right;
+  }
+
+  .msg-row.me .bubble-time {
+    color: rgba(255,255,255,0.6);
+  }
+
+  .date-divider {
+    text-align: center;
+    font-size: 11px;
+    color: #bbb;
+    margin: 8px 0;
+    position: relative;
+  }
+
+  .date-divider::before,
+  .date-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 50px);
+    height: 1px;
+    background: #e5e5e5;
+  }
+
+  .date-divider::before { left: 0; }
+  .date-divider::after { right: 0; }
+
+  /* ---- INPUT ---- */
+  .chat-input-area {
+    padding: 12px 16px;
+    border-top: 1px solid #e5e5e5;
+    background: #fff;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .chat-input-area textarea {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.5;
+    font-family: inherit;
+    transition: border 0.2s;
+  }
+
+  .chat-input-area textarea:focus {
+    border-color: #4f46e5;
+  }
+
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #4f46e5;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.1s;
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 18px;
+  }
+
+  .send-btn:hover { background: #4338ca; }
+  .send-btn:active { transform: scale(0.94); }
+  .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* ---- EMPTY STATE ---- */
+  .chat-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    gap: 12px;
+    background: #fafafa;
+  }
+
+  .chat-empty-icon {
+    font-size: 48px;
+    opacity: 0.3;
+  }
+
+  .chat-empty p {
+    font-size: 14px;
+  }
+
+  /* ---- LOADING ---- */
+  .loading-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 10px 14px;
+  }
+
+  .loading-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ccc;
+    animation: bounce 1.2s infinite ease-in-out both;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---- MOBILE ---- */
+  @media (max-width: 640px) {
+    .msg-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .sidebar.show { display: flex; position: fixed; inset: 0; z-index: 100; background: #fff; }
+    .chat-area { display: flex; }
+  }
+
+  /* ---- NOTIFICATION TOAST ---- */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #111;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 999;
+    max-width: 280px;
+  }
+
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Navbar (เหมือนกับหน้าอื่น) -->
+<nav id="navbar"></nav>
+
+<div class="msg-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>ข้อความ</h2>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="ค้นหาการสนทนา..." />
+      </div>
+    </div>
+    <div class="conv-list" id="convList">
+      <div class="conv-empty">กำลังโหลด...</div>
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-icon">💬</div>
+      <p>เลือกการสนทนาเพื่อเริ่มพูดคุย</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let me = null;
+let socket = null;
+let currentPartnerId = null;
+let currentRoomId = null;
+let conversations = [];
+
+const token = localStorage.getItem('token');
+if (!token) { location.href = '/login.html'; }
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  const auth = await fetchJSON('/api/auth/me');
+  me = auth.user;
+  if (!me || !me.id) {
+    localStorage.removeItem('token');
+    return location.href = '/login.html';
+  }
+  socket = io();
+
+  socket.on('connect_error', (err) => showToast(`Socket error: ${err.message}`));
+  socket.on('chat:error', ({ message }) => showToast(message));
+  socket.on('disconnect', () => showToast('Disconnected from server'));
+
+  // Join personal notification room
+  socket.emit('user:join', me.id);
+
+  // Real-time message incoming
+  socket.on('chat:message', (msg) => {
+    if (
+      (msg.senderId === currentPartnerId && msg.receiverId === me.id) ||
+      (msg.senderId === me.id && msg.receiverId === currentPartnerId)
+    ) {
+      appendMessage(msg);
+      scrollToBottom();
+    }
+    loadConversations();
+  });
+
+  // Notification when not in that chat
+  socket.on('chat:notification', ({ fromId, preview }) => {
+    if (fromId !== currentPartnerId) {
+      showToast(`ข้อความใหม่: ${preview}`);
+      loadConversations();
+    }
+  });
+
+  await loadConversations();
+  // prepare navbar back button
+  ensureNavbarBack();
+
+  // Open chat from query string ?with=userId or ?with=admin or ?room=roomId
+  const params = new URLSearchParams(location.search);
+  let withId = params.get('with');
+  const roomId = params.get('room');
+  
+  // Store room context for message sending
+  if (roomId) {
+    currentRoomId = roomId;
+  }
+
+  // If room context exists, resolve to room owner (seller)
+  if (roomId && !withId) {
+    try {
+      const roomData = await fetchJSON(`/api/rooms/${roomId}`);
+      if (roomData?.sellerId) {
+        withId = roomData.sellerId;
+      }
+    } catch (err) {
+      console.error('Cannot resolve room:', err);
+    }
+  }
+
+  if (withId === 'admin') {
+    try {
+      const adminPayload = await fetchJSON('/api/messages/admin');
+      withId = adminPayload.admin?._id;
+    } catch (err) {
+      showToast('ไม่สามารถติดต่อ admin ได้');
+    }
+  }
+  if (withId) {
+    // Preserve room context when opening chat from init
+    openChat(withId, roomId ? true : false);
+  }
+}
+
+// ============================================================
+// CONVERSATIONS
+// ============================================================
+async function loadConversations() {
+  const data = await fetchJSON('/api/messages/conversations');
+  conversations = data;
+  renderConversations(data);
+}
+
+function renderConversations(list) {
+  const el = document.getElementById('convList');
+  if (!list.length) {
+    el.innerHTML = '<div class="conv-empty">ยังไม่มีการสนทนา</div>';
+    return;
+  }
+
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = q
+    ? list.filter(c => {
+        const name = (c.partner?.name || '').toLowerCase();
+        const email = (c.partner?.email || '').toLowerCase();
+        return name.includes(q) || email.includes(q);
+      })
+    : list;
+
+  el.innerHTML = filtered.map(c => {
+    const partnerName = c.partner?.name || 'ไม่ทราบ';
+    const partnerId = c.partner?._id || '';
+    return `
+      <div class="conv-item ${partnerId === currentPartnerId ? 'active' : ''}"
+           onclick="openChat('${partnerId}')">
+        <div class="avatar">${initials(partnerName)}</div>
+        <div class="conv-info">
+          <div class="conv-name">
+            <span>${esc(partnerName)}</span>
+            <span class="conv-time">${relativeTime(c.lastMessage.createdAt)}</span>
+          </div>
+          <div class="conv-preview">
+            <span>${c.lastMessage.senderId === me.id ? 'คุณ: ' : ''}${esc(c.lastMessage.text.substring(0, 40))}</span>
+            ${c.unread > 0 ? `<span class="unread-badge">${c.unread}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  renderConversations(conversations);
+});
+
+// ============================================================
+// OPEN CHAT
+// ============================================================
+async function openChat(partnerId, preserveRoomContext = false) {
+  if (!partnerId) {
+    showToast('ไม่พบผู้ใช้สำหรับการสนทนานี้');
+    return;
+  }
+
+  // Leave old chat room
+  if (currentPartnerId) {
+    socket.emit('chat:leave', { myId: me.id, otherId: currentPartnerId });
+  }
+
+  // Clear room context if this is a regular conversation click (not from room context init)
+  if (!preserveRoomContext) {
+    currentRoomId = null;
+  }
+
+  currentPartnerId = partnerId;
+  const historyUrl = currentRoomId ? `?room=${currentRoomId}&with=${partnerId}` : `?with=${partnerId}`;
+  history.replaceState(null, '', historyUrl);
+
+  // Update active state in sidebar
+  document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.conv-item').forEach(el => {
+    if (el.onclick.toString().includes(partnerId)) el.classList.add('active');
+  });
+
+  const chatArea = document.getElementById('chatArea');
+  chatArea.innerHTML = `
+    <div class="chat-header" id="chatHeader">
+      <div class="avatar" id="partnerAvatar">...</div>
+      <div class="chat-header-info">
+        <h3 id="partnerName">กำลังโหลด...</h3>
+      </div>
+    </div>
+    <div class="messages-container" id="messagesContainer"></div>
+    <div class="chat-input-area">
+      <textarea id="msgInput" placeholder="พิมพ์ข้อความ..." rows="1"
+        onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" onclick="sendMessage()" id="sendBtn">➤</button>
+    </div>
+  `;
+
+  let messages = [];
+  let otherUser = null;
+
+  try {
+    ({ messages, otherUser } = await fetchJSON(`/api/messages/${partnerId}`));
+    if (!otherUser || !otherUser.name) {
+      throw new Error('ไม่พบผู้ใช้ปลายทาง');
+    }
+  } catch (err) {
+    showToast(err.message || 'ไม่สามารถโหลดการสนทนาได้');
+    currentPartnerId = null;
+    history.replaceState(null, '', location.pathname);
+    showNavbarBack(false);
+    chatArea.innerHTML = `
+      <div class="chat-empty" id="chatEmpty">
+        <div class="chat-empty-icon">💬</div>
+        <p>ไม่สามารถโหลดการสนทนาได้ โปรดลองอีกครั้ง</p>
+      </div>
+    `;
+    renderConversations(conversations);
+    return;
+  }
+
+  socket.emit('chat:join', { myId: me.id, otherId: partnerId });
+  document.getElementById('partnerAvatar').textContent = initials(otherUser.name);
+  document.getElementById('partnerName').textContent = otherUser.name;
+
+  // show back button in navbar when chat is open
+  showNavbarBack(true);
+
+  const container = document.getElementById('messagesContainer');
+  container.innerHTML = '';
+
+  if (!messages.length) {
+    container.innerHTML = '<div style="text-align:center;color:#ccc;font-size:13px;margin-top:40px;">เริ่มการสนทนา 👋</div>';
+  } else {
+    let lastDate = null;
+    for (const msg of messages) {
+      const d = new Date(msg.createdAt).toLocaleDateString('th-TH');
+      if (d !== lastDate) {
+        container.innerHTML += `<div class="date-divider">${d}</div>`;
+        lastDate = d;
+      }
+      container.innerHTML += renderBubble(msg);
+    }
+  }
+
+  scrollToBottom();
+
+  // Auto-grow textarea
+  const ta = document.getElementById('msgInput');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+
+  loadConversations();
+}
+
+// ============================================================
+// SEND MESSAGE
+// ============================================================
+async function sendMessage() {
+  const ta = document.getElementById('msgInput');
+  const text = ta.value.trim();
+  if (!text || !currentPartnerId) return;
+
+  try {
+    const payload = { text };
+    if (currentRoomId) {
+      payload.roomId = currentRoomId;
+    }
+    await fetchJSON(`/api/messages/${currentPartnerId}`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    scrollToBottom();
+    loadConversations();
+  } catch (err) {
+    showToast('ไม่สามารถส่งข้อความได้');
+  }
+
+  ta.value = '';
+  ta.style.height = 'auto';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function goBack() {
+  if (currentRoomId) {
+    window.location.href = `/room.html?id=${currentRoomId}`;
+    return;
+  }
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = '/';
+  }
+}
+
+// Navbar back button: create and control visibility
+function ensureNavbarBack() {
+  const nav = document.getElementById('navbar');
+  if (!nav) return null;
+  let btn = document.getElementById('navbar-back-btn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'navbar-back-btn';
+    btn.textContent = '← ย้อนกลับ';
+    btn.addEventListener('click', goBack);
+    nav.appendChild(btn);
+  }
+  return btn;
+}
+
+function showNavbarBack(show) {
+  const btn = ensureNavbarBack();
+  if (!btn) return;
+  if (show) btn.classList.add('show'); else btn.classList.remove('show');
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderBubble(msg) {
+  const isMe = msg.senderId === me.id;
+  const time = new Date(msg.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const text = String(msg.text || '');
+  // Calculate width based on text length (characters). Adjust factors as needed.
+  const minPx = 80;
+  const maxPx = Math.floor(window.innerWidth * 0.6);
+  const perChar = 8; // pixels per character (approx)
+  // If text contains newlines, prefer wider base
+  const lines = text.split(/\r?\n/).length;
+  const estimated = Math.round(text.length * perChar / Math.max(1, lines));
+  const width = Math.min(maxPx, Math.max(minPx, estimated + (lines > 1 ? 20 : 0)));
+
+  return `
+    <div class="msg-row ${isMe ? 'me' : 'them'}" data-msgid="${msg._id}">
+      <div class="msg-avatar">${isMe ? initials(me.name) : '?'}</div>
+      <div>
+        <div class="bubble" style="width: ${width}px">
+          ${esc(msg.text)}
+          <div class="bubble-time">${time}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function appendMessage(msg) {
+  const container = document.getElementById('messagesContainer');
+  if (!container) return;
+  if (container.querySelector(`[data-msgid="${msg._id}"]`)) return;
+  const placeholder = container.querySelector('[style*="เริ่มการสนทนา"]');
+  if (placeholder) placeholder.remove();
+  container.insertAdjacentHTML('beforeend', renderBubble(msg));
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('messagesContainer');
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function initials(name = '') {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2) || '?';
+}
+
+function esc(str = '') {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function relativeTime(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'เมื่อกี้';
+  if (m < 60) return `${m} นาที`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} ชั่วโมง`;
+  const d = Math.floor(h / 24);
+  return `${d} วัน`;
+}
+
+async function fetchJSON(url, options = {}) {
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    ...options
+  });
+  if (!res.ok) {
+    const payload = await res.text();
+    throw new Error(`HTTP ${res.status}: ${payload}`);
+  }
+  return res.json();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ============================================================
+// START
+// ============================================================
+init().catch(console.error);
+</script>
+</body>
+</html>

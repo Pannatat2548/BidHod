@@ -14,6 +14,7 @@ const { authSocket } = require("./middleware/auth");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+app.set('io', io);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -28,6 +29,7 @@ app.use("/api/auth",   authRoutes);
 app.use("/api/rooms",  roomRoutes);
 app.use("/api/admin",  adminRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use('/api/messages', require('./routes/messages'));
 
 // SPA fallback
 app.get("*", (req, res) => {
@@ -130,6 +132,43 @@ io.on("connection", (socket) => {
     const count = io.sockets.adapter.rooms.get(currentRoom)?.size || 0;
     io.to(currentRoom).emit("room:viewers", { count });
   });
+
+  socket.on('chat:join', ({ myId, otherId }) => {
+    const roomId = [myId, otherId].sort().join('_');
+    console.log('chat:join', roomId, myId, otherId);
+    socket.join(`chat:${roomId}`);
+  });
+
+  socket.on('chat:leave', ({ myId, otherId }) => {
+    const roomId = [myId, otherId].sort().join('_');
+    socket.leave(`chat:${roomId}`);
+  });
+
+  socket.on('user:join', (userId) => {
+    console.log('user:join', userId);
+    socket.join(`user:${userId}`);
+  });
+
+  socket.on('chat:send', async ({ senderId, receiverId, text }) => {
+    console.log('chat:send', {senderId, receiverId, text});
+    if (!text || !text.trim()) return;
+    const msg = { senderId, receiverId, text: text.trim(), createdAt: Date.now() };
+    try {
+      const saved = await new Promise((resolve, reject) => {
+        db.messages.insert(msg, (err, doc) => err ? reject(err) : resolve(doc));
+      });
+      const roomId = [senderId, receiverId].sort().join('_');
+      io.to(`chat:${roomId}`).emit('chat:message', saved);
+      io.to(`user:${receiverId}`).emit('chat:notification', {
+        fromId: senderId,
+        preview: saved.text.substring(0, 60)
+      });
+      console.log('chat:message emitted', { roomId, saved });
+    } catch (err) {
+      socket.emit('chat:error', { message: err.message });
+    }
+  });
+
 });
 
 // ── Timer ─────────────────────────────────────────
@@ -145,6 +184,28 @@ setInterval(async () => {
         winner: lot.highestBidder,
         finalPrice: lot.currentPrice,
       });
+
+      // Send chat notification to the winner only (persisted)
+      try {
+        const winnerId = lot.highestBidderId;
+        if (winnerId) {
+          const adminUser = await findOne('users', { role: 'admin' }) || { _id: 'system', name: 'ระบบ' };
+          const text = `การประมูลของ Lot ${lot.name} สิ้นสุดแล้ว — คุณเป็นผู้ชนะ ด้วยราคา ฿${Number(lot.currentPrice).toLocaleString()}`;
+          const msg = {
+            senderId: adminUser._id || adminUser.id || 'system',
+            receiverId: winnerId,
+            text,
+            createdAt: Date.now(),
+          };
+
+          const saved = await insert('messages', msg);
+          const roomId = [msg.senderId, winnerId].sort().join('_');
+          io.to(`chat:${roomId}`).emit('chat:message', saved);
+          io.to(`user:${winnerId}`).emit('chat:notification', { fromId: msg.senderId, preview: saved.text.substring(0,60) });
+        }
+      } catch (err) {
+        console.error('error notifying winner on lot end', err);
+      }
     } else {
       io.to(lot.roomId).emit("lot:tick", { lotId: lot._id, timeLeft, endsAt });
     }
