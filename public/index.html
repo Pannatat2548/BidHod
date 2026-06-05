@@ -23,7 +23,11 @@
       z-index: 999;
       max-width: 280px;
     }
-    #toast.show { opacity: 1; }
+
+    #toast.show {
+      opacity: 1;
+    }
+
     .nav-badge {
       margin-left: 8px;
       display: none;
@@ -38,6 +42,60 @@
       font-weight: 700;
       padding: 0 6px;
     }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--bg);
+      padding: 6px;
+      border-radius: 999px;
+      /* ทรงแคปซูล */
+      border: 1px solid var(--line);
+      width: fit-content;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .filter-btn {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--ink3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-btn:hover {
+      color: var(--ink);
+      background: var(--bg2);
+    }
+
+    /* สไตล์เมื่อปุ่มถูกเลือก (Active) */
+    .filter-btn.on {
+      background: var(--ink);
+      /* หรือใช้สี Primary ถ้าชอบ */
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* เพิ่ม Icon เล็กน้อยถ้าอยากได้ */
+    .filter-btn.on::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -51,8 +109,10 @@
       </div>
       <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
       <button class="nav-btn" id="admin-btn" style="display:none" onclick="location.href='/admin.html'">Admin</button>
-      <button class="nav-btn" id="messages-btn" style="display:none" onclick="location.href='/messages.html'">ข้อความ<span id="messages-badge" class="nav-badge"></span></button>
-      <button class="nav-btn" id="contact-admin-btn" style="display:none" onclick="openAdminChat()">ติดต่อ Admin</button>
+      <button class="nav-btn" id="messages-btn" style="display:none"
+        onclick="location.href='/messages.html'">ข้อความ<span id="messages-badge" class="nav-badge"></span></button>
+      <button class="nav-btn" id="contact-admin-btn" style="display:none" onclick="openAdminChat()">ติดต่อ
+        Admin</button>
       <button class="nav-btn" id="sell-btn" style="display:none" onclick="location.href='/create-room.html'">+
         ลงของ</button>
       <button class="nav-btn" id="logout-btn" style="display:none" onclick="logout()">ออกจากระบบ</button>
@@ -64,9 +124,9 @@
     <div class="page-label">Auctions</div>
     <h1>รายการประมูลทั้งหมด</h1>
     <div class="filter-bar">
-      <button class="filter-btn on" onclick="filterRooms('all',this)">ทั้งหมด</button>
-      <button class="filter-btn" onclick="filterRooms('live',this)">กำลัง Live</button>
-      <button class="filter-btn" onclick="filterRooms('ended',this)">สิ้นสุดแล้ว</button>
+      <button class="filter-btn on" onclick="filterRooms('all', this)">ทั้งหมด</button>
+      <button class="filter-btn" onclick="filterRooms('live', this)">กำลัง Live 🔴</button>
+      <button class="filter-btn" onclick="filterRooms('ended', this)">สิ้นสุดแล้ว</button>
     </div>
     <div class="feed-grid" id="rooms-grid">
       <div class="empty">กำลังโหลด...</div>
@@ -146,7 +206,7 @@
         updateMessagesBadge();
         showToast(`ข้อความใหม่: ${preview}`);
       });
-      socket.on('disconnect', () => {});
+      socket.on('disconnect', () => { });
     }
 
     async function loadRooms() {
@@ -162,25 +222,39 @@
       document.getElementById('live-count').textContent = live;
       document.getElementById('showing').textContent = rooms.length;
       document.getElementById('live-rooms').textContent = live;
-      if (!rooms.length) { document.getElementById('rooms-grid').innerHTML = '<div class="empty">ไม่พบรายการ</div>'; return; }
+
+      if (!rooms.length) {
+        document.getElementById('rooms-grid').innerHTML = '<div class="empty" style="grid-column: 1/-1; padding: 60px;">ไม่พบรายการประมูลในขณะนี้</div>';
+        return;
+      }
+
       document.getElementById('rooms-grid').innerHTML = rooms.map(r => {
         const isLive = r.activeLots > 0;
-        const thumb = r.coverImage ? '<img src="' + r.coverImage + '" alt="' + r.title + '">' : '🏛';
-        return `<a class="feed-card" href="/room.html?id=${r._id}">
-      <div class="feed-thumb">${thumb}</div>
-      <div class="feed-body">
-        <div class="feed-top">
-          <span class="badge ${isLive ? 'badge-live' : 'badge-ended'}">${isLive ? '● LIVE' : 'สิ้นสุด'}</span>
-          <span style="font-size:11px;color:var(--ink4)">${r.totalLots} lots</span>
+        const thumb = r.coverImage ? `<img src="${r.coverImage}" alt="${r.title}">` : '🏛️';
+        return `
+      <a class="feed-card" href="/room.html?id=${r._id}">
+        <div class="feed-thumb">
+          ${thumb}
+          <span style="position: absolute; top: 12px; left: 12px;" class="badge ${isLive ? 'badge-live' : 'badge-ended'}">
+            ${isLive ? '● LIVE' : 'สิ้นสุด'}
+          </span>
         </div>
-        <div class="feed-house">${r.house}</div>
-        <div class="feed-title">${r.title}</div>
-        <div class="feed-bottom">
-          <div><div class="price-label">ราคาเริ่มจาก</div><div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div></div>
-          <div style="font-size:11px;color:var(--ink4)">โดย ${r.sellerName || '—'}</div>
+        <div class="feed-body">
+          <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
+          <div class="feed-title">${r.title}</div>
+          <div class="feed-bottom">
+            <div>
+              <div class="price-label">ราคาเริ่มจาก</div>
+              <div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div>
+            </div>
+            <div style="font-size: 12px; color: var(--ink4); text-align: right;">
+              <div>${r.totalLots} Lots</div>
+              <div style="margin-top: 2px;">โดย ${r.sellerName || '—'}</div>
+            </div>
+          </div>
         </div>
-      </div>
-    </a>`;
+      </a>
+    `;
       }).join('');
     }
 

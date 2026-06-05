@@ -215,7 +215,7 @@
     cursor: pointer;
     padding: 6px 8px;
     border-radius: 6px;
-    display: none;
+    display: none; /* ซ่อนไว้ก่อน ให้ JS มาเปิด */
     align-items: center;
     z-index: 50;
   }
@@ -270,15 +270,16 @@
     color: #fff;
   }
 
+  /* [FIX] ปรับ Bubble ให้กระชับขึ้น */
   .bubble {
     display: inline-block;
     width: auto;
     max-width: 150%;
-    min-width: 160px;
+    min-width: 80px; /* ลดจาก 160px */
     max-height: 80px;
-    padding: 5px 14px;
+    padding: 8px 14px; /* เพิ่ม padding แนวตั้งเล็กน้อย */
     border-radius: 18px;
-    font-size: 16px;
+    font-size: 14px; /* ลดจาก 16px */
     line-height: 1.5;
     position: relative;
     white-space: pre-line;
@@ -543,8 +544,10 @@ async function init() {
   });
 
   await loadConversations();
-  // prepare navbar back button
+  
+  // [FIX] สร้างปุ่มย้อนกลับทันทีที่โหลดหน้ามา ไม่ต้องรอเปิดแชท
   ensureNavbarBack();
+  showNavbarBack(true); 
 
   // Open chat from query string ?with=userId or ?with=admin or ?room=roomId
   const params = new URLSearchParams(location.search);
@@ -690,7 +693,8 @@ async function openChat(partnerId, preserveRoomContext = false) {
     showToast(err.message || 'ไม่สามารถโหลดการสนทนาได้');
     currentPartnerId = null;
     history.replaceState(null, '', location.pathname);
-    showNavbarBack(false);
+    // ไม่ต้องซ่อนปุ่มย้อนกลับแล้ว เพราะเราอยากให้มันมีตลอด
+    // showNavbarBack(false); 
     chatArea.innerHTML = `
       <div class="chat-empty" id="chatEmpty">
         <div class="chat-empty-icon">💬</div>
@@ -705,7 +709,7 @@ async function openChat(partnerId, preserveRoomContext = false) {
   document.getElementById('partnerAvatar').textContent = initials(otherUser.name);
   document.getElementById('partnerName').textContent = otherUser.name;
 
-  // show back button in navbar when chat is open
+  // ปุ่มย้อนกลับจะมีอยู่แล้วจาก init() แต่ถ้าอยากมั่นใจก็เรียกซ้ำได้
   showNavbarBack(true);
 
   const container = document.getElementById('messagesContainer');

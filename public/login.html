@@ -1,113 +1,312 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Bidmai — Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --ink: #111827;
+      --ink2: #374151;
+      --ink3: #6b7280;
+      --ink4: #9ca3af;
+      --bg: #ffffff;
+      --line: rgba(0,0,0,0.08);
+      --line2: rgba(0,0,0,0.12);
+      --red: #ef4444;
+      --green: #10b981;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html, body { height: 100%; }
+
     body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       padding: 24px;
-      background: var(--bg2)
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 40%, #fdf4ff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative blobs */
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    body::before {
+      width: 400px; height: 400px;
+      background: #c7d2fe;
+      top: -100px; right: -100px;
+    }
+    body::after {
+      width: 350px; height: 350px;
+      background: #fbcfe8;
+      bottom: -80px; left: -80px;
+    }
+
+    .login-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.5s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: var(--ink);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .card {
-      background: var(--bg);
-      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       border-radius: var(--radius);
-      padding: 28px;
-      width: 100%;
-      max-width: 360px
+      padding: 36px 32px;
+      box-shadow:
+        0 4px 6px -1px rgba(0,0,0,0.05),
+        0 20px 40px -8px rgba(79, 70, 229, 0.12);
     }
 
     .tabs {
       display: flex;
-      margin-bottom: 22px;
-      border-bottom: 1px solid var(--line)
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--line);
+      position: relative;
     }
 
     .tab {
       flex: 1;
-      padding: 9px;
+      padding: 10px;
       text-align: center;
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--ink3);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all .15s
+      transition: color 0.2s;
+      position: relative;
     }
 
+    .tab:hover { color: var(--ink2); }
+
     .tab.active {
-      color: var(--ink);
-      border-bottom-color: var(--ink)
+      color: var(--primary);
+      font-weight: 600;
     }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink2);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--bg);
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .field input::placeholder { color: var(--ink4); }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary), #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, var(--primary-hover), #4f46e5);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.45);
+    }
+
+    .btn.primary:active {
+      transform: translateY(0);
+    }
+
+    .msg {
+      font-size: 13px;
+      margin-top: 14px;
+      text-align: center;
+      min-height: 20px;
+      font-weight: 500;
+    }
+    .msg.err { color: var(--red); }
+    .msg.ok  { color: var(--green); }
 
     .role-note {
       font-size: 11px;
       color: var(--ink4);
-      margin-top: 4px;
-      line-height: 1.5
+      margin-top: 6px;
+      line-height: 1.5;
+      padding-left: 2px;
+    }
+
+    .field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 22px; }
+      .logo { font-size: 18px; letter-spacing: 4px; }
     }
   </style>
 </head>
 
 <body>
-  <div style="font-size:15px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px">Bidmai
-  </div>
-  <div class="card">
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('login')">เข้าสู่ระบบ</div>
-      <div class="tab" onclick="switchTab('register')">สมัครสมาชิก</div>
-    </div>
+  <div class="login-wrapper">
+    <div class="logo"><span>BIDMAI</span></div>
 
-    <div id="login-form">
-      <div class="field"><label>อีเมล</label><input id="l-email" type="email" placeholder="your@email.com"></div>
-      <div class="field"><label>รหัสผ่าน</label><input id="l-pass" type="password" placeholder="••••••••"></div>
-      <button class="btn primary btn-full" onclick="doLogin()">เข้าสู่ระบบ</button>
-      <div class="msg" id="login-msg"></div>
-    </div>
-
-    <div id="register-form" style="display:none">
-      <div class="field"><label>ชื่อ</label><input id="r-name" type="text" placeholder="ชื่อของคุณ"></div>
-      <div class="field"><label>อีเมล</label><input id="r-email" type="email" placeholder="your@email.com"></div>
-      <div class="field"><label>รหัสผ่าน</label><input id="r-pass" type="password" placeholder="อย่างน้อย 6 ตัว"></div>
-      <div class="field">
-        <label>ประเภทบัญชี</label>
-        <select id="r-role" onchange="updateNote()">
-          <option value="buyer">Buyer — ผู้ประมูล</option>
-          <option value="seller">Seller — ผู้ลงของ</option>
-        </select>
-        <div class="role-note" id="role-note">สมัครแล้วเข้าใช้งานได้ทันที</div>
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('login')">เข้าสู่ระบบ</div>
+        <div class="tab" onclick="switchTab('register')">สมัครสมาชิก</div>
       </div>
-      <button class="btn primary btn-full" onclick="doRegister()">สมัครสมาชิก</button>
-      <div class="msg" id="register-msg"></div>
+
+      <div id="login-form">
+        <div class="field">
+          <label>อีเมล</label>
+          <input id="l-email" type="email" placeholder="your@email.com">
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน</label>
+          <input id="l-pass" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn primary" onclick="doLogin()">เข้าสู่ระบบ</button>
+        <div class="msg" id="login-msg"></div>
+      </div>
+
+      <div id="register-form" style="display:none">
+        <div class="field">
+          <label>ชื่อ</label>
+          <input id="r-name" type="text" placeholder="ชื่อของคุณ">
+        </div>
+        <div class="field">
+          <label>อีเมล</label>
+          <input id="r-email" type="email" placeholder="your@email.com">
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน</label>
+          <input id="r-pass" type="password" placeholder="อย่างน้อย 6 ตัว">
+        </div>
+        <div class="field">
+          <label>ประเภทบัญชี</label>
+          <select id="r-role" onchange="updateNote()">
+            <option value="buyer">Buyer — ผู้ประมูล</option>
+            <option value="seller">Seller — ผู้ลงของ</option>
+          </select>
+          <div class="role-note" id="role-note">สมัครแล้วเข้าใช้งานได้ทันที</div>
+        </div>
+        <button class="btn primary" onclick="doRegister()">สมัครสมาชิก</button>
+        <div class="msg" id="register-msg"></div>
+      </div>
     </div>
   </div>
 
   <script>
     if (localStorage.getItem('token')) location.href = '/';
+
     function switchTab(t) {
-      document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register')));
-      document.getElementById('login-form').style.display = t === 'login' ? 'block' : 'none';
+      document.querySelectorAll('.tab').forEach((el, i) =>
+        el.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register'))
+      );
+      document.getElementById('login-form').style.display    = t === 'login'    ? 'block' : 'none';
       document.getElementById('register-form').style.display = t === 'register' ? 'block' : 'none';
     }
+
     function updateNote() {
-      document.getElementById('role-note').textContent = document.getElementById('r-role').value === 'seller'
-        ? 'บัญชี Seller ต้องรอ admin อนุมัติก่อนถึงจะลงของได้' : 'สมัครแล้วเข้าใช้งานได้ทันที';
+      document.getElementById('role-note').textContent =
+        document.getElementById('r-role').value === 'seller'
+          ? 'บัญชี Seller ต้องรอ admin อนุมัติก่อนถึงจะลงของได้'
+          : 'สมัครแล้วเข้าใช้งานได้ทันที';
     }
+
     async function doLogin() {
-      const email = document.getElementById('l-email').value.trim();
+      const email    = document.getElementById('l-email').value.trim();
       const password = document.getElementById('l-pass').value;
-      const msg = document.getElementById('login-msg');
+      const msg      = document.getElementById('login-msg');
       try {
-        const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        const r = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
         const d = await r.json();
         if (!r.ok) { msg.className = 'msg err'; msg.textContent = d.error; return; }
         localStorage.setItem('token', d.token);
@@ -115,22 +314,34 @@
         location.href = new URLSearchParams(location.search).get('redirect') || '/';
       } catch { msg.className = 'msg err'; msg.textContent = 'เกิดข้อผิดพลาด'; }
     }
+
     async function doRegister() {
-      const name = document.getElementById('r-name').value.trim();
-      const email = document.getElementById('r-email').value.trim();
+      const name     = document.getElementById('r-name').value.trim();
+      const email    = document.getElementById('r-email').value.trim();
       const password = document.getElementById('r-pass').value;
-      const role = document.getElementById('r-role').value;
-      const msg = document.getElementById('register-msg');
+      const role     = document.getElementById('r-role').value;
+      const msg      = document.getElementById('register-msg');
       try {
-        const r = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, role }) });
+        const r = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role })
+        });
         const d = await r.json();
         if (!r.ok) { msg.className = 'msg err'; msg.textContent = d.error; return; }
-        if (d.token) { localStorage.setItem('token', d.token); localStorage.setItem('user', JSON.stringify(d.user)); location.href = '/'; }
-        else { msg.className = 'msg ok'; msg.textContent = d.message; }
+        if (d.token) {
+          localStorage.setItem('token', d.token);
+          localStorage.setItem('user', JSON.stringify(d.user));
+          location.href = '/';
+        } else { msg.className = 'msg ok'; msg.textContent = d.message; }
       } catch { msg.className = 'msg err'; msg.textContent = 'เกิดข้อผิดพลาด'; }
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-form').style.display !== 'none' ? doLogin() : doRegister(); });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        document.getElementById('login-form').style.display !== 'none' ? doLogin() : doRegister();
+      }
+    });
   </script>
 </body>
-
 </html>

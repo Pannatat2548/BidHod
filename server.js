@@ -20,14 +20,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ── Routes ──────────────────────────────────────
-const authRoutes   = require("./routes/auth");
-const roomRoutes   = require("./routes/rooms");
-const adminRoutes  = require("./routes/admin");
+const authRoutes = require("./routes/auth");
+const roomRoutes = require("./routes/rooms");
+const adminRoutes = require("./routes/admin");
 const uploadRoutes = require("./routes/upload");
 
-app.use("/api/auth",   authRoutes);
-app.use("/api/rooms",  roomRoutes);
-app.use("/api/admin",  adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use('/api/messages', require('./routes/messages'));
 
@@ -107,7 +107,7 @@ io.on("connection", (socket) => {
     // anti-sniping — ใช้ค่าจาก room ถ้าไม่มีก็ไม่ต่อเวลา
     const endsAt = new Date(lot.endsAt).getTime();
     const snipeTrigger = (lot.snipeTrigger || 0) * 1000;
-    const snipeExt     = (lot.snipeExt || 0) * 1000;
+    const snipeExt = (lot.snipeExt || 0) * 1000;
     if (snipeTrigger > 0 && snipeExt > 0 && endsAt - Date.now() < snipeTrigger) {
       const newEndsAt = new Date(Date.now() + snipeExt);
       await update("lots", { _id: lotId }, { $set: { endsAt: newEndsAt } });
@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
 
   // admin/seller broadcast อัปเดตข้อมูล lot
   socket.on("lot:update", async ({ roomId, lotId, changes }) => {
-    if (!user || !["admin","seller"].includes(user.role))
+    if (!user || !["admin", "seller"].includes(user.role))
       return socket.emit("error", { message: "ไม่มีสิทธิ์" });
     await update("lots", { _id: lotId }, { $set: changes });
     io.to(roomId).emit("lot:updated", { lotId, changes });
@@ -173,7 +173,14 @@ io.on("connection", (socket) => {
     // แจ้งเตือนผู้ชนะผ่าน chat (เหมือน lot:ended)
     try {
       const adminUser = await findOne('users', { role: 'admin' }) || { _id: 'system', name: 'ระบบ' };
-      const text = `คุณซื้อ Lot ${lot.name} ด้วยราคาปิด ฿${Number(lot.binPrice).toLocaleString()} เรียบร้อยแล้ว`;
+
+      // ดึงข้อมูลห้องมาใส่ในข้อความด้วย
+      const room = await findOne('rooms', { _id: roomId });
+      const roomTitle = room ? room.title : 'ไม่ระบุห้อง';
+
+      // เพิ่ม ${roomTitle} เข้าไปใน text
+      const text = `✅ สำเร็จ! คุณซื้อ "${lot.name}" จากห้อง "${roomTitle}" ด้วยราคาปิด ฿${Number(lot.binPrice).toLocaleString()} เรียบร้อยแล้ว`;
+
       const msg = { senderId: adminUser._id || 'system', receiverId: user.id, text, createdAt: Date.now() };
       const saved = await insert('messages', msg);
       const chatRoom = [msg.senderId, user.id].sort().join('_');
@@ -201,7 +208,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('chat:send', async ({ senderId, receiverId, text }) => {
-    console.log('chat:send', {senderId, receiverId, text});
+    console.log('chat:send', { senderId, receiverId, text });
     if (!text || !text.trim()) return;
     const msg = { senderId, receiverId, text: text.trim(), createdAt: Date.now() };
     try {
@@ -240,8 +247,15 @@ setInterval(async () => {
       try {
         const winnerId = lot.highestBidderId;
         if (winnerId) {
+          // ดึงข้อมูลห้องมาใส่ในข้อความด้วย
+          const room = await findOne('rooms', { _id: lot.roomId });
+          const roomTitle = room ? room.title : 'ไม่ระบุห้อง';
+
           const adminUser = await findOne('users', { role: 'admin' }) || { _id: 'system', name: 'ระบบ' };
-          const text = `การประมูลของ Lot ${lot.name} สิ้นสุดแล้ว — คุณเป็นผู้ชนะ ด้วยราคา ฿${Number(lot.currentPrice).toLocaleString()}`;
+
+          // เพิ่ม ${roomTitle} เข้าไปใน text
+          const text = `🎉 ยินดีด้วย! คุณชนะการประมูล "${lot.name}" จากห้อง "${roomTitle}" ด้วยราคา ฿${Number(lot.currentPrice).toLocaleString()}`;
+
           const msg = {
             senderId: adminUser._id || adminUser.id || 'system',
             receiverId: winnerId,
@@ -252,7 +266,7 @@ setInterval(async () => {
           const saved = await insert('messages', msg);
           const roomId = [msg.senderId, winnerId].sort().join('_');
           io.to(`chat:${roomId}`).emit('chat:message', saved);
-          io.to(`user:${winnerId}`).emit('chat:notification', { fromId: msg.senderId, preview: saved.text.substring(0,60) });
+          io.to(`user:${winnerId}`).emit('chat:notification', { fromId: msg.senderId, preview: saved.text.substring(0, 60) });
         }
       } catch (err) {
         console.error('error notifying winner on lot end', err);
