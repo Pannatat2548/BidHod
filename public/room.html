@@ -166,6 +166,28 @@
       overflow-y: auto
     }
 
+    .bin-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      font-weight: 500;
+      background: var(--green, #16a34a);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .bin-btn:hover { opacity: .85; }
+    .bin-price-hint {
+      font-size: 11px;
+      color: var(--ink4);
+      text-align: center;
+      margin-top: 4px;
+    }
+
     @media(max-width:680px) {
       .layout {
         grid-template-columns: 1fr
@@ -302,8 +324,12 @@
     function renderBidSection() {
       const sec = document.getElementById('bid-section');
       if (!token) { sec.innerHTML = `<button class="login-prompt" onclick="location.href='/login.html?redirect=/room.html?id=${ROOM_ID}'">เข้าสู่ระบบเพื่อประมูล →</button>`; return; }
-      sec.innerHTML = `<div class="s-block"><div class="s-block-label">ประมูล</div><div class="quick-grid" id="quick-grid"></div><input class="bid-amount-input" id="bid-amount" type="number" placeholder="ระบุจำนวนเงิน (฿)" style="width:100%;margin-bottom:6px"><button class="btn primary btn-full" onclick="placeBid()">ประมูลเลย</button><div class="bid-error" id="bid-error"></div></div>`;
       const lot = roomData?.lots.find(l => l._id === activeLotId);
+      const binHTML = lot?.binPrice
+        ? `<button class="bin-btn" onclick="buyNow()">⚡ ซื้อทันที ฿${lot.binPrice.toLocaleString()}</button>
+           <div class="bin-price-hint">กดเพื่อปิด lot ทันที</div>`
+        : '';
+      sec.innerHTML = `<div class="s-block"><div class="s-block-label">ประมูล</div><div class="quick-grid" id="quick-grid"></div><input class="bid-amount-input" id="bid-amount" type="number" placeholder="ระบุจำนวนเงิน (฿)" style="width:100%;margin-bottom:6px"><button class="btn primary btn-full" onclick="placeBid()">ประมูลเลย</button>${binHTML}<div class="bid-error" id="bid-error"></div></div>`;
       if (lot) updateQuickBids(lot.currentPrice);
     }
 
@@ -359,8 +385,9 @@
       if (!bids.length) { list.innerHTML = '<div class="h-empty">ยังไม่มีการประมูล</div>'; return; }
       list.innerHTML = '';[...bids].reverse().forEach(b => prependHistory(b));
     }
-    function showEnded(winner, price) {
-      document.getElementById('bid-section').innerHTML = `<div class="ended-block"><div class="ended-title">Lot สิ้นสุดแล้ว</div><div class="ended-sub">ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>฿${price.toLocaleString()}</div></div>`;
+    function showEnded(winner, price, isBin = false) {
+      const label = isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว';
+      document.getElementById('bid-section').innerHTML = `<div class="ended-block"><div class="ended-title">${label}</div><div class="ended-sub">ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>฿${price.toLocaleString()}</div></div>`;
       document.getElementById('timer').textContent = '00:00';
     }
     function showError(msg) { const el = document.getElementById('bid-error'); if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 3000); } }
@@ -370,6 +397,20 @@
       socket.emit('bid:place', { roomId: ROOM_ID, lotId: activeLotId, amount });
       document.getElementById('bid-amount').value = '';
     }
+
+    function buyNow() {
+      const lot = roomData?.lots.find(l => l._id === activeLotId);
+      if (!lot?.binPrice) return;
+      if (!confirm(`ยืนยันซื้อทันที ฿${lot.binPrice.toLocaleString()}?`)) return;
+      socket.emit('bin:place', { roomId: ROOM_ID, lotId: activeLotId });
+    }
+
+    socket.on('lot:bin', ({ lotId, buyerName, finalPrice }) => {
+      const lot = roomData?.lots.find(l => l._id === lotId);
+      if (lot) lot.isActive = false;
+      renderTabs(roomData?.lots || []);
+      if (lotId === activeLotId) showEnded(buyerName, finalPrice, true);
+    });
     document.addEventListener('keydown', e => { if (e.key === 'Enter') placeBid(); });
 
     if (token && user) {

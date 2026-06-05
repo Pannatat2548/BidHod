@@ -32,13 +32,15 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/rooms — seller/admin สร้างห้อง
 router.post("/", requireSeller, async (req, res) => {
-  const { title, house, lots: lotsData } = req.body;
+  const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0 } = req.body;
   if (!title || !house) return res.status(400).json({ error: "กรุณากรอก title และ house" });
 
   const room = await insert("rooms", {
     title, house,
     sellerId: req.user.id,
     sellerName: req.user.name,
+    snipeExt,
+    snipeTrigger,
     createdAt: new Date(),
   });
 
@@ -51,10 +53,13 @@ router.post("/", requireSeller, async (req, res) => {
       image: l.image || "",
       startingPrice: l.startingPrice || 0,
       currentPrice: l.startingPrice || 0,
+      binPrice: l.binPrice || null,
       highestBidder: null,
       highestBidderId: null,
       isActive: true,
       endsAt: new Date(Date.now() + (l.durationMin || 30) * 60 * 1000),
+      snipeExt,
+      snipeTrigger,
       createdAt: new Date(),
     })));
   }

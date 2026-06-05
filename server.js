@@ -104,10 +104,12 @@ io.on("connection", (socket) => {
       $set: { currentPrice: amount, highestBidder: user.name, highestBidderId: user.id }
     });
 
-    // anti-sniping
+    // anti-sniping — ใช้ค่าจาก room ถ้าไม่มีก็ไม่ต่อเวลา
     const endsAt = new Date(lot.endsAt).getTime();
-    if (endsAt - Date.now() < 60_000) {
-      const newEndsAt = new Date(Date.now() + 30_000);
+    const snipeTrigger = (lot.snipeTrigger || 0) * 1000;
+    const snipeExt     = (lot.snipeExt || 0) * 1000;
+    if (snipeTrigger > 0 && snipeExt > 0 && endsAt - Date.now() < snipeTrigger) {
+      const newEndsAt = new Date(Date.now() + snipeExt);
       await update("lots", { _id: lotId }, { $set: { endsAt: newEndsAt } });
       io.to(roomId).emit("lot:extended", { lotId, newEndsAt });
     }
@@ -131,6 +133,55 @@ io.on("connection", (socket) => {
     if (!currentRoom) return;
     const count = io.sockets.adapter.rooms.get(currentRoom)?.size || 0;
     io.to(currentRoom).emit("room:viewers", { count });
+  });
+
+  // BIN — ซื้อทันที
+  socket.on('bin:place', async ({ roomId, lotId }) => {
+    if (!user) return socket.emit('bid:error', { message: 'กรุณา login ก่อน', lotId });
+
+    const lot = await findOne('lots', { _id: lotId });
+    if (!lot) return socket.emit('bid:error', { message: 'ไม่พบ lot นี้', lotId });
+    if (!lot.isActive) return socket.emit('bid:error', { message: 'Lot นี้สิ้นสุดแล้ว', lotId });
+    if (!lot.binPrice) return socket.emit('bid:error', { message: 'Lot นี้ไม่มีราคาปิด', lotId });
+
+    // บันทึก bid ในราคา BIN
+    await insert('bids', {
+      lotId, roomId,
+      bidderId: user.id,
+      bidderName: user.name,
+      amount: lot.binPrice,
+      isBin: true,
+      createdAt: new Date(),
+    });
+
+    // ปิด lot ทันที
+    await update('lots', { _id: lotId }, {
+      $set: {
+        isActive: false,
+        currentPrice: lot.binPrice,
+        highestBidder: user.name,
+        highestBidderId: user.id,
+      }
+    });
+
+    io.to(roomId).emit('lot:bin', {
+      lotId,
+      buyerName: user.name,
+      finalPrice: lot.binPrice,
+    });
+
+    // แจ้งเตือนผู้ชนะผ่าน chat (เหมือน lot:ended)
+    try {
+      const adminUser = await findOne('users', { role: 'admin' }) || { _id: 'system', name: 'ระบบ' };
+      const text = `คุณซื้อ Lot ${lot.name} ด้วยราคาปิด ฿${Number(lot.binPrice).toLocaleString()} เรียบร้อยแล้ว`;
+      const msg = { senderId: adminUser._id || 'system', receiverId: user.id, text, createdAt: Date.now() };
+      const saved = await insert('messages', msg);
+      const chatRoom = [msg.senderId, user.id].sort().join('_');
+      io.to(`chat:${chatRoom}`).emit('chat:message', saved);
+      io.to(`user:${user.id}`).emit('chat:notification', { fromId: msg.senderId, preview: saved.text.substring(0, 60) });
+    } catch (e) {
+      console.error('bin notify error', e);
+    }
   });
 
   socket.on('chat:join', ({ myId, otherId }) => {

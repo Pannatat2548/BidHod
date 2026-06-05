@@ -99,6 +99,12 @@ table.lot-table tr:hover td{background:var(--bg2)}
         <input id="default-dur" type="number" value="30" oninput="applyDefaultDur()">
       </div>
     </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div class="field" style="margin:0">
+        <label>ต่อเวลา Anti-snipe (วินาที)</label>
+        <input id="snipe-ext" type="number" min="0" placeholder="เช่น 30 (ไม่กรอก = ไม่ต่อเวลา)">
+      </div>
+    </div>
 
     <!-- Range price -->
     <div style="margin-bottom:12px">
@@ -109,8 +115,10 @@ table.lot-table tr:hover td{background:var(--bg2)}
           <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-0" min="1">
           <span class="bulk-label">ถึง</span>
           <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-0" min="1">
-          <span class="bulk-label">ราคา ฿</span>
+          <span class="bulk-label">ราคาเริ่ม ฿</span>
           <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-0">
+          <span class="bulk-label">BIN ฿</span>
+          <input class="bulk-input" style="width:110px" type="number" placeholder="ไม่บังคับ" id="rb-0">
           <button class="btn" onclick="applyRange(0)">ใช้ราคานี้</button>
         </div>
       </div>
@@ -198,6 +206,7 @@ function generateTable() {
     return `<tr>
       <td class="lot-num-cell">${num}</td>
       <td><input class="lot-price-input" id="p-${num}" type="number" placeholder="ราคาเริ่มต้น (฿)" value="${defPrice || ''}"></td>
+      <td><input class="lot-price-input" id="bin-${num}" type="number" placeholder="ไม่บังคับ"></td>
       <td><input class="lot-desc-input" id="d-${num}" type="text" placeholder="หมายเหตุ (ถ้ามี)"></td>
       <td><input class="lot-dur-input" id="dur-${num}" type="number" value="${defDur}" min="1"></td>
     </tr>`;
@@ -207,6 +216,7 @@ function generateTable() {
     <thead><tr>
       <th style="text-align:center">เบอร์</th>
       <th>ราคาเริ่มต้น (฿)</th>
+      <th>ราคาปิด BIN (฿)</th>
       <th>หมายเหตุ</th>
       <th>เวลา (นาที)</th>
     </tr></thead>
@@ -229,8 +239,10 @@ function addRangeRow() {
     <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-${id}" min="1">
     <span class="bulk-label">ถึง</span>
     <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-${id}" min="1">
-    <span class="bulk-label">ราคา ฿</span>
+    <span class="bulk-label">ราคาเริ่ม ฿</span>
     <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-${id}">
+    <span class="bulk-label">BIN ฿</span>
+    <input class="bulk-input" style="width:110px" type="number" placeholder="ไม่บังคับ" id="rb-${id}">
     <button class="btn" onclick="applyRange(${id})">ใช้ราคานี้</button>
     <button class="btn" onclick="removeRange(${id})" style="color:var(--red);border-color:rgba(209,48,48,.2)">✕</button>
   `;
@@ -242,14 +254,17 @@ function removeRange(id) {
 }
 
 function applyRange(id) {
-  const from = parseInt(document.getElementById('rf-' + id)?.value);
-  const to   = parseInt(document.getElementById('rt-' + id)?.value);
+  const from  = parseInt(document.getElementById('rf-' + id)?.value);
+  const to    = parseInt(document.getElementById('rt-' + id)?.value);
   const price = document.getElementById('rp-' + id)?.value;
+  const bin   = document.getElementById('rb-' + id)?.value;
   if (!from || !to || !price) return;
   if (from > to) return showMsg('เบอร์เริ่มต้นต้องน้อยกว่าเบอร์สุดท้าย', 'err');
   for (let n = from; n <= to; n++) {
-    const el = document.getElementById('p-' + n);
-    if (el) el.value = price;
+    const ep = document.getElementById('p-' + n);
+    if (ep) ep.value = price;
+    const eb = document.getElementById('bin-' + n);
+    if (eb) eb.value = bin || '';
   }
 }
 
@@ -260,6 +275,7 @@ function applyDefaultDur() {
 
 function clearAllPrices() {
   document.querySelectorAll('[id^="p-"]').forEach(el => el.value = '');
+  document.querySelectorAll('[id^="bin-"]').forEach(el => el.value = '');
 }
 
 // ── Create room ───────────────────────────────
@@ -277,25 +293,30 @@ async function createRoom() {
   for (let i = 0; i < count; i++) {
     const num = start + i;
     const price = parseInt(document.getElementById('p-' + num)?.value) || 0;
+    const bin = parseInt(document.getElementById('bin-' + num)?.value) || null;
     const desc = document.getElementById('d-' + num)?.value.trim() || '';
     const dur = parseInt(document.getElementById('dur-' + num)?.value) || 30;
     lots.push({
-      name: String(num),   // ชื่อ = เบอร์
+      name: String(num),
       desc,
-      image: img,          // ทุกเบอร์ใช้รูปเดียวกัน
+      image: img,
       startingPrice: price,
+      binPrice: bin,
       durationMin: dur,
     });
   }
 
   if (!lots.length) return showMsg('ไม่พบรายการ', 'err');
 
+  const snipeExt     = parseInt(document.getElementById('snipe-ext').value) || 0;
+  const snipeTrigger = snipeExt; // trigger = ค่าเดียวกับ ext
+
   try {
     showMsg('กำลังสร้างห้อง...', 'ok');
     const r = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ title, house, lots })
+      body: JSON.stringify({ title, house, lots, snipeExt, snipeTrigger })
     });
     const d = await r.json();
     if (!r.ok) return showMsg(d.error, 'err');
