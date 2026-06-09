@@ -199,72 +199,128 @@
     }
 
     .lot-status-card {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-top: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  }
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
 
-  .status-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 8px;
-  }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
 
-  .status-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-  .status-label {
-    font-size: 11px;
-    color: var(--ink4);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-  }
+    .status-label {
+      font-size: 11px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
 
-  .status-value {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--ink);
-  }
+    .status-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
 
-  .status-value.price {
-    color: var(--primary); /* หรือสีตามธีมของคุณ */
-    font-size: 18px;
-  }
+    .status-value.price {
+      color: var(--primary);
+      /* หรือสีตามธีมของคุณ */
+      font-size: 18px;
+    }
 
-  .status-value.leader {
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  /* ปรับปุ่มติดต่อ Seller ให้ดูดีขึ้นนิดหน่อย */
-  .btn-contact-seller {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--ink2);
-    text-decoration: none;
-    margin-bottom: 0;
-    padding: 8px 12px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--bg);
-    transition: all 0.2s;
-  }
-  .btn-contact-seller:hover {
-    background: var(--bg2);
-    border-color: var(--ink3);
-  }
+    .status-value.leader {
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ปรับปุ่มติดต่อ Seller ให้ดูดีขึ้นนิดหน่อย */
+    .btn-contact-seller {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--ink2);
+      text-decoration: none;
+      margin-bottom: 0;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      transition: all 0.2s;
+    }
+
+    .btn-contact-seller:hover {
+      background: var(--bg2);
+      border-color: var(--ink3);
+    }
+
+    /* ── Proof Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeUp 0.2s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .modal-title { font-size:15px; font-weight:600; margin-bottom:6px; }
+    .modal-sub { font-size:12px; color:var(--ink4); margin-bottom:16px; line-height:1.6; }
+    .modal-upload-area {
+      border: 2px dashed var(--line2);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .modal-upload-area:hover { border-color: var(--primary); }
+    .modal-upload-area input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .modal-upload-preview {
+      width: 100%; max-height: 160px; object-fit: contain;
+      border-radius: 8px; margin-bottom: 12px; display: none;
+    }
+    .modal-input {
+      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
+      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
+      background: var(--bg); outline: none; margin-bottom: 8px;
+      transition: border-color 0.2s;
+    }
+    .modal-input:focus { border-color: var(--primary); }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
   </style>
 </head>
 
@@ -369,20 +425,20 @@
     }
 
     function switchLot(lotId) {
-  activeLotId = lotId;
-  const lot = roomData?.lots.find(l => l._id === lotId);
-  if (!lot) return;
+      activeLotId = lotId;
+      const lot = roomData?.lots.find(l => l._id === lotId);
+      if (!lot) return;
 
-  renderTabs(roomData.lots);
+      renderTabs(roomData.lots);
 
-  // ── สร้าง HTML ใหม่ที่มีกล่อง Status Card ──
-  const sellerBtnHTML = roomData.sellerId 
-    ? `<a href="/messages.html?room=${roomData._id}&with=${roomData.sellerId}" class="btn-contact-seller">
+      // ── สร้าง HTML ใหม่ที่มีกล่อง Status Card ──
+      const sellerBtnHTML = roomData.sellerId
+        ? `<a href="/messages.html?room=${roomData._id}&with=${roomData.sellerId}" class="btn-contact-seller">
          💬 ติดต่อ Seller
-       </a>` 
-    : '';
+       </a>`
+        : '';
 
-  document.getElementById('main').innerHTML = `
+      document.getElementById('main').innerHTML = `
     <div class="lot-thumb">
       ${lot.image ? `<img src="${lot.image}" alt="${lot.name}">` : lotIcon(lot.name)}
     </div>
@@ -420,11 +476,11 @@
     </div>
   `;
 
-  updatePrice(lot.currentPrice, lot.highestBidder);
-  updateQuickBids(lot.currentPrice);
-  renderHistoryFull(lot.bids || []);
-  lot.isActive ? renderBidSection() : showEnded(lot.highestBidder, lot.currentPrice);
-}
+      updatePrice(lot.currentPrice, lot.highestBidder);
+      updateQuickBids(lot.currentPrice);
+      renderHistoryFull(lot.bids || []);
+      lot.isActive ? renderBidSection() : showEnded(lot.highestBidder, lot.currentPrice);
+    }
 
     function renderBidSection() {
       const sec = document.getElementById('bid-section');
@@ -515,9 +571,36 @@
       list.innerHTML = '';[...bids].reverse().forEach(b => prependHistory(b));
     }
     function showEnded(winner, price, isBin = false) {
-      const label = isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว';
-      document.getElementById('bid-section').innerHTML = `<div class="ended-block"><div class="ended-title">${label}</div><div class="ended-sub">ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>฿${price.toLocaleString()}</div></div>`;
-      document.getElementById('timer').textContent = '00:00';
+      const lot = roomData?.lots.find(l => l._id === activeLotId);
+      const isWinner = user && (winner === user.name);
+      const isSeller = roomData && roomData.sellerId === user?.id;
+
+      let actionButtons = '';
+
+      if (isWinner && !lot?.paid) {
+        actionButtons += `<button class="btn success" onclick="openRoomSlipModal('${activeLotId}')">📎 แนบสลิปยืนยันจ่าย</button>`;
+      }
+
+      if (isSeller && lot?.paid && !lot?.delivered) {
+        actionButtons += `<button class="btn primary" onclick="openRoomTrackingModal('${activeLotId}')">📦 กรอก Tracking</button>`;
+      }
+
+      if (isWinner && lot?.delivered && !lot?.received) {
+        actionButtons += `<button class="btn success" onclick="markReceived('${activeLotId}')">ยืนยันรับของ</button>`;
+      }
+
+      document.getElementById('bid-section').innerHTML = `
+    <div class="ended-block">
+      <div class="ended-title">${isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว'}</div>
+      <div class="ended-sub">
+        ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>
+        ฿${price.toLocaleString()}
+      </div>
+      ${lot.paymentSlip ? `<div style="margin:8px 0"><img src="${lot.paymentSlip}" style="max-width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--line)" title="สลิปการโอน"></div>` : ''}
+      ${lot.trackingNumber ? `<div style="margin:8px 0;font-size:12px">🚚 ${lot.shippingProvider ? lot.shippingProvider+': ' : ''}${lot.trackingNumber}</div>` : ''}
+      ${actionButtons}
+    </div>
+  `;
     }
     function showError(msg) { const el = document.getElementById('bid-error'); if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 3000); } }
     function placeBid() {
@@ -548,7 +631,196 @@
         document.getElementById('msg-badge').style.display = 'block';
       });
     }
+    async function markPaid(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้ชำระเงินแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/pay`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        alert('ยืนยันการชำระเงินสำเร็จ!');
+        location.reload(); // โหลดใหม่เพื่อดูสถานะที่อัปเดต
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function markDelivered(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้ส่งของให้ผู้ซื้อแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/deliver`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        alert('ยืนยันการส่งของสำเร็จ!');
+        location.reload();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function markReceived(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้รับของแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/receive`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        alert('ยืนยันการรับของสำเร็จ! เครดิตของคุณเพิ่มขึ้น');
+        location.reload();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // ── Room Slip Modal ──
+    let roomPayLotId = null;
+
+    function openRoomSlipModal(lotId) {
+      roomPayLotId = lotId;
+      document.getElementById('room-slip-preview').style.display = 'none';
+      document.getElementById('room-slip-placeholder').style.display = 'block';
+      document.getElementById('room-slip-file').value = '';
+      document.getElementById('room-slip-modal').style.display = 'flex';
+    }
+    function closeRoomSlipModal() {
+      document.getElementById('room-slip-modal').style.display = 'none';
+      roomPayLotId = null;
+    }
+    function roomPreviewSlip(input) {
+      const file = input.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const p = document.getElementById('room-slip-preview');
+        p.src = e.target.result; p.style.display = 'block';
+        document.getElementById('room-slip-placeholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+    async function confirmRoomPaid() {
+      if (!roomPayLotId) return;
+      const fileInput = document.getElementById('room-slip-file');
+      if (!fileInput.files[0]) { alert('กรุณาเลือกรูปสลิปก่อน'); return; }
+      const btn = document.getElementById('room-slip-confirm-btn');
+      btn.disabled = true; btn.textContent = 'กำลังอัพโหลด...';
+      try {
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        if (!uploadRes.ok) throw new Error('อัพโหลดรูปไม่สำเร็จ');
+        const { url } = await uploadRes.json();
+
+        const res = await fetch(`/api/profile/lots/${roomPayLotId}/pay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ paymentSlip: url })
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
+
+        // อัพเดต lot data local แล้ว re-render
+        const lot = roomData?.lots.find(l => l._id === roomPayLotId);
+        if (lot) { lot.paid = true; lot.paymentSlip = url; }
+        closeRoomSlipModal();
+        showEnded(lot?.highestBidder, lot?.currentPrice);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = '✓ ยืนยันการชำระเงิน';
+      }
+    }
+
+    // ── Room Tracking Modal ──
+    let roomDeliverLotId = null;
+
+    function openRoomTrackingModal(lotId) {
+      roomDeliverLotId = lotId;
+      document.getElementById('room-tracking-input').value = '';
+      document.getElementById('room-shipping-provider').value = '';
+      document.getElementById('room-tracking-modal').style.display = 'flex';
+    }
+    function closeRoomTrackingModal() {
+      document.getElementById('room-tracking-modal').style.display = 'none';
+      roomDeliverLotId = null;
+    }
+    async function confirmRoomDelivered() {
+      if (!roomDeliverLotId) return;
+      const trackingNumber = document.getElementById('room-tracking-input').value.trim();
+      const shippingProvider = document.getElementById('room-shipping-provider').value;
+      if (!trackingNumber) { alert('กรุณากรอกเลข tracking'); return; }
+      try {
+        const res = await fetch(`/api/profile/lots/${roomDeliverLotId}/deliver`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ trackingNumber, shippingProvider })
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
+
+        const lot = roomData?.lots.find(l => l._id === roomDeliverLotId);
+        if (lot) { lot.delivered = true; lot.trackingNumber = trackingNumber; lot.shippingProvider = shippingProvider; }
+        closeRoomTrackingModal();
+        showEnded(lot?.highestBidder, lot?.currentPrice);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById('room-slip-modal')?.addEventListener('click', e => { if (e.target.id === 'room-slip-modal') closeRoomSlipModal(); });
+    document.getElementById('room-tracking-modal')?.addEventListener('click', e => { if (e.target.id === 'room-tracking-modal') closeRoomTrackingModal(); });
   </script>
+  <!-- Room Slip Modal -->
+  <div id="room-slip-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">📎 แนบสลิปการชำระเงิน</div>
+      <div id="room-slip-placeholder" style="border:2px dashed var(--line2);border-radius:8px;padding:32px;text-align:center;color:var(--ink4);font-size:13px;margin-bottom:12px;">
+        คลิกเพื่อเลือกรูปสลิป
+      </div>
+      <img id="room-slip-preview" style="display:none;width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;" />
+      <input id="room-slip-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px;font-size:13px;" onchange="roomPreviewSlip(this)">
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="closeRoomSlipModal()" style="flex:1;">ยกเลิก</button>
+        <button id="room-slip-confirm-btn" class="btn success" onclick="confirmRoomPaid()" style="flex:1;">✓ ยืนยันการชำระเงิน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Tracking Modal -->
+  <div id="room-tracking-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">📦 กรอกเลข Tracking</div>
+      <select id="room-shipping-provider" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:10px;">
+        <option value="">-- เลือกขนส่ง --</option>
+        <option value="Kerry">Kerry Express</option>
+        <option value="Flash">Flash Express</option>
+        <option value="J&T">J&T Express</option>
+        <option value="Thailand Post">ไปรษณีย์ไทย</option>
+        <option value="Ninja Van">Ninja Van</option>
+        <option value="DHL">DHL</option>
+        <option value="Other">อื่นๆ</option>
+      </select>
+      <input id="room-tracking-input" type="text" placeholder="เลข Tracking เช่น TH123456789" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:12px;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="closeRoomTrackingModal()" style="flex:1;">ยกเลิก</button>
+        <button class="btn primary" onclick="confirmRoomDelivered()" style="flex:1;">📦 ยืนยันจัดส่ง</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>

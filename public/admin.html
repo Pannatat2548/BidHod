@@ -128,6 +128,16 @@
     .section.active { display: block; }
     
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ---- MOBILE RESPONSIVE ---- */
+    @media (max-width: 640px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+      .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+      .tab-bar::-webkit-scrollbar { display: none; }
+      table { font-size: 12px; }
+      table th, table td { padding: 8px 6px; }
+      .action-row { flex-wrap: wrap; gap: 4px; }
+    }
   </style>
 </head>
 

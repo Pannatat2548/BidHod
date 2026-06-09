@@ -24,12 +24,14 @@ const authRoutes = require("./routes/auth");
 const roomRoutes = require("./routes/rooms");
 const adminRoutes = require("./routes/admin");
 const uploadRoutes = require("./routes/upload");
+const profileRoutes = require('./routes/profile');
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/profile', profileRoutes);
 
 // SPA fallback
 app.get("*", (req, res) => {
@@ -227,6 +229,78 @@ io.on("connection", (socket) => {
     }
   });
 
+});
+
+app.get('/api/profile/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await findOne('users', { _id: userId });
+    if (!user) return res.status(404).json({ error: 'ไม่พบผู้ใช้' });
+
+    // ดึง bids ที่ user นี้ทำ (ฝั่ง buyer)
+    const bids = await find('bids', { bidderId: userId }, { createdAt: -1 });
+    
+    // ดึง lots ที่ user นี้ชนะ (highestBidderId = userId)
+    const wonLots = await find('lots', { highestBidderId: userId, isActive: false }, { createdAt: -1 });
+    
+    // ดึง rooms ที่ user นี้เป็น seller
+    const sellerRooms = await find('rooms', { sellerId: userId }, { createdAt: -1 });
+    
+    // ดึง lots ทั้งหมดใน rooms ที่ user เป็น seller
+    const sellerLots = [];
+    for (const room of sellerRooms) {
+      const lots = await find('lots', { roomId: room._id });
+      sellerLots.push(...lots.map(l => ({ ...l, roomTitle: room.title, roomHouse: room.house })));
+    }
+
+    res.json({
+      user: { ...user, password: undefined },
+      stats: {
+        buy: {
+          totalBids: bids.length,
+          totalWon: wonLots.length,
+          totalSpent: wonLots.reduce((sum, l) => sum + (l.currentPrice || 0), 0),
+          lots: wonLots.map(l => ({
+            lotName: l.name,
+            roomTitle: l.roomId, // ต้อง resolve เป็นชื่อห้อง
+            price: l.currentPrice,
+            paid: l.paid || false,
+            endedAt: l.endsAt
+          }))
+        },
+        sell: {
+          totalRooms: sellerRooms.length,
+          totalLots: sellerLots.length,
+          totalRevenue: sellerLots.filter(l => !l.isActive).reduce((sum, l) => sum + (l.currentPrice || 0), 0),
+          lots: sellerLots.map(l => ({
+            lotName: l.name,
+            roomTitle: l.roomTitle,
+            currentPrice: l.currentPrice,
+            isActive: l.isActive,
+            bidderCount: l.bids?.length || 0
+          }))
+        }
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/profile/:userId — อัปเดต social links
+app.patch('/api/profile/:userId', require('./middleware/auth').requireAuth, async (req, res) => {
+  try {
+    if (req.user.id !== req.params.userId && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'ไม่มีสิทธิ์แก้ไข' });
+    }
+    const { facebook, instagram, discord } = req.body;
+    await update('users', { _id: req.params.userId }, { 
+      $set: { facebook, instagram, discord } 
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Timer ─────────────────────────────────────────

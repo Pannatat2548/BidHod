@@ -4,53 +4,259 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bidmai — สร้างห้องประมูล</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 <style>
-body{background:var(--bg2)}
-.card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
-.card-title{font-size:10px;letter-spacing:2px;color:var(--ink4);text-transform:uppercase;margin-bottom:16px;font-weight:500}
+body { background: var(--bg2); }
 
-/* ── Cover image upload ── */
-.cover-upload{border:2px dashed var(--line2);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg2);position:relative}
-.cover-upload:hover{border-color:var(--ink2);background:var(--bg3)}
-.cover-upload.has-img{padding:0;border-style:solid;border-color:var(--line);overflow:hidden}
-.cover-upload img{width:100%;max-height:320px;object-fit:contain;background:var(--bg2);display:block}
-.cover-upload-icon{font-size:36px;margin-bottom:8px}
-.cover-upload-label{font-size:13px;color:var(--ink2);font-weight:500;margin-bottom:4px}
-.cover-upload-hint{font-size:11px;color:var(--ink4)}
-.cover-change-btn{display:block;padding:8px;text-align:center;font-size:12px;color:var(--ink4);cursor:pointer;border-top:1px solid var(--line);background:var(--bg);transition:background .15s}
-.cover-change-btn:hover{background:var(--bg2);color:var(--ink)}
+/* ── Page header ── */
+.page-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  border-radius: var(--radius);
+  padding: 28px 28px 24px;
+  margin-bottom: 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.page-hero::before {
+  content: '🏛️';
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 64px;
+  opacity: 0.15;
+}
+.page-hero .label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-bottom: 6px;
+}
+.page-hero h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+  border: none;
+  padding: 0;
+}
 
-/* ── Lot count & default price ── */
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ── Section card ── */
+.section-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--ink4);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.section-head .icon {
+  font-size: 16px;
+}
+
+/* ── Fields ── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink3);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+.field input, .field select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.field small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--ink4);
+}
+
+/* ── Grid layouts ── */
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.row3 .field, .row2 .field { margin: 0; }
+
+/* ── Cover upload ── */
+.cover-upload {
+  border: 2px dashed var(--line2);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  background: var(--bg2);
+  position: relative;
+}
+.cover-upload:hover { border-color: var(--primary); background: var(--primary-light); }
+.cover-upload.has-img { padding: 0; border-style: solid; border-color: var(--line); overflow: hidden; }
+.cover-upload img { width: 100%; max-height: 300px; object-fit: contain; background: var(--bg2); display: block; }
+.cover-upload-icon { font-size: 40px; margin-bottom: 8px; }
+.cover-upload-label { font-size: 14px; color: var(--ink2); font-weight: 600; margin-bottom: 4px; }
+.cover-upload-hint { font-size: 11px; color: var(--ink4); line-height: 1.6; }
+.cover-change-btn {
+  display: block; padding: 8px; text-align: center; font-size: 12px;
+  color: var(--ink4); cursor: pointer; border-top: 1px solid var(--line);
+  background: var(--bg); transition: background .15s;
+}
+.cover-change-btn:hover { background: var(--bg2); color: var(--ink); }
+.spinner { display: none; font-size: 11px; color: var(--ink4); margin-top: 8px; }
+.spinner.show { display: block; }
+
+/* ── Price groups ── */
+.group-section {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.group-grid-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+.group-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink4);
+  margin-bottom: 5px;
+  letter-spacing: 0.3px;
+}
+.bulk-input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg);
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.bulk-input:focus { border-color: var(--primary); }
+/* legacy - ไม่ใช้แล้วแต่เก็บไว้กัน */
+.bulk-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bulk-label { font-size: 12px; color: var(--ink3); white-space: nowrap; }
 
 /* ── Lot table ── */
-.lot-table-wrap{overflow-x:auto}
-table.lot-table{width:100%;border-collapse:collapse;font-size:13px}
-table.lot-table th{text-align:left;padding:8px 10px;font-size:10px;letter-spacing:1px;color:var(--ink4);text-transform:uppercase;border-bottom:1px solid var(--line);font-weight:500;white-space:nowrap}
-table.lot-table td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
-table.lot-table tr:last-child td{border-bottom:none}
-table.lot-table tr:hover td{background:var(--bg2)}
-.lot-num-cell{font-size:12px;font-weight:500;color:var(--ink2);width:50px;text-align:center}
-.lot-price-input{width:100%;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none;transition:border-color .15s}
-.lot-price-input:focus{border-color:var(--ink2)}
-.lot-dur-input{width:70px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none}
-.lot-desc-input{width:100%;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none}
+.lot-table-wrap { overflow-x: auto; margin-top: 16px; }
+table.lot-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.lot-table th {
+  text-align: left; padding: 8px 10px;
+  font-size: 10px; letter-spacing: 1px; color: var(--ink4);
+  text-transform: uppercase; border-bottom: 2px solid var(--line);
+  font-weight: 600; white-space: nowrap; background: var(--bg2);
+}
+table.lot-table th:first-child { text-align: center; border-radius: var(--radius-sm) 0 0 0; }
+table.lot-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.lot-table tr:last-child td { border-bottom: none; }
+table.lot-table tr:hover td { background: var(--primary-light); }
+.lot-num-cell { font-size: 12px; font-weight: 700; color: var(--primary); width: 50px; text-align: center; }
+.lot-input {
+  width: 100%; padding: 6px 8px; font-size: 12px; font-family: inherit;
+  background: var(--bg); border: 1px solid var(--line2);
+  border-radius: var(--radius-sm); color: var(--ink); outline: none;
+  transition: border-color .15s;
+}
+.lot-input:focus { border-color: var(--primary); }
+.lot-dur-input { width: 70px; }
 
-/* ── Bulk actions ── */
-.bulk-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.bulk-label{font-size:12px;color:var(--ink3)}
-.bulk-input{padding:6px 10px;font-size:12px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);outline:none;width:120px}
-.bulk-input:focus{border-color:var(--ink2)}
+/* ── Hint box ── */
+.hint-box {
+  background: var(--blue-bg);
+  border: 1px solid rgba(59,130,246,.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--blue);
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-/* ── Spinner ── */
-.spinner{display:none;font-size:11px;color:var(--ink4);margin-top:6px}
-.spinner.show{display:block}
+/* ── Submit btn ── */
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 4px 12px rgba(79,70,229,.35);
+  margin-top: 6px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.45); }
+.btn-submit:active { transform: translateY(0); }
+
+/* ── Msg ── */
+.msg { min-height: 20px; font-size: 13px; margin-top: 10px; text-align: center; border-radius: var(--radius-sm); padding: 0; transition: all .2s; }
+.msg.ok { color: var(--green); background: var(--green-bg); padding: 10px; }
+.msg.err { color: var(--red); background: var(--red-bg); padding: 10px; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .page-hero { padding: 20px; }
+  .page-hero h1 { font-size: 18px; }
+  .section-card { padding: 16px; }
+  .row3, .row2 { grid-template-columns: 1fr; }
+  .group-grid { grid-template-columns: 1fr 1fr; }
+  .group-grid-bottom { grid-template-columns: 1fr 1fr; }
+  .group-grid-bottom .btn-apply { grid-column: 1 / -1; }
+}
 </style>
 </head>
 <body>
+
 <nav>
   <div style="display:flex;align-items:center;gap:12px">
     <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
@@ -59,19 +265,29 @@ table.lot-table tr:hover td{background:var(--bg2)}
 </nav>
 
 <div class="container-narrow">
-  <div class="page-label">Seller</div>
-  <h1>สร้างห้องประมูล</h1>
 
-  <!-- ข้อมูลห้อง -->
-  <div class="card">
-    <div class="card-title">ข้อมูลห้องประมูล</div>
-    <div class="field"><label>ชื่อห้องประมูล</label><input id="room-title" type="text" placeholder="เช่น การ์ด Cardfight!! Vanguard Batch มีนา 2026"></div>
-    <div class="field"><label>ชื่อ House / เจ้าของ</label><input id="room-house" type="text" placeholder="เช่น ร้าน CardShop TH"></div>
+  <!-- Hero -->
+  <div class="page-hero">
+    <div class="label">Seller Dashboard</div>
+    <h1>สร้างห้องประมูล</h1>
   </div>
 
-  <!-- รูปหลัก -->
-  <div class="card">
-    <div class="card-title">รูปสินค้า (1 รูป ใช้กับทุกเบอร์)</div>
+  <!-- ส่วนที่ 1: ข้อมูลห้อง -->
+  <div class="section-card">
+    <div class="section-head"><span class="icon">📋</span> ข้อมูลห้องประมูล</div>
+    <div class="field">
+      <label>ชื่อห้องประมูล <span class="req">*</span></label>
+      <input id="room-title" type="text" placeholder="เช่น พระเครื่องชุดพิเศษ มีนา 2026">
+    </div>
+    <div class="field">
+      <label>ชื่อ House / เจ้าของ <span class="req">*</span></label>
+      <input id="room-house" type="text" placeholder="เช่น House A">
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 2: รูปสินค้า -->
+  <div class="section-card">
+    <div class="section-head"><span class="icon">🖼️</span> รูปสินค้า</div>
     <div class="cover-upload" id="cover-upload" onclick="document.getElementById('cover-input').click()">
       <div class="cover-upload-icon">🖼</div>
       <div class="cover-upload-label">คลิกเพื่ออัปโหลดรูป</div>
@@ -82,63 +298,84 @@ table.lot-table tr:hover td{background:var(--bg2)}
     <input type="hidden" id="cover-img">
   </div>
 
-  <!-- ตั้งค่าเบอร์ -->
-  <div class="card">
-    <div class="card-title">ตั้งค่าเบอร์และราคา</div>
-    <div class="row3" style="margin-bottom:14px">
-      <div class="field" style="margin:0">
-        <label>จำนวนเบอร์ทั้งหมด</label>
+  <!-- ส่วนที่ 3: ตั้งค่าเบอร์และราคา -->
+  <div class="section-card">
+    <div class="section-head"><span class="icon">⚙️</span> ตั้งค่าเบอร์และราคา</div>
+
+    <div class="row3">
+      <div class="field">
+        <label>จำนวนเบอร์ทั้งหมด <span class="req">*</span></label>
         <input id="lot-count" type="number" min="1" max="200" placeholder="เช่น 12" oninput="generateTable()">
+        <small>สูงสุด 200 เบอร์</small>
       </div>
-      <div class="field" style="margin:0">
-        <label>เบอร์เริ่มต้น</label>
+      <div class="field">
+        <label>เบอร์เริ่มต้น <span class="req">*</span></label>
         <input id="lot-start" type="number" min="1" value="1" oninput="generateTable()">
+        <small>ปกติเริ่มจาก 1</small>
       </div>
-      <div class="field" style="margin:0">
-        <label>ระยะเวลา (นาที)</label>
-        <input id="default-dur" type="number" value="30" oninput="applyDefaultDur()">
-      </div>
-    </div>
-    <div class="row2" style="margin-bottom:14px">
-      <div class="field" style="margin:0">
-        <label>ต่อเวลา Anti-snipe (วินาที)</label>
-        <input id="snipe-ext" type="number" min="0" placeholder="เช่น 30 (ไม่กรอก = ไม่ต่อเวลา)">
+      <div class="field">
+        <label>ระยะเวลาต่อเบอร์ (นาที) <span class="req">*</span></label>
+        <input id="default-dur" type="number" value="30" min="1" oninput="applyDefaultDur()">
+        <small>ใช้กับทุกเบอร์</small>
       </div>
     </div>
 
-    <!-- Range price -->
+    <div class="row2">
+      <div class="field">
+        <label>⏱️ ต่อเวลา Anti-Snipe (วินาที)</label>
+        <input id="snipe-ext" type="number" min="0" placeholder="เช่น 30">
+        <small>เพิ่มเวลาเมื่อมีคนประมูลในช่วงท้าย (0 หรือปล่อยว่าง = ไม่ต่อเวลา)</small>
+      </div>
+    </div>
+
+    <!-- กำหนดราคาเป็นกลุ่ม -->
     <div style="margin-bottom:12px">
-      <div style="font-size:11px;letter-spacing:1px;color:var(--ink4);text-transform:uppercase;margin-bottom:8px;font-weight:500">กำหนดราคาเป็นกลุ่ม</div>
-      <div class="bulk-row" id="range-rows">
-        <div class="range-row" id="rr-0" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
-          <span class="bulk-label">เบอร์</span>
-          <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-0" min="1">
-          <span class="bulk-label">ถึง</span>
-          <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-0" min="1">
-          <span class="bulk-label">ราคาเริ่ม ฿</span>
-          <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-0">
-          <span class="bulk-label">BIN ฿</span>
-          <input class="bulk-input" style="width:110px" type="number" placeholder="ไม่บังคับ" id="rb-0">
-          <button class="btn" onclick="applyRange(0)">ใช้ราคานี้</button>
+      <div style="font-size:11px;letter-spacing:1.5px;color:var(--ink4);text-transform:uppercase;margin-bottom:10px;font-weight:600">💰 กำหนดราคาเป็นกลุ่ม</div>
+      <div id="range-rows">
+      <div class="group-section" id="rr-0">
+          <div class="group-grid">
+            <div class="group-field">
+              <label>จาก (เบอร์)</label>
+              <input class="bulk-input" type="number" placeholder="เช่น 1" id="rf-0" min="1">
+            </div>
+            <div class="group-field">
+              <label>ถึง (เบอร์)</label>
+              <input class="bulk-input" type="number" placeholder="เช่น 12" id="rt-0" min="1">
+            </div>
+            <div class="group-field">
+              <label>ราคาเริ่ม (฿)</label>
+              <input class="bulk-input" type="number" placeholder="เช่น 500" id="rp-0">
+            </div>
+          </div>
+          <div class="group-grid-bottom">
+            <div class="group-field">
+              <label>BIN ราคาปิด (฿)</label>
+              <input class="bulk-input" type="number" placeholder="ไม่บังคับ" id="rb-0">
+            </div>
+            <div></div>
+            <div class="group-field" style="display:flex;align-items:flex-end">
+              <button class="btn primary btn-apply" style="width:100%;padding:9px 16px" onclick="applyRange(0)">✓ ใช้ราคานี้</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
+      <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn" onclick="addRangeRow()">+ เพิ่มกลุ่ม</button>
-        <button class="btn" onclick="clearAllPrices()" style="color:var(--ink4)">ล้างราคาทั้งหมด</button>
+        <button class="btn" onclick="clearAllPrices()" style="color:var(--ink4)">🗑️ ล้างราคาทั้งหมด</button>
       </div>
     </div>
 
     <!-- Lot table -->
     <div class="lot-table-wrap" id="lot-table-wrap">
-      <div style="text-align:center;padding:24px;font-size:13px;color:var(--ink4)">
-        กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง
-      </div>
+      <div class="hint-box">💡 กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง</div>
     </div>
   </div>
 
-  <button class="btn primary btn-full" onclick="createRoom()">สร้างห้องประมูล</button>
+  <!-- Submit -->
+  <button class="btn-submit" onclick="createRoom()">🚀 สร้างห้องประมูล</button>
   <div class="msg" id="msg"></div>
   <div style="height:40px"></div>
+
 </div>
 
 <script>
@@ -150,7 +387,7 @@ if (!token || !user || !['admin','seller'].includes(user.role))
 let coverUrl = '';
 let tableGenerated = false;
 
-// ── Upload cover ─────────────────────────────
+// ── Upload cover ──────────────────────────────
 async function uploadCover(input) {
   const file = input.files[0];
   if (!file) return;
@@ -188,12 +425,12 @@ async function uploadCover(input) {
 function generateTable() {
   const count = parseInt(document.getElementById('lot-count').value) || 0;
   const start = parseInt(document.getElementById('lot-start').value) || 1;
-  const defPrice = '';
   const defDur = document.getElementById('default-dur').value || 30;
   const wrap = document.getElementById('lot-table-wrap');
 
   if (!count || count < 1) {
-    wrap.innerHTML = '<div style="text-align:center;padding:24px;font-size:13px;color:var(--ink4)">กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง</div>';
+    wrap.innerHTML = '<div class="hint-box">💡 กรอกจำนวนเบอร์ด้านบนเพื่อสร้างตาราง</div>';
+    tableGenerated = false;
     return;
   }
   if (count > 200) {
@@ -205,10 +442,10 @@ function generateTable() {
     const num = start + i;
     return `<tr>
       <td class="lot-num-cell">${num}</td>
-      <td><input class="lot-price-input" id="p-${num}" type="number" placeholder="ราคาเริ่มต้น (฿)" value="${defPrice || ''}"></td>
-      <td><input class="lot-price-input" id="bin-${num}" type="number" placeholder="ไม่บังคับ"></td>
-      <td><input class="lot-desc-input" id="d-${num}" type="text" placeholder="หมายเหตุ (ถ้ามี)"></td>
-      <td><input class="lot-dur-input" id="dur-${num}" type="number" value="${defDur}" min="1"></td>
+      <td><input class="lot-input" id="p-${num}" type="number" placeholder="ราคาเริ่มต้น (฿)"></td>
+      <td><input class="lot-input" id="bin-${num}" type="number" placeholder="ไม่บังคับ"></td>
+      <td><input class="lot-input" id="d-${num}" type="text" placeholder="หมายเหตุ (ถ้ามี)"></td>
+      <td><input class="lot-input lot-dur-input" id="dur-${num}" type="number" value="${defDur}" min="1"></td>
     </tr>`;
   }).join('');
 
@@ -225,27 +462,40 @@ function generateTable() {
   tableGenerated = true;
 }
 
-// ── Bulk actions ──────────────────────────────
+// ── Bulk range ────────────────────────────────
 let rangeCount = 1;
 
 function addRangeRow() {
   const id = rangeCount++;
   const div = document.createElement('div');
-  div.className = 'range-row';
+  div.className = 'group-section';
   div.id = 'rr-' + id;
-  div.style = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap';
   div.innerHTML = `
-    <span class="bulk-label">เบอร์</span>
-    <input class="bulk-input" style="width:70px" type="number" placeholder="จาก" id="rf-${id}" min="1">
-    <span class="bulk-label">ถึง</span>
-    <input class="bulk-input" style="width:70px" type="number" placeholder="ถึง" id="rt-${id}" min="1">
-    <span class="bulk-label">ราคาเริ่ม ฿</span>
-    <input class="bulk-input" style="width:110px" type="number" placeholder="ราคา" id="rp-${id}">
-    <span class="bulk-label">BIN ฿</span>
-    <input class="bulk-input" style="width:110px" type="number" placeholder="ไม่บังคับ" id="rb-${id}">
-    <button class="btn" onclick="applyRange(${id})">ใช้ราคานี้</button>
-    <button class="btn" onclick="removeRange(${id})" style="color:var(--red);border-color:rgba(209,48,48,.2)">✕</button>
-  `;
+    <div class="group-grid">
+      <div class="group-field">
+        <label>จาก (เบอร์)</label>
+        <input class="bulk-input" type="number" placeholder="เช่น 1" id="rf-${id}" min="1">
+      </div>
+      <div class="group-field">
+        <label>ถึง (เบอร์)</label>
+        <input class="bulk-input" type="number" placeholder="เช่น 12" id="rt-${id}" min="1">
+      </div>
+      <div class="group-field">
+        <label>ราคาเริ่ม (฿)</label>
+        <input class="bulk-input" type="number" placeholder="เช่น 500" id="rp-${id}">
+      </div>
+    </div>
+    <div class="group-grid-bottom">
+      <div class="group-field">
+        <label>BIN ราคาปิด (฿)</label>
+        <input class="bulk-input" type="number" placeholder="ไม่บังคับ" id="rb-${id}">
+      </div>
+      <div></div>
+      <div class="group-field" style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn primary btn-apply" style="flex:1;padding:9px 16px" onclick="applyRange(${id})">✓ ใช้ราคานี้</button>
+        <button class="btn" style="padding:9px 12px;color:var(--red);border-color:rgba(239,68,68,.2)" onclick="removeRange(${id})">✕</button>
+      </div>
+    </div>`;
   document.getElementById('range-rows').appendChild(div);
 }
 
@@ -258,7 +508,7 @@ function applyRange(id) {
   const to    = parseInt(document.getElementById('rt-' + id)?.value);
   const price = document.getElementById('rp-' + id)?.value;
   const bin   = document.getElementById('rb-' + id)?.value;
-  if (!from || !to || !price) return;
+  if (!from || !to || !price) return showMsg('กรุณากรอกเบอร์และราคา', 'err');
   if (from > to) return showMsg('เบอร์เริ่มต้นต้องน้อยกว่าเบอร์สุดท้าย', 'err');
   for (let n = from; n <= to; n++) {
     const ep = document.getElementById('p-' + n);
@@ -266,6 +516,8 @@ function applyRange(id) {
     const eb = document.getElementById('bin-' + n);
     if (eb) eb.value = bin || '';
   }
+  showMsg(`ตั้งราคาเบอร์ ${from}–${to} สำเร็จ`, 'ok');
+  setTimeout(() => document.getElementById('msg').className = 'msg', 2000);
 }
 
 function applyDefaultDur() {
@@ -274,15 +526,15 @@ function applyDefaultDur() {
 }
 
 function clearAllPrices() {
-  document.querySelectorAll('[id^="p-"]').forEach(el => el.value = '');
-  document.querySelectorAll('[id^="bin-"]').forEach(el => el.value = '');
+  if (!confirm('ต้องการล้างราคาทั้งหมด?')) return;
+  document.querySelectorAll('[id^="p-"],[id^="bin-"]').forEach(el => el.value = '');
 }
 
 // ── Create room ───────────────────────────────
 async function createRoom() {
   const title = document.getElementById('room-title').value.trim();
   const house = document.getElementById('room-house').value.trim();
-  if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ house', 'err');
+  if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ House', 'err');
   if (!tableGenerated) return showMsg('กรุณากรอกจำนวนเบอร์', 'err');
 
   const count = parseInt(document.getElementById('lot-count').value) || 0;
@@ -309,7 +561,7 @@ async function createRoom() {
   if (!lots.length) return showMsg('ไม่พบรายการ', 'err');
 
   const snipeExt     = parseInt(document.getElementById('snipe-ext').value) || 0;
-  const snipeTrigger = snipeExt; // trigger = ค่าเดียวกับ ext
+  const snipeTrigger = snipeExt;
 
   try {
     showMsg('กำลังสร้างห้อง...', 'ok');

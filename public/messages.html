@@ -270,22 +270,21 @@
     color: #fff;
   }
 
-  /* [FIX] ปรับ Bubble ให้กระชับขึ้น */
+  /* Bubble - responsive & no overflow */
   .bubble {
     display: inline-block;
     width: auto;
-    max-width: 150%;
-    min-width: 80px; /* ลดจาก 160px */
-    max-height: 80px;
-    padding: 8px 14px; /* เพิ่ม padding แนวตั้งเล็กน้อย */
+    max-width: min(72vw, 420px);
+    min-width: 60px;
+    padding: 8px 14px;
     border-radius: 18px;
-    font-size: 14px; /* ลดจาก 16px */
+    font-size: 14px;
     line-height: 1.5;
     position: relative;
     white-space: pre-line;
     overflow-wrap: break-word;
     word-wrap: break-word;
-    word-break: normal;
+    word-break: break-word;
     vertical-align: top;
   }
 
@@ -430,10 +429,25 @@
 
   /* ---- MOBILE ---- */
   @media (max-width: 640px) {
-    .msg-layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
+    .msg-layout {
+      grid-template-columns: 1fr;
+      height: calc(100vh - 60px);
+    }
+    /* sidebar ซ่อนเมื่อมี active chat */
+    .sidebar { display: flex; }
+    .sidebar.hidden { display: none !important; }
     .sidebar.show { display: flex; position: fixed; inset: 0; z-index: 100; background: #fff; }
-    .chat-area { display: flex; }
+    .chat-area { display: none; }
+    .chat-area.active { display: flex; }
+    /* ซ่อน sidebar เมื่อเปิดแชท */
+    .msg-layout.chat-open .sidebar { display: none; }
+    .msg-layout.chat-open .chat-area { display: flex; }
+    /* bubble ให้แคบลงอีกบน mobile เล็ก */
+    .bubble { max-width: min(65vw, 280px); font-size: 13px; }
+    .messages-container { padding: 12px; }
+    .chat-header { padding: 10px 14px 10px 50px; }
+    .chat-input-area { padding: 8px 10px; }
+    .chat-input-area textarea { font-size: 14px; padding: 8px 12px; }
   }
 
   /* ---- NOTIFICATION TOAST ---- */
@@ -709,6 +723,10 @@ async function openChat(partnerId, preserveRoomContext = false) {
   document.getElementById('partnerAvatar').textContent = initials(otherUser.name);
   document.getElementById('partnerName').textContent = otherUser.name;
 
+  // Mobile: switch view from sidebar to chat
+  const layout = document.querySelector('.msg-layout');
+  if (layout) layout.classList.add('chat-open');
+
   // ปุ่มย้อนกลับจะมีอยู่แล้วจาก init() แต่ถ้าอยากมั่นใจก็เรียกซ้ำได้
   showNavbarBack(true);
 
@@ -776,6 +794,14 @@ function handleKey(e) {
 }
 
 function goBack() {
+  // On mobile, if chat is open just go back to sidebar
+  const layout = document.querySelector('.msg-layout');
+  if (layout && layout.classList.contains('chat-open') && window.innerWidth <= 640) {
+    layout.classList.remove('chat-open');
+    currentPartnerId = null;
+    history.replaceState(null, '', location.pathname);
+    return;
+  }
   if (currentRoomId) {
     window.location.href = `/room.html?id=${currentRoomId}`;
     return;
@@ -814,21 +840,11 @@ function showNavbarBack(show) {
 function renderBubble(msg) {
   const isMe = msg.senderId === me.id;
   const time = new Date(msg.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-  const text = String(msg.text || '');
-  // Calculate width based on text length (characters). Adjust factors as needed.
-  const minPx = 80;
-  const maxPx = Math.floor(window.innerWidth * 0.6);
-  const perChar = 8; // pixels per character (approx)
-  // If text contains newlines, prefer wider base
-  const lines = text.split(/\r?\n/).length;
-  const estimated = Math.round(text.length * perChar / Math.max(1, lines));
-  const width = Math.min(maxPx, Math.max(minPx, estimated + (lines > 1 ? 20 : 0)));
-
   return `
     <div class="msg-row ${isMe ? 'me' : 'them'}" data-msgid="${msg._id}">
       <div class="msg-avatar">${isMe ? initials(me.name) : '?'}</div>
-      <div>
-        <div class="bubble" style="width: ${width}px">
+      <div style="max-width:min(72vw,420px)">
+        <div class="bubble">
           ${esc(msg.text)}
           <div class="bubble-time">${time}</div>
         </div>

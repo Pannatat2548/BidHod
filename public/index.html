@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,26 +22,7 @@
       z-index: 999;
       max-width: 280px;
     }
-
-    #toast.show {
-      opacity: 1;
-    }
-
-    .nav-badge {
-      margin-left: 8px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: #ef4444;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 0 6px;
-    }
-
+    #toast.show { opacity: 1; }
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -50,12 +30,10 @@
       background: var(--bg);
       padding: 6px;
       border-radius: 999px;
-      /* ทรงแคปซูล */
       border: 1px solid var(--line);
       width: fit-content;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
-
     .filter-btn {
       padding: 8px 20px;
       font-size: 13px;
@@ -67,25 +45,14 @@
       color: var(--ink3);
       cursor: pointer;
       transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
     }
-
-    .filter-btn:hover {
-      color: var(--ink);
-      background: var(--bg2);
-    }
-
-    /* สไตล์เมื่อปุ่มถูกเลือก (Active) */
+    .filter-btn:hover { color: var(--ink); background: var(--bg2); }
     .filter-btn.on {
       background: var(--ink);
-      /* หรือใช้สี Primary ถ้าชอบ */
       color: #fff;
       font-weight: 600;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
-
-    /* เพิ่ม Icon เล็กน้อยถ้าอยากได้ */
     .filter-btn.on::before {
       content: '';
       display: inline-block;
@@ -96,27 +63,52 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+    @media (max-width: 640px) {
+      .filter-bar {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 6px;
+        border-radius: 12px;
+        gap: 4px;
+        scrollbar-width: none;
+      }
+      .filter-bar::-webkit-scrollbar { display: none; }
+      .filter-btn { padding: 7px 14px; font-size: 12px; white-space: nowrap; }
+    }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
-
 <body>
   <nav>
-    <div class="logo">Bidmai</div>
+    <a href="/" class="logo">BIDMAI</a>
     <div class="nav-right">
-      <div class="live-pill">
-        <div class="live-dot"></div><span id="live-count">0</span> live
+      <a href="/" class="live-pill">
+        <span class="live-dot"></span>
+        <span id="live-count">0</span> live
+      </a>
+      <a href="/messages.html" class="nav-btn">💬 ข้อความ</a>
+      <div class="user-menu" id="userMenu">
+        <button class="user-trigger" onclick="toggleUserMenu(event)">
+          <span id="nav-username">โปรไฟล์</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div class="dropdown" id="userDropdown">
+          <a href="/profile.html" class="dropdown-item">
+            <span class="dropdown-icon">👤</span> โปรไฟล์
+          </a>
+          <a href="/messages.html?admin=1" class="dropdown-item">
+            <span class="dropdown-icon">🛡️</span> ติดต่อ Admin
+          </a>
+          <a href="/create-room.html" class="dropdown-item">
+            <span class="dropdown-icon">➕</span> ลงของ
+          </a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="logout()">
+            <span class="dropdown-icon">🚪</span> ออกจากระบบ
+          </button>
+        </div>
       </div>
-      <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
-      <button class="nav-btn" id="admin-btn" style="display:none" onclick="location.href='/admin.html'">Admin</button>
-      <button class="nav-btn" id="messages-btn" style="display:none"
-        onclick="location.href='/messages.html'">ข้อความ<span id="messages-badge" class="nav-badge"></span></button>
-      <button class="nav-btn" id="contact-admin-btn" style="display:none" onclick="openAdminChat()">ติดต่อ
-        Admin</button>
-      <button class="nav-btn" id="sell-btn" style="display:none" onclick="location.href='/create-room.html'">+
-        ลงของ</button>
-      <button class="nav-btn" id="logout-btn" style="display:none" onclick="logout()">ออกจากระบบ</button>
-      <button class="nav-btn primary" id="login-btn" onclick="location.href='/login.html'">เข้าสู่ระบบ</button>
     </div>
   </nav>
 
@@ -140,19 +132,19 @@
   <script>
     let allRooms = [];
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    // อัปเดตชื่อผู้ใช้
     if (user) {
-      document.getElementById('nav-user').textContent = user.name;
-      document.getElementById('login-btn').style.display = 'none';
-      document.getElementById('logout-btn').style.display = 'block';
-      document.getElementById('messages-btn').style.display = 'inline-block';
-      if (user.role === 'admin') {
-        document.getElementById('admin-btn').style.display = 'block';
-      } else {
-        document.getElementById('contact-admin-btn').style.display = 'inline-block';
-      }
-      if (['admin', 'seller'].includes(user.role)) document.getElementById('sell-btn').style.display = 'block';
+      const navUsername = document.getElementById('nav-username');
+      if (navUsername) navUsername.textContent = user.name || 'โปรไฟล์';
     }
-    function logout() { localStorage.clear(); location.reload(); }
+
+    function logout() {
+      if (confirm('ต้องการออกจากระบบ?')) {
+        localStorage.clear();
+        location.href = '/login.html';
+      }
+    }
 
     let unreadMessages = 0;
 
@@ -164,17 +156,6 @@
       setTimeout(() => el.classList.remove('show'), 3200);
     }
 
-    function updateMessagesBadge() {
-      const badge = document.getElementById('messages-badge');
-      if (!badge) return;
-      if (unreadMessages > 0) {
-        badge.textContent = unreadMessages > 9 ? '9+' : unreadMessages;
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
-
     async function loadUnreadCount() {
       if (!localStorage.getItem('token')) return;
       try {
@@ -184,15 +165,13 @@
         if (!res.ok) return;
         const conv = await res.json();
         unreadMessages = conv.reduce((sum, c) => sum + (c.unread || 0), 0);
-        updateMessagesBadge();
+        const msgBtn = document.querySelector('a[href="/messages.html"]');
+        if (msgBtn && unreadMessages > 0) {
+          msgBtn.innerHTML = `💬 ข้อความ <span style="background:#ef4444;color:#fff;border-radius:999px;font-size:10px;padding:2px 6px;margin-left:4px;font-weight:700;">${unreadMessages > 9 ? '9+' : unreadMessages}</span>`;
+        }
       } catch (err) {
         console.warn('Unread load failed', err);
       }
-    }
-
-    function openAdminChat() {
-      if (!localStorage.getItem('token')) return location.href = '/login.html';
-      location.href = '/messages.html?with=admin';
     }
 
     async function initIndexNotifications() {
@@ -203,7 +182,7 @@
       });
       socket.on('chat:notification', ({ fromId, preview }) => {
         unreadMessages += 1;
-        updateMessagesBadge();
+        loadUnreadCount();
         showToast(`ข้อความใหม่: ${preview}`);
       });
       socket.on('disconnect', () => { });
@@ -214,7 +193,9 @@
         const r = await fetch('/api/rooms');
         allRooms = await r.json();
         renderRooms(allRooms);
-      } catch { document.getElementById('rooms-grid').innerHTML = '<div class="empty">โหลดไม่ได้</div>'; }
+      } catch {
+        document.getElementById('rooms-grid').innerHTML = '<div class="empty">โหลดไม่ได้</div>';
+      }
     }
 
     function renderRooms(rooms) {
@@ -265,6 +246,31 @@
       else if (type === 'live') renderRooms(allRooms.filter(r => r.activeLots > 0));
       else renderRooms(allRooms.filter(r => r.activeLots === 0));
     }
+
+    // Dropdown Toggle
+    function toggleUserMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('userMenu');
+      if (menu) menu.classList.toggle('open');
+    }
+
+    // ปิด Dropdown เมื่อคลิกนอกเมนู
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('userMenu');
+      if (menu && !menu.contains(e.target)) {
+        menu.classList.remove('open');
+      }
+    });
+
+    // ปิด Dropdown เมื่อกด Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        const menu = document.getElementById('userMenu');
+        if (menu) menu.classList.remove('open');
+      }
+    });
+
+    // Init
     loadRooms();
     loadUnreadCount();
     initIndexNotifications();
@@ -272,5 +278,4 @@
   </script>
   <div id="toast"></div>
 </body>
-
 </html>

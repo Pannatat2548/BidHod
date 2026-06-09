@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bidmai — Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 40px;
+    }
+
+    /* ── Left: Profile Card ── */
+    .profile-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      height: fit-content;
+      position: sticky;
+      top: 72px;
+    }
+
+    .profile-avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--bg2);
+      color: var(--ink);
+      font-size: 44px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      border: 3px solid var(--bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .profile-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .profile-email {
+      font-size: 12px;
+      color: var(--ink4);
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
+
+    /* ── Social Section ── */
+    .profile-social {
+      text-align: left;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
+    .profile-social-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .add-social-btn {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--ink2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .add-social-btn:hover {
+      background: var(--bg3);
+      border-color: var(--ink3);
+    }
+
+    .social-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .social-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+
+    .social-item:hover {
+      border-color: var(--ink3);
+    }
+
+    .social-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .social-type-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 70px;
+    }
+
+    .social-value {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--ink2);
+      font-weight: 500;
+    }
+
+    .social-edit-btn {
+      background: none;
+      border: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .social-edit-btn:hover {
+      background: var(--blue-bg);
+    }
+
+    .social-delete-btn {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .social-delete-btn:hover {
+      background: var(--red-bg);
+    }
+
+    /* ── Add Social Form ── */
+    .add-social-form {
+      display: none;
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      gap: 8px;
+    }
+
+    .add-social-form.show {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .add-social-form select,
+    .add-social-form input {
+      padding: 10px 12px;
+      font-size: 13px;
+      border: 1px solid var(--line2);
+      border-radius: 10px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .add-social-form select:focus,
+    .add-social-form input:focus {
+      border-color: var(--ink2);
+    }
+
+    .add-social-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .add-social-actions button {
+      padding: 8px 16px;
+      font-size: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    /* ── Right: Credit Section ── */
+    .credit-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .credit-header {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .credit-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .credit-block {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .credit-block-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .credit-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .credit-stat {
+      text-align: center;
+    }
+
+    .credit-stat-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .credit-stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .credit-stat-value.green {
+      color: var(--green);
+    }
+
+    .lots-list {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .lots-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .lots-list::-webkit-scrollbar-thumb {
+      background: var(--line2);
+      border-radius: 2px;
+    }
+
+    .lot-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .lot-item:last-child {
+      border-bottom: none;
+    }
+
+    .lot-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lot-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lot-room {
+      font-size: 11px;
+      color: var(--ink4);
+    }
+
+    .lot-price {
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+
+    .lot-status {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .lot-status.paid {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .lot-status.unpaid {
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .lot-status.active {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .lot-status.ended {
+      background: var(--bg3);
+      color: var(--ink3);
+    }
+
+    /* ── Summary Bar (กล่องเหลือง) ── */
+    .summary-bar {
+      background: #fffbeb;
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-item {
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .summary-value.buy {
+      color: var(--blue);
+    }
+
+    .summary-value.sell {
+      color: var(--green);
+    }
+
+    .summary-value.credit {
+      color: #d97706;
+    }
+
+    .empty-credit {
+      padding: 28px;
+      text-align: center;
+      color: var(--ink4);
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .profile-layout {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 16px;
+      }
+      .profile-card { position: static; }
+      .profile-layout {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      .profile-card {
+        position: static;
+      }
+
+      .credit-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ── Proof Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeUp 0.2s ease;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--ink4);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .modal-upload-area {
+      border: 2px dashed var(--line2);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .modal-upload-area:hover { border-color: var(--primary); background: var(--primary-light, #eef2ff); }
+    .modal-upload-area input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .modal-upload-preview {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .modal-input:focus { border-color: var(--primary); }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+    .modal-slip-img {
+      width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      margin-top: 6px;
+    }
+    .tracking-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+      <div class="logo">Bidmai</div>
+    </div>
+    <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+  </nav>
+
+  <div class="profile-layout">
+    <!-- Left: Profile Card -->
+    <div class="profile-card">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div class="profile-name" id="profile-name">กำลังโหลด...</div>
+      <div class="profile-email" id="profile-email"></div>
+      <div id="profile-role-wrap" style="margin-bottom:16px"></div>
+
+      <div class="profile-social">
+        <div class="profile-social-label">
+          <span>ข้อมูลติดต่อ</span>
+          <button class="add-social-btn" onclick="toggleAddForm()">+ เพิ่ม</button>
+        </div>
+
+        <div class="social-list" id="social-list">
+          <!-- Dynamic social items -->
+        </div>
+
+        <!-- Add Social Form -->
+        <div class="add-social-form" id="add-social-form">
+          <select id="social-type-select" onchange="handleTypeChange()">
+            <option value="">เลือกประเภท</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="reddit">Reddit</option>
+            <option value="discord">Discord</option>
+            <option value="phone">เบอร์โทร</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+          <input type="text" id="social-value-input" placeholder="กรอกข้อมูล">
+          <input type="text" id="social-custom-label" placeholder="ชื่อประเภท (ถ้าเลือกอื่นๆ)" style="display:none">
+          <div class="add-social-actions">
+            <button class="btn" onclick="toggleAddForm()">ยกเลิก</button>
+            <button class="btn primary" onclick="addSocial()">บันทึก</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Credit Section -->
+    <div class="credit-section">
+      <div>
+        <div class="credit-header">Credit History</div>
+        <div class="credit-title">ประวัติการประมูลและการขาย</div>
+      </div>
+
+      <!-- Buy Block -->
+      <div class="credit-block">
+        <div class="credit-block-title">
+          🛒 ฝั่งผู้ซื้อ (Buy)
+          <span class="badge badge-buyer">Buyer</span>
+        </div>
+        <div class="credit-stats">
+          <div class="credit-stat">
+            <div class="credit-stat-label">ประมูลทั้งหมด</div>
+            <div class="credit-stat-value" id="buy-total-bids">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">ชนะประมูล</div>
+            <div class="credit-stat-value green" id="buy-total-won">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">จ่ายแล้ว</div>
+            <div class="credit-stat-value" id="buy-total-paid">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">ค้างจ่าย</div>
+            <div class="credit-stat-value" style="color:var(--red)" id="buy-total-unpaid">0</div>
+          </div>
+        </div>
+        <div class="lots-list" id="buy-lots-list">
+          <div class="empty-credit">ยังไม่มีประวัติการประมูล</div>
+        </div>
+      </div>
+
+      <!-- Sell Block -->
+      <div class="credit-block">
+        <div class="credit-block-title">
+          💰 ฝั่งผู้ขาย (Sell)
+          <span class="badge badge-seller">Seller</span>
+        </div>
+        <div class="credit-stats">
+          <div class="credit-stat">
+            <div class="credit-stat-label">ห้องทั้งหมด</div>
+            <div class="credit-stat-value" id="sell-total-rooms">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">Lot ทั้งหมด</div>
+            <div class="credit-stat-value" id="sell-total-lots">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">กำลังประมูล</div>
+            <div class="credit-stat-value" style="color:var(--blue)" id="sell-total-active">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">ส่งแล้ว</div>
+            <div class="credit-stat-value" style="color:#d97706" id="sell-total-delivered">0</div>
+          </div>
+          <div class="credit-stat">
+            <div class="credit-stat-label">ผู้ซื้อรับแล้ว</div>
+            <div class="credit-stat-value green" id="sell-total-received">0</div>
+          </div>
+        </div>
+        <div class="lots-list" id="sell-lots-list">
+          <div class="empty-credit">ยังไม่มีประวัติการขาย</div>
+        </div>
+      </div>
+
+      <!-- Summary Bar (กล่องเหลือง) -->
+      <div class="summary-bar">
+        <div class="summary-item">
+          <div class="summary-label">Buy (ใช้จ่าย)</div>
+          <div class="summary-value buy" id="summary-buy">฿0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Sell (รายได้)</div>
+          <div class="summary-value sell" id="summary-sell">฿0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">เครดิตที่รวมให้</div>
+          <div class="summary-value credit" id="summary-credit">฿0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slip Modal ── -->
+  <div class="modal-overlay" id="slip-modal">
+    <div class="modal-box">
+      <div class="modal-title">📎 แนบสลิปการโอนเงิน</div>
+      <div class="modal-sub" id="slip-modal-sub"></div>
+      <div class="modal-upload-area">
+        <input type="file" id="slip-file-input" accept="image/*" onchange="previewSlip(this)">
+        <div id="slip-upload-placeholder">
+          <div style="font-size:28px;margin-bottom:8px">🖼️</div>
+          <div style="font-size:13px;color:var(--ink3)">คลิกหรือลากไฟล์มาวางที่นี่</div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px">รองรับ JPG, PNG</div>
+        </div>
+      </div>
+      <img class="modal-upload-preview" id="slip-preview">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeSlipModal()">ยกเลิก</button>
+        <button class="btn primary" id="slip-confirm-btn" onclick="confirmPaid()">✓ ยืนยันการชำระเงิน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tracking Modal ── -->
+  <div class="modal-overlay" id="tracking-modal">
+    <div class="modal-box">
+      <div class="modal-title">📦 กรอกเลข Tracking</div>
+      <div class="modal-sub" id="tracking-modal-sub"></div>
+      <select class="modal-input" id="shipping-provider">
+        <option value="">เลือกขนส่ง (ไม่บังคับ)</option>
+        <option value="ไปรษณีย์ไทย">ไปรษณีย์ไทย</option>
+        <option value="Kerry">Kerry Express</option>
+        <option value="Flash">Flash Express</option>
+        <option value="J&T">J&T Express</option>
+        <option value="Ninja Van">Ninja Van</option>
+        <option value="DHL">DHL</option>
+      </select>
+      <input class="modal-input" type="text" id="tracking-number-input" placeholder="เลข Tracking">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeTrackingModal()">ยกเลิก</button>
+        <button class="btn primary" onclick="confirmDelivered()">✓ ยืนยันการส่งของ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user) location.href = '/login.html';
+
+    const userId = new URLSearchParams(location.search).get('id') || user.id;
+    document.getElementById('nav-user').textContent = user.name;
+
+    let profileData = null;
+    let socials = [];
+
+    const socialIcons = {
+      facebook: '📘',
+      instagram: '📷',
+      reddit: '',
+      discord: '',
+      phone: '📞',
+      other: '🔗'
+    };
+
+    const socialLabels = {
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      reddit: 'Reddit',
+      discord: 'Discord',
+      phone: 'เบอร์โทร',
+      other: 'อื่นๆ'
+    };
+
+    async function loadProfile() {
+      try {
+        const res = await fetch(`/api/profile/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('โหลดข้อมูลไม่ได้');
+        profileData = await res.json();
+        renderProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderProfile() {
+      const { user: u, stats } = profileData;
+
+      document.getElementById('profile-name').textContent = u.name;
+      document.getElementById('profile-email').textContent = u.email;
+      document.getElementById('profile-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
+
+      const roleWrap = document.getElementById('profile-role-wrap');
+      roleWrap.innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
+
+      // โหลด socials จาก user
+      socials = [];
+      if (u.facebook) socials.push({ type: 'facebook', value: u.facebook });
+      if (u.instagram) socials.push({ type: 'instagram', value: u.instagram });
+      if (u.reddit) socials.push({ type: 'reddit', value: u.reddit });
+      if (u.discord) socials.push({ type: 'discord', value: u.discord });
+      if (u.phone) socials.push({ type: 'phone', value: u.phone });
+      if (u.otherSocial) socials.push({ type: 'other', value: u.otherSocial, customLabel: u.otherSocialLabel });
+
+      renderSocials();
+
+      // ========== Buy stats ==========
+      document.getElementById('buy-total-bids').textContent = stats.buy.totalBids;
+      document.getElementById('buy-total-won').textContent = stats.buy.totalWon;
+      document.getElementById('buy-total-paid').textContent = stats.buy.totalPaid;
+      document.getElementById('buy-total-unpaid').textContent = stats.buy.totalUnpaid;
+
+      const buyList = document.getElementById('buy-lots-list');
+      if (stats.buy.lots.length === 0) {
+        buyList.innerHTML = '<div class="empty-credit">ยังไม่มีประวัติการประมูล</div>';
+      } else {
+        buyList.innerHTML = stats.buy.lots.map(l => {
+          const statusHtml = l.paid
+            ? (l.delivered
+              ? (l.received
+                ? `<span class="lot-status paid">รับแล้ว ✓</span>`
+                : `<button class="btn success" onclick="markReceived('${l._id}')" style="padding:2px 8px;font-size:10px">ยืนยันรับของ</button>`)
+              : `<span class="lot-status" style="background:#fffbeb;color:#d97706">รอส่งของ</span>`)
+            : `<button class="btn success" onclick="openSlipModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">📎 แนบสลิป</button>`;
+
+          const slipHtml = l.paymentSlip
+            ? `<img src="${l.paymentSlip}" class="modal-slip-img" title="สลิปการโอน">`
+            : '';
+          const trackingHtml = l.trackingNumber
+            ? `<div style="margin-top:6px"><span class="tracking-badge">🚚 ${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}</span></div>`
+            : '';
+
+          return `
+            <div class="lot-item" style="flex-wrap:wrap;gap:8px">
+              <div class="lot-info">
+                <div class="lot-name">Lot ${l.lotName}</div>
+                <div class="lot-room">${l.roomTitle}</div>
+                ${slipHtml}
+                ${trackingHtml}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="lot-price">฿${l.price.toLocaleString()}</div>
+                ${statusHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ========== Sell stats ==========
+      document.getElementById('sell-total-rooms').textContent = stats.sell.totalRooms;
+      document.getElementById('sell-total-lots').textContent = stats.sell.totalLots;
+      document.getElementById('sell-total-active').textContent = stats.sell.totalActive;
+      document.getElementById('sell-total-delivered').textContent = stats.sell.totalDelivered;
+      document.getElementById('sell-total-received').textContent = stats.sell.totalReceived;
+
+      const sellList = document.getElementById('sell-lots-list');
+      if (stats.sell.lots.length === 0) {
+        sellList.innerHTML = '<div class="empty-credit">ยังไม่มีประวัติการขาย</div>';
+      } else {
+        sellList.innerHTML = stats.sell.lots.map(l => {
+          let statusHtml = '';
+          if (l.isActive) {
+            statusHtml = `<span class="lot-status active">กำลังประมูล</span>`;
+          } else if (l.received) {
+            statusHtml = `<span class="lot-status paid">ผู้ซื้อรับแล้ว ✓</span>`;
+          } else if (l.delivered) {
+            statusHtml = `<span class="lot-status" style="background:#fffbeb;color:#d97706">รอผู้ซื้อยืนยัน</span>`;
+          } else if (l.paid) {
+            statusHtml = `<button class="btn primary" onclick="openTrackingModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">📦 กรอก Tracking</button>`;
+          }
+
+          return `
+            <div class="lot-item">
+              <div class="lot-info">
+                <div class="lot-name">Lot ${l.lotName}</div>
+                <div class="lot-room">${l.roomTitle} • ${l.bidderCount} bids</div>
+              </div>
+              <div class="lot-price">฿${l.currentPrice.toLocaleString()}</div>
+              ${statusHtml}
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ========== Summary (กล่องเหลือง) ==========
+      document.getElementById('summary-buy').textContent = stats.buy.totalPaid;
+      document.getElementById('summary-sell').textContent = stats.sell.totalReceived;
+      document.getElementById('summary-credit').textContent = stats.credit.totalScore;
+    }
+
+    // ========== Actions ==========
+    async function markPaid(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้ชำระเงินแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/pay`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function markDelivered(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้ส่งของให้ผู้ซื้อแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/deliver`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderSocials() {
+      const list = document.getElementById('social-list');
+      if (socials.length === 0) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--ink4);padding:8px 0">ยังไม่มีข้อมูลติดต่อ</div>';
+        return;
+      }
+
+      list.innerHTML = socials.map((s, i) => `
+        <div class="social-item">
+          <div class="social-icon">${socialIcons[s.type] || '🔗'}</div>
+          <div class="social-type-label">${s.customLabel || socialLabels[s.type] || s.type}</div>
+          <div class="social-value">${s.value}</div>
+          <button class="social-edit-btn" onclick="editSocial(${i})">แก้ไข</button>
+          <button class="social-delete-btn" onclick="deleteSocial(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleAddForm() {
+      const form = document.getElementById('add-social-form');
+      form.classList.toggle('show');
+      if (!form.classList.contains('show')) {
+        document.getElementById('social-type-select').value = '';
+        document.getElementById('social-value-input').value = '';
+        document.getElementById('social-custom-label').value = '';
+        document.getElementById('social-custom-label').style.display = 'none';
+      }
+    }
+
+    function handleTypeChange() {
+      const type = document.getElementById('social-type-select').value;
+      const customInput = document.getElementById('social-custom-label');
+      customInput.style.display = type === 'other' ? 'block' : 'none';
+    }
+
+    async function addSocial() {
+      const type = document.getElementById('social-type-select').value;
+      const value = document.getElementById('social-value-input').value.trim();
+      const customLabel = document.getElementById('social-custom-label').value.trim();
+
+      if (!type || !value) {
+        alert('กรุณาเลือกประเภทและกรอกข้อมูล');
+        return;
+      }
+
+      try {
+        const payload = { [type]: value };
+        if (type === 'other') {
+          payload.otherSocial = value;
+          payload.otherSocialLabel = customLabel || 'อื่นๆ';
+        }
+
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
+        toggleAddForm();
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function editSocial(index) {
+      const s = socials[index];
+      const newValue = prompt(`แก้ไข ${s.customLabel || socialLabels[s.type] || s.type}:`, s.value);
+      if (newValue === null) return;
+
+      try {
+        const payload = { [s.type]: newValue.trim() };
+        if (s.type === 'other') {
+          payload.otherSocial = newValue.trim();
+          payload.otherSocialLabel = s.customLabel || 'อื่นๆ';
+        }
+
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('แก้ไขไม่สำเร็จ');
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function deleteSocial(index) {
+      const s = socials[index];
+      if (!confirm(`ลบ ${s.customLabel || socialLabels[s.type] || s.type}?`)) return;
+
+      try {
+        const payload = { [s.type]: '' };
+        if (s.type === 'other') {
+          payload.otherSocial = '';
+          payload.otherSocialLabel = '';
+        }
+
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('ลบไม่สำเร็จ');
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function markReceived(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้รับของแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/receive`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // ========== Slip Modal ==========
+    let currentPayLotId = null;
+
+    function openSlipModal(lotId, lotName) {
+      currentPayLotId = lotId;
+      document.getElementById('slip-modal-sub').textContent = `แนบสลิปสำหรับ "${lotName}"`;
+      document.getElementById('slip-preview').style.display = 'none';
+      document.getElementById('slip-upload-placeholder').style.display = 'block';
+      document.getElementById('slip-file-input').value = '';
+      document.getElementById('slip-modal').classList.add('show');
+    }
+
+    function closeSlipModal() {
+      document.getElementById('slip-modal').classList.remove('show');
+      currentPayLotId = null;
+    }
+
+    function previewSlip(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('slip-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('slip-upload-placeholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function confirmPaid() {
+      if (!currentPayLotId) return;
+      const fileInput = document.getElementById('slip-file-input');
+      if (!fileInput.files[0]) { alert('กรุณาเลือกรูปสลิปก่อน'); return; }
+
+      const btn = document.getElementById('slip-confirm-btn');
+      btn.disabled = true; btn.textContent = 'กำลังอัพโหลด...';
+
+      try {
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        if (!uploadRes.ok) throw new Error('อัพโหลดรูปไม่สำเร็จ');
+        const { url } = await uploadRes.json();
+
+        const res = await fetch(`/api/profile/lots/${currentPayLotId}/pay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ paymentSlip: url })
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
+
+        closeSlipModal();
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = '✓ ยืนยันการชำระเงิน';
+      }
+    }
+
+    // ========== Tracking Modal ==========
+    let currentDeliverLotId = null;
+
+    function openTrackingModal(lotId, lotName) {
+      currentDeliverLotId = lotId;
+      document.getElementById('tracking-modal-sub').textContent = `กรอกเลข tracking สำหรับ "${lotName}"`;
+      document.getElementById('tracking-number-input').value = '';
+      document.getElementById('shipping-provider').value = '';
+      document.getElementById('tracking-modal').classList.add('show');
+    }
+
+    function closeTrackingModal() {
+      document.getElementById('tracking-modal').classList.remove('show');
+      currentDeliverLotId = null;
+    }
+
+    async function confirmDelivered() {
+      if (!currentDeliverLotId) return;
+      const trackingNumber = document.getElementById('tracking-number-input').value.trim();
+      const shippingProvider = document.getElementById('shipping-provider').value;
+      if (!trackingNumber) { alert('กรุณากรอกเลข tracking'); return; }
+
+      try {
+        const res = await fetch(`/api/profile/lots/${currentDeliverLotId}/deliver`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ trackingNumber, shippingProvider })
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
+
+        closeTrackingModal();
+        loadProfile();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // ปิด modal เมื่อกด overlay
+    document.getElementById('slip-modal').addEventListener('click', e => { if (e.target.id === 'slip-modal') closeSlipModal(); });
+    document.getElementById('tracking-modal').addEventListener('click', e => { if (e.target.id === 'tracking-modal') closeTrackingModal(); });
+
+    loadProfile();
+  </script>
+</body>
+
+</html>
