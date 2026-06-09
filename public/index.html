@@ -63,6 +63,48 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+    /* ── Search bar ── */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 11px 40px 11px 40px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--ink);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color .15s;
+    }
+    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap .search-clear {
+      display: none;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: var(--ink4);
+      line-height: 1;
+      padding: 4px;
+    }
+    .search-wrap .search-clear.show { display: block; }
     @media (max-width: 640px) {
       .filter-bar {
         width: 100%;
@@ -115,6 +157,19 @@
   <div class="container">
     <div class="page-label">Auctions</div>
     <h1>รายการประมูลทั้งหมด</h1>
+
+    <!-- ── Search bar ── -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="ค้นหาชื่อห้อง, House, ผู้ขาย..."
+        oninput="onSearch(this.value)"
+      >
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+
     <div class="filter-bar">
       <button class="filter-btn on" onclick="filterRooms('all', this)">ทั้งหมด</button>
       <button class="filter-btn" onclick="filterRooms('live', this)">กำลัง Live 🔴</button>
@@ -131,9 +186,10 @@
 
   <script>
     let allRooms = [];
+    let currentFilter = 'all';
+    let searchTimer = null;
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-    // อัปเดตชื่อผู้ใช้
     if (user) {
       const navUsername = document.getElementById('nav-username');
       if (navUsername) navUsername.textContent = user.name || 'โปรไฟล์';
@@ -185,14 +241,56 @@
         loadUnreadCount();
         showToast(`ข้อความใหม่: ${preview}`);
       });
-      socket.on('disconnect', () => { });
+      socket.on('disconnect', () => {});
     }
 
+    // ── Search ──────────────────────────────────
+    function onSearch(val) {
+      document.getElementById('search-clear').classList.toggle('show', !!val);
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => doSearch(val), 300);
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-clear').classList.remove('show');
+      doSearch('');
+    }
+
+    async function doSearch(q) {
+      try {
+        const url = q.trim() ? `/api/rooms?q=${encodeURIComponent(q.trim())}` : '/api/rooms';
+        const r = await fetch(url);
+        allRooms = await r.json();
+        applyFilter();
+      } catch {
+        document.getElementById('rooms-grid').innerHTML = '<div class="empty">ค้นหาไม่ได้</div>';
+      }
+    }
+
+    // ── Filter ──────────────────────────────────
+    function applyFilter() {
+      if (currentFilter === 'live') renderRooms(allRooms.filter(r => r.activeLots > 0));
+      else if (currentFilter === 'ended') renderRooms(allRooms.filter(r => r.activeLots === 0));
+      else renderRooms(allRooms);
+    }
+
+    function filterRooms(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      applyFilter();
+    }
+
+    // ── Load & Render ────────────────────────────
     async function loadRooms() {
+      // ถ้ากำลัง search อยู่ ไม่ refresh ทับ
+      const q = document.getElementById('search-input').value.trim();
+      if (q) return;
       try {
         const r = await fetch('/api/rooms');
         allRooms = await r.json();
-        renderRooms(allRooms);
+        applyFilter();
       } catch {
         document.getElementById('rooms-grid').innerHTML = '<div class="empty">โหลดไม่ได้</div>';
       }
@@ -205,7 +303,7 @@
       document.getElementById('live-rooms').textContent = live;
 
       if (!rooms.length) {
-        document.getElementById('rooms-grid').innerHTML = '<div class="empty" style="grid-column: 1/-1; padding: 60px;">ไม่พบรายการประมูลในขณะนี้</div>';
+        document.getElementById('rooms-grid').innerHTML = '<div class="empty" style="grid-column:1/-1;padding:60px;">ไม่พบรายการประมูลในขณะนี้</div>';
         return;
       }
 
@@ -213,64 +311,52 @@
         const isLive = r.activeLots > 0;
         const thumb = r.coverImage ? `<img src="${r.coverImage}" alt="${r.title}">` : '🏛️';
         return `
-      <a class="feed-card" href="/room.html?id=${r._id}">
-        <div class="feed-thumb">
-          ${thumb}
-          <span style="position: absolute; top: 12px; left: 12px;" class="badge ${isLive ? 'badge-live' : 'badge-ended'}">
-            ${isLive ? '● LIVE' : 'สิ้นสุด'}
-          </span>
-        </div>
-        <div class="feed-body">
-          <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
-          <div class="feed-title">${r.title}</div>
-          <div class="feed-bottom">
-            <div>
-              <div class="price-label">ราคาเริ่มจาก</div>
-              <div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div>
+          <a class="feed-card" href="/room.html?id=${r._id}">
+            <div class="feed-thumb">
+              ${thumb}
+              <span style="position:absolute;top:12px;left:12px;" class="badge ${isLive ? 'badge-live' : 'badge-ended'}">
+                ${isLive ? '● LIVE' : 'สิ้นสุด'}
+              </span>
             </div>
-            <div style="font-size: 12px; color: var(--ink4); text-align: right;">
-              <div>${r.totalLots} Lots</div>
-              <div style="margin-top: 2px;">โดย ${r.sellerName || '—'}</div>
+            <div class="feed-body">
+              <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
+              <div class="feed-title">${r.title}</div>
+              <div class="feed-bottom">
+                <div>
+                  <div class="price-label">ราคาเริ่มจาก</div>
+                  <div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div>
+                </div>
+                <div style="font-size:12px;color:var(--ink4);text-align:right;">
+                  <div>${r.totalLots} Lots</div>
+                  <div style="margin-top:2px;">โดย ${r.sellerName || '—'}</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </a>
-    `;
+          </a>
+        `;
       }).join('');
     }
 
-    function filterRooms(type, btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      if (type === 'all') renderRooms(allRooms);
-      else if (type === 'live') renderRooms(allRooms.filter(r => r.activeLots > 0));
-      else renderRooms(allRooms.filter(r => r.activeLots === 0));
-    }
-
-    // Dropdown Toggle
+    // ── Dropdown ─────────────────────────────────
     function toggleUserMenu(e) {
       if (e) e.stopPropagation();
       const menu = document.getElementById('userMenu');
       if (menu) menu.classList.toggle('open');
     }
 
-    // ปิด Dropdown เมื่อคลิกนอกเมนู
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
       const menu = document.getElementById('userMenu');
-      if (menu && !menu.contains(e.target)) {
-        menu.classList.remove('open');
-      }
+      if (menu && !menu.contains(e.target)) menu.classList.remove('open');
     });
 
-    // ปิด Dropdown เมื่อกด Escape
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         const menu = document.getElementById('userMenu');
         if (menu) menu.classList.remove('open');
       }
     });
 
-    // Init
+    // ── Init ─────────────────────────────────────
     loadRooms();
     loadUnreadCount();
     initIndexNotifications();
