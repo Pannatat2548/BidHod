@@ -45,328 +45,182 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    .profile-name {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .profile-email {
-      font-size: 12px;
-      color: var(--ink4);
-      margin-bottom: 16px;
-      word-break: break-all;
-    }
+    .profile-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .profile-email { font-size: 12px; color: var(--ink4); margin-bottom: 16px; word-break: break-all; }
 
     /* ── Social Section ── */
-    .profile-social {
-      text-align: left;
-      border-top: 1px solid var(--line);
-      padding-top: 18px;
-    }
-
+    .profile-social { text-align: left; border-top: 1px solid var(--line); padding-top: 18px; }
     .profile-social-label {
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      font-size: 10px; letter-spacing: 1px; color: var(--ink4);
+      text-transform: uppercase; margin-bottom: 12px; font-weight: 500;
+      display: flex; justify-content: space-between; align-items: center;
     }
-
     .add-social-btn {
-      background: var(--bg2);
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      padding: 3px 10px;
-      font-size: 11px;
-      color: var(--ink2);
-      cursor: pointer;
-      transition: all 0.15s;
+      background: var(--bg2); border: 1px solid var(--line); border-radius: 4px;
+      padding: 3px 10px; font-size: 11px; color: var(--ink2); cursor: pointer; transition: all 0.15s;
     }
-
-    .add-social-btn:hover {
-      background: var(--bg3);
-      border-color: var(--ink3);
-    }
-
-    .social-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
+    .add-social-btn:hover { background: var(--bg3); border-color: var(--ink3); }
+    .social-list { display: flex; flex-direction: column; gap: 6px; }
     .social-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      font-size: 12px;
-      transition: all 0.15s;
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      background: var(--bg2); border: 1px solid var(--line); border-radius: 6px;
+      font-size: 12px; transition: all 0.15s;
     }
-
-    .social-item:hover {
-      border-color: var(--ink3);
-    }
-
+    .social-item:hover { border-color: var(--ink3); }
     .social-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 4px;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 4px; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
     }
-
-    .social-type-label {
-      font-size: 10px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      min-width: 70px;
-    }
-
-    .social-value {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: var(--ink2);
-      font-weight: 500;
-    }
-
+    .social-type-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.5px; min-width: 70px; }
+    .social-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); font-weight: 500; }
     .social-edit-btn {
-      background: none;
-      border: none;
-      color: var(--blue);
-      cursor: pointer;
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: background 0.15s;
+      background: none; border: none; color: var(--blue); cursor: pointer; font-size: 11px;
+      padding: 2px 6px; border-radius: 4px; transition: background 0.15s;
     }
-
-    .social-edit-btn:hover {
-      background: var(--blue-bg);
-    }
-
+    .social-edit-btn:hover { background: var(--blue-bg); }
     .social-delete-btn {
-      background: none;
-      border: none;
-      color: var(--red);
-      cursor: pointer;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: background 0.15s;
+      background: none; border: none; color: var(--red); cursor: pointer; font-size: 12px;
+      padding: 2px 6px; border-radius: 4px; transition: background 0.15s;
     }
-
-    .social-delete-btn:hover {
-      background: var(--red-bg);
-    }
-
-    /* ── Add Social Form ── */
+    .social-delete-btn:hover { background: var(--red-bg); }
     .add-social-form {
-      display: none;
-      margin-top: 10px;
-      padding: 12px;
-      background: var(--bg2);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      gap: 8px;
+      display: none; margin-top: 10px; padding: 12px; background: var(--bg2);
+      border: 1px solid var(--line); border-radius: 10px; gap: 8px;
     }
-
-    .add-social-form.show {
-      display: flex;
-      flex-direction: column;
+    .add-social-form.show { display: flex; flex-direction: column; }
+    .add-social-form select, .add-social-form input {
+      padding: 10px 12px; font-size: 13px; border: 1px solid var(--line2);
+      border-radius: 10px; background: var(--bg); outline: none; transition: border-color 0.15s;
     }
-
-    .add-social-form select,
-    .add-social-form input {
-      padding: 10px 12px;
-      font-size: 13px;
-      border: 1px solid var(--line2);
-      border-radius: 10px;
-      background: var(--bg);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .add-social-form select:focus,
-    .add-social-form input:focus {
-      border-color: var(--ink2);
-    }
-
-    .add-social-actions {
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
-    }
-
-    .add-social-actions button {
-      padding: 8px 16px;
-      font-size: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+    .add-social-form select:focus, .add-social-form input:focus { border-color: var(--ink2); }
+    .add-social-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .add-social-actions button { padding: 8px 16px; font-size: 12px; border-radius: 10px; cursor: pointer; }
 
     /* ── Right: Credit Section ── */
-    .credit-section {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .credit-header {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-
-    .credit-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
+    .credit-section { display: flex; flex-direction: column; gap: 20px; }
+    .credit-header { font-size: 10px; letter-spacing: 2px; color: var(--ink4); text-transform: uppercase; font-weight: 500; }
+    .credit-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
     .credit-block {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
+      background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 20px;
     }
-
-    .credit-block-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .credit-block-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .credit-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--line);
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
     }
-
-    .credit-stat {
-      text-align: center;
-    }
-
-    .credit-stat-label {
-      font-size: 10px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .credit-stat-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    .credit-stat-value.green {
-      color: var(--green);
-    }
-
-    .lots-list {
-      max-height: 280px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .lots-list::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .lots-list::-webkit-scrollbar-thumb {
-      background: var(--line2);
-      border-radius: 2px;
-    }
+    .credit-stat { text-align: center; }
+    .credit-stat-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; margin-bottom: 4px; }
+    .credit-stat-value { font-size: 18px; font-weight: 600; color: var(--ink); }
+    .credit-stat-value.green { color: var(--green); }
+    .lots-list { max-height: 340px; overflow-y: auto; padding-right: 4px; }
+    .lots-list::-webkit-scrollbar { width: 4px; }
+    .lots-list::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
 
     .lot-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--line); gap: 12px;
     }
-
-    .lot-item:last-child {
-      border-bottom: none;
-    }
-
-    .lot-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .lot-name {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 2px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .lot-room {
-      font-size: 11px;
-      color: var(--ink4);
-    }
-
-    .lot-price {
-      font-size: 14px;
-      font-weight: 600;
-      margin-right: 12px;
-    }
-
+    .lot-item:last-child { border-bottom: none; }
+    .lot-info { flex: 1; min-width: 0; }
+    .lot-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lot-room { font-size: 11px; color: var(--ink4); }
+    .lot-price { font-size: 14px; font-weight: 600; margin-right: 12px; white-space: nowrap; }
     .lot-status {
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-weight: 500;
-      white-space: nowrap;
+      font-size: 11px; padding: 3px 10px; border-radius: 999px;
+      font-weight: 500; white-space: nowrap;
     }
+    .lot-status.paid { background: var(--green-bg); color: var(--green); }
+    .lot-status.unpaid { background: var(--red-bg); color: var(--red); }
+    .lot-status.active { background: var(--blue-bg); color: var(--blue); }
+    .lot-status.ended { background: var(--bg3); color: var(--ink3); }
 
-    .lot-status.paid {
+    /* ── Slip display (seller view) ── */
+    .slip-viewer {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg2);
+    }
+    .slip-viewer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--ink3);
+      font-weight: 500;
+    }
+    .slip-viewer-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      display: block;
+      background: #f8f8f8;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .slip-viewer-img:hover { opacity: 0.85; }
+    .slip-actions {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      background: var(--bg);
+    }
+    .slip-confirm-btn {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1.5px solid rgba(34,197,94,0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .slip-confirm-btn:hover { background: var(--green); color: #fff; }
+    .slip-reject-btn {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1.5px solid rgba(239,68,68,0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .slip-reject-btn:hover { background: var(--red); color: #fff; }
+    .slip-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .slip-status-badge.confirmed {
       background: var(--green-bg);
       color: var(--green);
     }
-
-    .lot-status.unpaid {
+    .slip-status-badge.rejected {
       background: var(--red-bg);
       color: var(--red);
     }
-
-    .lot-status.active {
-      background: var(--blue-bg);
-      color: var(--blue);
+    .slip-status-badge.pending {
+      background: #fffbeb;
+      color: #d97706;
     }
 
-    .lot-status.ended {
-      background: var(--bg3);
-      color: var(--ink3);
-    }
-
-    /* ── Summary Bar (กล่องเหลือง) ── */
+    /* ── Summary Bar ── */
     .summary-bar {
       background: #fffbeb;
       border: 1px solid rgba(217, 119, 6, 0.3);
@@ -376,155 +230,80 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .summary-item {
-      text-align: center;
-    }
-
-    .summary-label {
-      font-size: 10px;
-      color: var(--ink4);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .summary-value {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .summary-value.buy {
-      color: var(--blue);
-    }
-
-    .summary-value.sell {
-      color: var(--green);
-    }
-
-    .summary-value.credit {
-      color: #d97706;
-    }
-
-    .empty-credit {
-      padding: 28px;
-      text-align: center;
-      color: var(--ink4);
-      font-size: 12px;
-    }
+    .summary-item { text-align: center; }
+    .summary-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; margin-bottom: 4px; }
+    .summary-value { font-size: 20px; font-weight: 600; }
+    .summary-value.buy { color: var(--blue); }
+    .summary-value.sell { color: var(--green); }
+    .summary-value.credit { color: #d97706; }
+    .empty-credit { padding: 28px; text-align: center; color: var(--ink4); font-size: 12px; }
 
     @media (max-width: 768px) {
-      .profile-layout {
-        grid-template-columns: 1fr;
-        padding: 16px;
-        gap: 16px;
-      }
+      .profile-layout { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
       .profile-card { position: static; }
-      .profile-layout {
-        grid-template-columns: 1fr;
-        padding: 20px;
-      }
-
-      .profile-card {
-        position: static;
-      }
-
-      .credit-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .credit-stats { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* ── Proof Modal ── */
+    /* ── Modals ── */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center;
     }
     .modal-overlay.show { display: flex; }
     .modal-box {
-      background: var(--bg);
-      border-radius: var(--radius);
-      padding: 28px;
-      width: 100%;
-      max-width: 420px;
+      background: var(--bg); border-radius: var(--radius); padding: 28px;
+      width: 100%; max-width: 420px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
       animation: fadeUp 0.2s ease;
     }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .modal-sub {
-      font-size: 12px;
-      color: var(--ink4);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
+    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .modal-sub { font-size: 12px; color: var(--ink4); margin-bottom: 20px; line-height: 1.6; }
     .modal-upload-area {
-      border: 2px dashed var(--line2);
-      border-radius: var(--radius-sm);
-      padding: 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 12px;
-      position: relative;
+      border: 2px dashed var(--line2); border-radius: var(--radius-sm);
+      padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;
+      margin-bottom: 12px; position: relative;
     }
     .modal-upload-area:hover { border-color: var(--primary); background: var(--primary-light, #eef2ff); }
-    .modal-upload-area input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
-    }
-    .modal-upload-preview {
-      width: 100%;
-      max-height: 180px;
-      object-fit: contain;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      display: none;
-    }
+    .modal-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .modal-upload-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-bottom: 12px; display: none; }
     .modal-input {
-      width: 100%;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-family: inherit;
-      border: 1.5px solid var(--line2);
-      border-radius: var(--radius-sm);
-      background: var(--bg);
-      outline: none;
-      margin-bottom: 8px;
-      transition: border-color 0.2s;
-      box-sizing: border-box;
+      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
+      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
+      background: var(--bg); outline: none; margin-bottom: 8px;
+      transition: border-color 0.2s; box-sizing: border-box;
     }
     .modal-input:focus { border-color: var(--primary); }
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      margin-top: 16px;
-    }
-    .modal-slip-img {
-      width: 100%;
-      max-height: 160px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      margin-top: 6px;
-    }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    .modal-slip-img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); margin-top: 6px; }
     .tracking-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-radius: 999px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 500;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #eff6ff; color: #1d4ed8; border-radius: 999px;
+      padding: 3px 10px; font-size: 11px; font-weight: 500;
     }
+
+    /* ── Slip fullscreen modal ── */
+    .slip-fullscreen {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      z-index: 2000; align-items: center; justify-content: center;
+    }
+    .slip-fullscreen.show { display: flex; }
+    .slip-fullscreen img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; }
+    .slip-fullscreen-close {
+      position: absolute; top: 20px; right: 20px; color: #fff;
+      font-size: 28px; cursor: pointer; line-height: 1;
+      background: rgba(0,0,0,0.5); width: 44px; height: 44px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Reject reason modal ── */
+    .reject-reason-input {
+      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
+      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
+      background: var(--bg); outline: none; resize: vertical; min-height: 80px;
+      transition: border-color 0.2s; box-sizing: border-box; margin-top: 8px;
+    }
+    .reject-reason-input:focus { border-color: var(--red); }
   </style>
 </head>
 
@@ -550,12 +329,7 @@
           <span>ข้อมูลติดต่อ</span>
           <button class="add-social-btn" onclick="toggleAddForm()">+ เพิ่ม</button>
         </div>
-
-        <div class="social-list" id="social-list">
-          <!-- Dynamic social items -->
-        </div>
-
-        <!-- Add Social Form -->
+        <div class="social-list" id="social-list"></div>
         <div class="add-social-form" id="add-social-form">
           <select id="social-type-select" onchange="handleTypeChange()">
             <option value="">เลือกประเภท</option>
@@ -645,7 +419,7 @@
         </div>
       </div>
 
-      <!-- Summary Bar (กล่องเหลือง) -->
+      <!-- Summary Bar -->
       <div class="summary-bar">
         <div class="summary-item">
           <div class="summary-label">Buy (ใช้จ่าย)</div>
@@ -663,7 +437,7 @@
     </div>
   </div>
 
-  <!-- ── Slip Modal ── -->
+  <!-- ── Slip Modal (buyer ส่งสลิป) ── -->
   <div class="modal-overlay" id="slip-modal">
     <div class="modal-box">
       <div class="modal-title">📎 แนบสลิปการโอนเงิน</div>
@@ -706,34 +480,39 @@
     </div>
   </div>
 
+  <!-- ── Reject Modal ── -->
+  <div class="modal-overlay" id="reject-modal">
+    <div class="modal-box">
+      <div class="modal-title">✕ ปฏิเสธสลิป</div>
+      <div class="modal-sub" id="reject-modal-sub">แจ้งให้ buyer ส่งสลิปใหม่ กรุณาระบุเหตุผล</div>
+      <textarea class="reject-reason-input" id="reject-reason" placeholder="เช่น สลิปไม่ชัด, ยอดเงินไม่ตรง, สลิปซ้ำ..."></textarea>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeRejectModal()">ยกเลิก</button>
+        <button class="btn" style="background:var(--red);color:#fff;border:none" onclick="confirmReject()">✕ ปฏิเสธสลิป</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slip Fullscreen Viewer ── -->
+  <div class="slip-fullscreen" id="slip-fullscreen" onclick="closeFullscreen()">
+    <div class="slip-fullscreen-close">✕</div>
+    <img id="slip-fullscreen-img" src="" alt="slip">
+  </div>
+
   <script>
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (!token || !user) location.href = '/login.html';
 
     const userId = new URLSearchParams(location.search).get('id') || user.id;
+    const isSelf = userId === user.id;
     document.getElementById('nav-user').textContent = user.name;
 
     let profileData = null;
     let socials = [];
 
-    const socialIcons = {
-      facebook: '📘',
-      instagram: '📷',
-      reddit: '',
-      discord: '',
-      phone: '📞',
-      other: '🔗'
-    };
-
-    const socialLabels = {
-      facebook: 'Facebook',
-      instagram: 'Instagram',
-      reddit: 'Reddit',
-      discord: 'Discord',
-      phone: 'เบอร์โทร',
-      other: 'อื่นๆ'
-    };
+    const socialIcons = { facebook:'📘', instagram:'📷', reddit:'', discord:'', phone:'📞', other:'🔗' };
+    const socialLabels = { facebook:'Facebook', instagram:'Instagram', reddit:'Reddit', discord:'Discord', phone:'เบอร์โทร', other:'อื่นๆ' };
 
     async function loadProfile() {
       try {
@@ -743,9 +522,7 @@
         if (!res.ok) throw new Error('โหลดข้อมูลไม่ได้');
         profileData = await res.json();
         renderProfile();
-      } catch (err) {
-        alert(err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
     function renderProfile() {
@@ -754,11 +531,8 @@
       document.getElementById('profile-name').textContent = u.name;
       document.getElementById('profile-email').textContent = u.email;
       document.getElementById('profile-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
+      document.getElementById('profile-role-wrap').innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
 
-      const roleWrap = document.getElementById('profile-role-wrap');
-      roleWrap.innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
-
-      // โหลด socials จาก user
       socials = [];
       if (u.facebook) socials.push({ type: 'facebook', value: u.facebook });
       if (u.instagram) socials.push({ type: 'instagram', value: u.instagram });
@@ -766,10 +540,9 @@
       if (u.discord) socials.push({ type: 'discord', value: u.discord });
       if (u.phone) socials.push({ type: 'phone', value: u.phone });
       if (u.otherSocial) socials.push({ type: 'other', value: u.otherSocial, customLabel: u.otherSocialLabel });
-
       renderSocials();
 
-      // ========== Buy stats ==========
+      // Buy stats
       document.getElementById('buy-total-bids').textContent = stats.buy.totalBids;
       document.getElementById('buy-total-won').textContent = stats.buy.totalWon;
       document.getElementById('buy-total-paid').textContent = stats.buy.totalPaid;
@@ -780,16 +553,25 @@
         buyList.innerHTML = '<div class="empty-credit">ยังไม่มีประวัติการประมูล</div>';
       } else {
         buyList.innerHTML = stats.buy.lots.map(l => {
-          const statusHtml = l.paid
+          // แสดง slip rejected reason ถ้ามี
+          const rejectedHtml = l.slipRejected
+            ? `<div style="margin-top:6px;padding:6px 10px;background:var(--red-bg);border-radius:6px;font-size:11px;color:var(--red)">
+                ✕ สลิปถูกปฏิเสธ: ${l.slipRejectReason || 'กรุณาส่งสลิปใหม่'}
+               </div>`
+            : '';
+
+          const statusHtml = l.paid && l.slipConfirmed
             ? (l.delivered
               ? (l.received
                 ? `<span class="lot-status paid">รับแล้ว ✓</span>`
                 : `<button class="btn success" onclick="markReceived('${l._id}')" style="padding:2px 8px;font-size:10px">ยืนยันรับของ</button>`)
               : `<span class="lot-status" style="background:#fffbeb;color:#d97706">รอส่งของ</span>`)
-            : `<button class="btn success" onclick="openSlipModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">📎 แนบสลิป</button>`;
+            : (l.paid && !l.slipConfirmed && !l.slipRejected)
+              ? `<span class="slip-status-badge pending">⏳ รอ seller ตรวจสลิป</span>`
+              : `<button class="btn success" onclick="openSlipModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">${l.slipRejected ? '🔄 ส่งสลิปใหม่' : '📎 แนบสลิป'}</button>`;
 
           const slipHtml = l.paymentSlip
-            ? `<img src="${l.paymentSlip}" class="modal-slip-img" title="สลิปการโอน">`
+            ? `<img src="${l.paymentSlip}" class="modal-slip-img" title="สลิปการโอน" onclick="openFullscreen('${l.paymentSlip}')" style="cursor:pointer">`
             : '';
           const trackingHtml = l.trackingNumber
             ? `<div style="margin-top:6px"><span class="tracking-badge">🚚 ${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}</span></div>`
@@ -800,6 +582,7 @@
               <div class="lot-info">
                 <div class="lot-name">Lot ${l.lotName}</div>
                 <div class="lot-room">${l.roomTitle}</div>
+                ${rejectedHtml}
                 ${slipHtml}
                 ${trackingHtml}
               </div>
@@ -807,12 +590,11 @@
                 <div class="lot-price">฿${l.price.toLocaleString()}</div>
                 ${statusHtml}
               </div>
-            </div>
-          `;
+            </div>`;
         }).join('');
       }
 
-      // ========== Sell stats ==========
+      // Sell stats
       document.getElementById('sell-total-rooms').textContent = stats.sell.totalRooms;
       document.getElementById('sell-total-lots').textContent = stats.sell.totalLots;
       document.getElementById('sell-total-active').textContent = stats.sell.totalActive;
@@ -825,212 +607,117 @@
       } else {
         sellList.innerHTML = stats.sell.lots.map(l => {
           let statusHtml = '';
+          let slipViewerHtml = '';
+
           if (l.isActive) {
             statusHtml = `<span class="lot-status active">กำลังประมูล</span>`;
           } else if (l.received) {
             statusHtml = `<span class="lot-status paid">ผู้ซื้อรับแล้ว ✓</span>`;
           } else if (l.delivered) {
             statusHtml = `<span class="lot-status" style="background:#fffbeb;color:#d97706">รอผู้ซื้อยืนยัน</span>`;
+          } else if (l.slipConfirmed) {
+            // ยืนยันสลิปแล้ว → ให้กรอก tracking
+            statusHtml = `<button class="btn primary" onclick="openTrackingModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">📦 กรอก Tracking</button>`;
+          } else if (l.paid && l.paymentSlip && !l.slipRejected) {
+            // มีสลิปรอตรวจ
+            statusHtml = `<span class="slip-status-badge pending">📎 รอตรวจสลิป</span>`;
+            slipViewerHtml = `
+              <div class="slip-viewer">
+                <div class="slip-viewer-header">
+                  <span>📎 สลิปจาก buyer</span>
+                  <button onclick="openFullscreen('${l.paymentSlip}')" style="background:none;border:none;font-size:11px;color:var(--blue);cursor:pointer">ดูเต็มจอ ↗</button>
+                </div>
+                <img src="${l.paymentSlip}" class="slip-viewer-img" onclick="openFullscreen('${l.paymentSlip}')" alt="payment slip">
+                <div class="slip-actions">
+                  <button class="slip-confirm-btn" onclick="confirmSlip('${l._id}', '${l.lotName}')">✓ ยืนยันรับเงินแล้ว</button>
+                  <button class="slip-reject-btn" onclick="openRejectModal('${l._id}', '${l.lotName}')">✕ ปฏิเสธสลิป</button>
+                </div>
+              </div>`;
+          } else if (l.slipRejected) {
+            statusHtml = `<span class="slip-status-badge rejected">✕ ปฏิเสธสลิปแล้ว</span>`;
           } else if (l.paid) {
+            // paid แต่ไม่มีสลิป (เคสเก่า)
             statusHtml = `<button class="btn primary" onclick="openTrackingModal('${l._id}', '${l.lotName}')" style="padding:2px 8px;font-size:10px">📦 กรอก Tracking</button>`;
           }
 
           return `
-            <div class="lot-item">
-              <div class="lot-info">
-                <div class="lot-name">Lot ${l.lotName}</div>
-                <div class="lot-room">${l.roomTitle} • ${l.bidderCount} bids</div>
+            <div class="lot-item" style="flex-direction:column;align-items:stretch">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="lot-info">
+                  <div class="lot-name">Lot ${l.lotName}</div>
+                  <div class="lot-room">${l.roomTitle} • ${l.bidderCount} bids</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="lot-price">฿${l.currentPrice.toLocaleString()}</div>
+                  ${statusHtml}
+                </div>
               </div>
-              <div class="lot-price">฿${l.currentPrice.toLocaleString()}</div>
-              ${statusHtml}
-            </div>
-          `;
+              ${slipViewerHtml}
+            </div>`;
         }).join('');
       }
 
-      // ========== Summary (กล่องเหลือง) ==========
+      // Summary
       document.getElementById('summary-buy').textContent = stats.buy.totalPaid;
       document.getElementById('summary-sell').textContent = stats.sell.totalReceived;
       document.getElementById('summary-credit').textContent = stats.credit.totalScore;
     }
 
-    // ========== Actions ==========
-    async function markPaid(lotId) {
-      if (!confirm('ยืนยันว่าคุณได้ชำระเงินแล้ว?')) return;
+    // ── Slip confirm (seller) ──────────────────
+    async function confirmSlip(lotId, lotName) {
+      if (!confirm(`ยืนยันว่าได้รับเงิน "${lotName}" แล้ว?`)) return;
       try {
-        const res = await fetch(`/api/profile/lots/${lotId}/pay`, {
+        const res = await fetch(`/api/profile/lots/${lotId}/confirm-slip`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
         loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
-    async function markDelivered(lotId) {
-      if (!confirm('ยืนยันว่าคุณได้ส่งของให้ผู้ซื้อแล้ว?')) return;
+    // ── Reject Modal ──────────────────────────
+    let currentRejectLotId = null;
+    let currentRejectLotName = null;
+
+    function openRejectModal(lotId, lotName) {
+      currentRejectLotId = lotId;
+      currentRejectLotName = lotName;
+      document.getElementById('reject-modal-sub').textContent = `ปฏิเสธสลิปของ "${lotName}" — buyer จะต้องส่งสลิปใหม่`;
+      document.getElementById('reject-reason').value = '';
+      document.getElementById('reject-modal').classList.add('show');
+    }
+
+    function closeRejectModal() {
+      document.getElementById('reject-modal').classList.remove('show');
+      currentRejectLotId = null;
+    }
+
+    async function confirmReject() {
+      if (!currentRejectLotId) return;
+      const reason = document.getElementById('reject-reason').value.trim();
       try {
-        const res = await fetch(`/api/profile/lots/${lotId}/deliver`, {
+        const res = await fetch(`/api/profile/lots/${currentRejectLotId}/reject-slip`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ reason })
         });
-        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+        closeRejectModal();
         loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
-    function renderSocials() {
-      const list = document.getElementById('social-list');
-      if (socials.length === 0) {
-        list.innerHTML = '<div style="font-size:11px;color:var(--ink4);padding:8px 0">ยังไม่มีข้อมูลติดต่อ</div>';
-        return;
-      }
-
-      list.innerHTML = socials.map((s, i) => `
-        <div class="social-item">
-          <div class="social-icon">${socialIcons[s.type] || '🔗'}</div>
-          <div class="social-type-label">${s.customLabel || socialLabels[s.type] || s.type}</div>
-          <div class="social-value">${s.value}</div>
-          <button class="social-edit-btn" onclick="editSocial(${i})">แก้ไข</button>
-          <button class="social-delete-btn" onclick="deleteSocial(${i})">✕</button>
-        </div>
-      `).join('');
+    // ── Fullscreen slip viewer ─────────────────
+    function openFullscreen(url) {
+      document.getElementById('slip-fullscreen-img').src = url;
+      document.getElementById('slip-fullscreen').classList.add('show');
+    }
+    function closeFullscreen() {
+      document.getElementById('slip-fullscreen').classList.remove('show');
     }
 
-    function toggleAddForm() {
-      const form = document.getElementById('add-social-form');
-      form.classList.toggle('show');
-      if (!form.classList.contains('show')) {
-        document.getElementById('social-type-select').value = '';
-        document.getElementById('social-value-input').value = '';
-        document.getElementById('social-custom-label').value = '';
-        document.getElementById('social-custom-label').style.display = 'none';
-      }
-    }
-
-    function handleTypeChange() {
-      const type = document.getElementById('social-type-select').value;
-      const customInput = document.getElementById('social-custom-label');
-      customInput.style.display = type === 'other' ? 'block' : 'none';
-    }
-
-    async function addSocial() {
-      const type = document.getElementById('social-type-select').value;
-      const value = document.getElementById('social-value-input').value.trim();
-      const customLabel = document.getElementById('social-custom-label').value.trim();
-
-      if (!type || !value) {
-        alert('กรุณาเลือกประเภทและกรอกข้อมูล');
-        return;
-      }
-
-      try {
-        const payload = { [type]: value };
-        if (type === 'other') {
-          payload.otherSocial = value;
-          payload.otherSocialLabel = customLabel || 'อื่นๆ';
-        }
-
-        const res = await fetch(`/api/profile/${userId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
-        toggleAddForm();
-        loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    async function editSocial(index) {
-      const s = socials[index];
-      const newValue = prompt(`แก้ไข ${s.customLabel || socialLabels[s.type] || s.type}:`, s.value);
-      if (newValue === null) return;
-
-      try {
-        const payload = { [s.type]: newValue.trim() };
-        if (s.type === 'other') {
-          payload.otherSocial = newValue.trim();
-          payload.otherSocialLabel = s.customLabel || 'อื่นๆ';
-        }
-
-        const res = await fetch(`/api/profile/${userId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('แก้ไขไม่สำเร็จ');
-        loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    async function deleteSocial(index) {
-      const s = socials[index];
-      if (!confirm(`ลบ ${s.customLabel || socialLabels[s.type] || s.type}?`)) return;
-
-      try {
-        const payload = { [s.type]: '' };
-        if (s.type === 'other') {
-          payload.otherSocial = '';
-          payload.otherSocialLabel = '';
-        }
-
-        const res = await fetch(`/api/profile/${userId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('ลบไม่สำเร็จ');
-        loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    async function markReceived(lotId) {
-      if (!confirm('ยืนยันว่าคุณได้รับของแล้ว?')) return;
-      try {
-        const res = await fetch(`/api/profile/lots/${lotId}/receive`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!res.ok) throw new Error('ยืนยันไม่ได้');
-        loadProfile();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // ========== Slip Modal ==========
+    // ── Slip Modal (buyer) ────────────────────
     let currentPayLotId = null;
 
     function openSlipModal(lotId, lotName) {
@@ -1088,14 +775,11 @@
 
         closeSlipModal();
         loadProfile();
-      } catch (err) {
-        alert(err.message);
-      } finally {
-        btn.disabled = false; btn.textContent = '✓ ยืนยันการชำระเงิน';
-      }
+      } catch (err) { alert(err.message); }
+      finally { btn.disabled = false; btn.textContent = '✓ ยืนยันการชำระเงิน'; }
     }
 
-    // ========== Tracking Modal ==========
+    // ── Tracking Modal ────────────────────────
     let currentDeliverLotId = null;
 
     function openTrackingModal(lotId, lotName) {
@@ -1124,20 +808,115 @@
           body: JSON.stringify({ trackingNumber, shippingProvider })
         });
         if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
-
         closeTrackingModal();
         loadProfile();
-      } catch (err) {
-        alert(err.message);
+      } catch (err) { alert(err.message); }
+    }
+
+    async function markReceived(lotId) {
+      if (!confirm('ยืนยันว่าคุณได้รับของแล้ว?')) return;
+      try {
+        const res = await fetch(`/api/profile/lots/${lotId}/receive`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('ยืนยันไม่ได้');
+        loadProfile();
+      } catch (err) { alert(err.message); }
+    }
+
+    // ── Social ────────────────────────────────
+    function renderSocials() {
+      const list = document.getElementById('social-list');
+      if (socials.length === 0) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--ink4);padding:8px 0">ยังไม่มีข้อมูลติดต่อ</div>';
+        return;
+      }
+      list.innerHTML = socials.map((s, i) => `
+        <div class="social-item">
+          <div class="social-icon">${socialIcons[s.type] || '🔗'}</div>
+          <div class="social-type-label">${s.customLabel || socialLabels[s.type] || s.type}</div>
+          <div class="social-value">${s.value}</div>
+          <button class="social-edit-btn" onclick="editSocial(${i})">แก้ไข</button>
+          <button class="social-delete-btn" onclick="deleteSocial(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleAddForm() {
+      const form = document.getElementById('add-social-form');
+      form.classList.toggle('show');
+      if (!form.classList.contains('show')) {
+        document.getElementById('social-type-select').value = '';
+        document.getElementById('social-value-input').value = '';
+        document.getElementById('social-custom-label').value = '';
+        document.getElementById('social-custom-label').style.display = 'none';
       }
     }
 
-    // ปิด modal เมื่อกด overlay
+    function handleTypeChange() {
+      const type = document.getElementById('social-type-select').value;
+      document.getElementById('social-custom-label').style.display = type === 'other' ? 'block' : 'none';
+    }
+
+    async function addSocial() {
+      const type = document.getElementById('social-type-select').value;
+      const value = document.getElementById('social-value-input').value.trim();
+      const customLabel = document.getElementById('social-custom-label').value.trim();
+      if (!type || !value) { alert('กรุณาเลือกประเภทและกรอกข้อมูล'); return; }
+      try {
+        const payload = { [type]: value };
+        if (type === 'other') { payload.otherSocial = value; payload.otherSocialLabel = customLabel || 'อื่นๆ'; }
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
+        toggleAddForm(); loadProfile();
+      } catch (err) { alert(err.message); }
+    }
+
+    async function editSocial(index) {
+      const s = socials[index];
+      const newValue = prompt(`แก้ไข ${s.customLabel || socialLabels[s.type] || s.type}:`, s.value);
+      if (newValue === null) return;
+      try {
+        const payload = { [s.type]: newValue.trim() };
+        if (s.type === 'other') { payload.otherSocial = newValue.trim(); payload.otherSocialLabel = s.customLabel || 'อื่นๆ'; }
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('แก้ไขไม่สำเร็จ');
+        loadProfile();
+      } catch (err) { alert(err.message); }
+    }
+
+    async function deleteSocial(index) {
+      const s = socials[index];
+      if (!confirm(`ลบ ${s.customLabel || socialLabels[s.type] || s.type}?`)) return;
+      try {
+        const payload = { [s.type]: '' };
+        if (s.type === 'other') { payload.otherSocial = ''; payload.otherSocialLabel = ''; }
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('ลบไม่สำเร็จ');
+        loadProfile();
+      } catch (err) { alert(err.message); }
+    }
+
+    // ── Close overlays ────────────────────────
     document.getElementById('slip-modal').addEventListener('click', e => { if (e.target.id === 'slip-modal') closeSlipModal(); });
     document.getElementById('tracking-modal').addEventListener('click', e => { if (e.target.id === 'tracking-modal') closeTrackingModal(); });
+    document.getElementById('reject-modal').addEventListener('click', e => { if (e.target.id === 'reject-modal') closeRejectModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSlipModal(); closeTrackingModal(); closeRejectModal(); closeFullscreen(); } });
 
     loadProfile();
   </script>
 </body>
-
 </html>

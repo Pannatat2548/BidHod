@@ -10,25 +10,25 @@ router.get("/:userId", async (req, res) => {
         if (!user) return res.status(404).json({ error: "ไม่พบผู้ใช้" });
 
         // ========== ฝั่ง BUYER ==========
-        // ดึง lots ที่ user นี้ชนะ (highestBidderId = userId)
         const wonLots = await find("lots", { highestBidderId: userId }, { createdAt: -1 });
-
-        // แยกตามสถานะการจ่าย
         const paidLots = wonLots.filter(l => l.paid === true);
         const unpaidLots = wonLots.filter(l => l.paid !== true);
 
-        // Resolve ชื่อห้องให้ wonLots
         const resolvedWonLots = await Promise.all(wonLots.map(async l => {
             const room = await findOne("rooms", { _id: l.roomId });
             return {
-                _id: l._id,  // ← ต้องมี _id ด้วย!
+                _id: l._id,
                 lotName: l.name,
                 roomTitle: room ? room.title : "ไม่ระบุห้อง",
                 price: l.currentPrice,
                 paid: l.paid || false,
-                delivered: l.delivered || false,    // ← เพิ่ม
+                delivered: l.delivered || false,
                 received: l.received || false,
                 paymentSlip: l.paymentSlip || null,
+                // ── ใหม่: สถานะการตรวจสลิป ──
+                slipConfirmed: l.slipConfirmed || false,
+                slipRejected: l.slipRejected || false,
+                slipRejectReason: l.slipRejectReason || null,
                 trackingNumber: l.trackingNumber || null,
                 shippingProvider: l.shippingProvider || null,
                 endedAt: l.endsAt,
@@ -36,10 +36,7 @@ router.get("/:userId", async (req, res) => {
         }));
 
         // ========== ฝั่ง SELLER ==========
-        // ดึง rooms ที่ user นี้เป็นเจ้าของ
         const sellerRooms = await find("rooms", { sellerId: userId }, { createdAt: -1 });
-
-        // ดึง lots ทั้งหมดใน rooms ของ seller
         const sellerLots = [];
         for (const room of sellerRooms) {
             const lots = await find("lots", { roomId: room._id });
@@ -50,14 +47,13 @@ router.get("/:userId", async (req, res) => {
             })));
         }
 
-        // แยกตามสถานะการรับของ
         const receivedLots = sellerLots.filter(l => l.received === true);
         const deliveredLots = sellerLots.filter(l => l.delivered === true && l.received !== true);
         const activeLots = sellerLots.filter(l => l.isActive === true);
 
         const resolvedSellerLots = await Promise.all(sellerLots.map(async l => {
             return {
-                _id: l._id,  // ← ต้องมี _id เพื่อให้ tracking/slip modal ใช้ได้
+                _id: l._id,
                 lotName: l.name,
                 roomTitle: l.roomTitle,
                 currentPrice: l.currentPrice,
@@ -65,6 +61,11 @@ router.get("/:userId", async (req, res) => {
                 paid: l.paid || false,
                 delivered: l.delivered || false,
                 received: l.received || false,
+                // ── ใหม่: ข้อมูลสลิปสำหรับ seller ──
+                paymentSlip: l.paymentSlip || null,
+                slipConfirmed: l.slipConfirmed || false,
+                slipRejected: l.slipRejected || false,
+                slipRejectReason: l.slipRejectReason || null,
                 trackingNumber: l.trackingNumber || null,
                 shippingProvider: l.shippingProvider || null,
                 bidderCount: l.bids?.length || 0
@@ -91,10 +92,9 @@ router.get("/:userId", async (req, res) => {
                     totalRevenue: receivedLots.reduce((sum, l) => sum + (l.currentPrice || 0), 0),
                     lots: resolvedSellerLots,
                 },
-                // เครดิตที่รวมให้ = จำนวนธุรกรรมที่สำเร็จจริง
                 credit: {
-                    buyerScore: paidLots.length,  // จำนวนครั้งที่จ่ายจริง
-                    sellerScore: receivedLots.length, // จำนวนครั้งที่ผู้ซื้อรับของจริง
+                    buyerScore: paidLots.length,
+                    sellerScore: receivedLots.length,
                     totalScore: paidLots.length + receivedLots.length,
                 }
             }
@@ -123,7 +123,6 @@ router.patch("/:userId", requireAuth, async (req, res) => {
         if (Object.keys(setObj).length === 0) {
             return res.status(400).json({ error: "ไม่มีข้อมูลที่จะอัปเดต" });
         }
-
         await update("users", { _id: req.params.userId }, { $set: setObj });
         res.json({ ok: true });
     } catch (err) {
@@ -131,7 +130,7 @@ router.patch("/:userId", requireAuth, async (req, res) => {
     }
 });
 
-// PATCH /api/lots/:id/pay — Buyer ยืนยันการชำระเงิน + แนบสลิป
+// PATCH /api/profile/lots/:id/pay — Buyer แนบสลิป
 router.patch("/lots/:id/pay", requireAuth, async (req, res) => {
     try {
         const lot = await findOne("lots", { _id: req.params.id });
@@ -145,7 +144,15 @@ router.patch("/lots/:id/pay", requireAuth, async (req, res) => {
         if (!paymentSlip) return res.status(400).json({ error: "กรุณาแนบสลิปการโอนเงิน" });
 
         await update("lots", { _id: req.params.id }, {
-            $set: { paid: true, paidAt: new Date(), paymentSlip }
+            $set: {
+                paid: true,
+                paidAt: new Date(),
+                paymentSlip,
+                // reset slip status ทุกครั้งที่ส่งสลิปใหม่
+                slipConfirmed: false,
+                slipRejected: false,
+                slipRejectReason: null,
+            }
         });
 
         res.json({ ok: true });
@@ -154,7 +161,70 @@ router.patch("/lots/:id/pay", requireAuth, async (req, res) => {
     }
 });
 
-// PATCH /api/lots/:id/deliver — Seller ยืนยันการส่งของ + tracking number
+// ── ใหม่: PATCH /api/profile/lots/:id/confirm-slip — Seller ยืนยันสลิป ──
+router.patch("/lots/:id/confirm-slip", requireAuth, async (req, res) => {
+    try {
+        const lot = await findOne("lots", { _id: req.params.id });
+        if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
+
+        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น
+        const room = await findOne("rooms", { _id: lot.roomId });
+        if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+        }
+
+        if (!lot.paymentSlip) {
+            return res.status(400).json({ error: "ยังไม่มีสลิปจาก buyer" });
+        }
+
+        await update("lots", { _id: req.params.id }, {
+            $set: {
+                slipConfirmed: true,
+                slipConfirmedAt: new Date(),
+                slipRejected: false,
+                slipRejectReason: null,
+            }
+        });
+
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── ใหม่: PATCH /api/profile/lots/:id/reject-slip — Seller ปฏิเสธสลิป ──
+router.patch("/lots/:id/reject-slip", requireAuth, async (req, res) => {
+    try {
+        const lot = await findOne("lots", { _id: req.params.id });
+        if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
+
+        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น
+        const room = await findOne("rooms", { _id: lot.roomId });
+        if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+        }
+
+        const { reason } = req.body;
+
+        await update("lots", { _id: req.params.id }, {
+            $set: {
+                slipRejected: true,
+                slipRejectedAt: new Date(),
+                slipRejectReason: reason || "กรุณาส่งสลิปใหม่",
+                slipConfirmed: false,
+                // reset paid เพื่อให้ buyer ส่งสลิปใหม่ได้
+                paid: false,
+                paymentSlip: null,
+            }
+        });
+
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH /api/profile/lots/:id/deliver — Seller ส่งของ + tracking
 router.patch("/lots/:id/deliver", requireAuth, async (req, res) => {
     try {
         const lot = await findOne("lots", { _id: req.params.id });
@@ -178,13 +248,12 @@ router.patch("/lots/:id/deliver", requireAuth, async (req, res) => {
     }
 });
 
-// PATCH /api/lots/:id/receive — Buyer ยืนยันการรับของ
+// PATCH /api/profile/lots/:id/receive — Buyer ยืนยันรับของ
 router.patch("/lots/:id/receive", requireAuth, async (req, res) => {
     try {
         const lot = await findOne("lots", { _id: req.params.id });
         if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
 
-        // เฉพาะผู้ชนะประมูลเท่านั้นที่สามารถยืนยันการรับของได้
         if (lot.highestBidderId !== req.user.id && req.user.role !== "admin") {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
         }
@@ -199,7 +268,7 @@ router.patch("/lots/:id/receive", requireAuth, async (req, res) => {
     }
 });
 
-// GET /api/profile/lots/:id — ดึงข้อมูล lot (paymentSlip, tracking)
+// GET /api/profile/lots/:id
 router.get("/lots/:id", requireAuth, async (req, res) => {
     try {
         const lot = await findOne("lots", { _id: req.params.id });

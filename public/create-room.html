@@ -6,6 +6,8 @@
 <title>Bidmai — สร้างห้องประมูล</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
+<!-- Flatpickr -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 <style>
 body { background: var(--bg2); }
 
@@ -66,9 +68,7 @@ body { background: var(--bg2); }
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
-.section-head .icon {
-  font-size: 16px;
-}
+.section-head .icon { font-size: 16px; }
 
 /* ── Fields ── */
 .field { margin-bottom: 14px; }
@@ -109,6 +109,80 @@ body { background: var(--bg2); }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .row3 .field, .row2 .field { margin: 0; }
+
+/* ── Datetime picker ── */
+.datetime-section {
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
+  border: 1.5px solid rgba(79,70,229,0.2);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 14px;
+}
+.datetime-section .section-head {
+  border-bottom-color: rgba(79,70,229,0.15);
+}
+.datetime-picker-wrap {
+  position: relative;
+}
+.datetime-picker-wrap input {
+  padding-left: 44px;
+  cursor: pointer;
+  background: var(--bg) !important;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  border-color: rgba(79,70,229,0.3);
+}
+.datetime-picker-wrap input:focus {
+  border-color: var(--primary);
+}
+.datetime-picker-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 1;
+}
+.end-time-preview {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(79,70,229,0.06);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--primary);
+  display: none;
+  line-height: 1.6;
+}
+.end-time-preview.show { display: block; }
+.end-time-preview strong { font-weight: 700; }
+
+/* Flatpickr custom style */
+.flatpickr-calendar {
+  font-family: 'Sarabun', sans-serif !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  border: 1px solid var(--line) !important;
+}
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.flatpickr-day:hover {
+  background: var(--primary-light) !important;
+}
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays,
+span.flatpickr-weekday {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: #fff !important;
+}
 
 /* ── Cover upload ── */
 .cover-upload {
@@ -178,9 +252,6 @@ body { background: var(--bg2); }
   box-sizing: border-box;
 }
 .bulk-input:focus { border-color: var(--primary); }
-/* legacy - ไม่ใช้แล้วแต่เก็บไว้กัน */
-.bulk-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.bulk-label { font-size: 12px; color: var(--ink3); white-space: nowrap; }
 
 /* ── Lot table ── */
 .lot-table-wrap { overflow-x: auto; margin-top: 16px; }
@@ -203,7 +274,6 @@ table.lot-table tr:hover td { background: var(--primary-light); }
   transition: border-color .15s;
 }
 .lot-input:focus { border-color: var(--primary); }
-.lot-dur-input { width: 70px; }
 
 /* ── Hint box ── */
 .hint-box {
@@ -285,7 +355,21 @@ table.lot-table tr:hover td { background: var(--primary-light); }
     </div>
   </div>
 
-  <!-- ส่วนที่ 2: รูปสินค้า -->
+  <!-- ── ส่วนที่ 2: วันเวลาปิดประมูล (ใหม่) ── -->
+  <div class="datetime-section section-card">
+    <div class="section-head"><span class="icon">📅</span> วันและเวลาปิดประมูล</div>
+    <div class="field" style="margin:0">
+      <label>ทุก lot จะปิดพร้อมกันเมื่อถึงเวลานี้ <span class="req">*</span></label>
+      <div class="datetime-picker-wrap">
+        <span class="datetime-picker-icon">📅</span>
+        <input type="text" id="end-datetime" placeholder="เลือกวันและเวลา..." readonly>
+      </div>
+      <div class="end-time-preview" id="end-time-preview"></div>
+      <small>เลือกได้ตั้งแต่ 15 นาทีจากนี้เป็นต้นไป</small>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 3: รูปสินค้า -->
   <div class="section-card">
     <div class="section-head"><span class="icon">🖼️</span> รูปสินค้า</div>
     <div class="cover-upload" id="cover-upload" onclick="document.getElementById('cover-input').click()">
@@ -298,7 +382,7 @@ table.lot-table tr:hover td { background: var(--primary-light); }
     <input type="hidden" id="cover-img">
   </div>
 
-  <!-- ส่วนที่ 3: ตั้งค่าเบอร์และราคา -->
+  <!-- ส่วนที่ 4: ตั้งค่าเบอร์และราคา -->
   <div class="section-card">
     <div class="section-head"><span class="icon">⚙️</span> ตั้งค่าเบอร์และราคา</div>
 
@@ -314,17 +398,9 @@ table.lot-table tr:hover td { background: var(--primary-light); }
         <small>ปกติเริ่มจาก 1</small>
       </div>
       <div class="field">
-        <label>ระยะเวลาต่อเบอร์ (นาที) <span class="req">*</span></label>
-        <input id="default-dur" type="number" value="30" min="1" oninput="applyDefaultDur()">
-        <small>ใช้กับทุกเบอร์</small>
-      </div>
-    </div>
-
-    <div class="row2">
-      <div class="field">
-        <label>⏱️ ต่อเวลา Anti-Snipe (วินาที)</label>
+        <label>⏱️ Anti-Snipe (วินาที)</label>
         <input id="snipe-ext" type="number" min="0" placeholder="เช่น 30">
-        <small>เพิ่มเวลาเมื่อมีคนประมูลในช่วงท้าย (0 หรือปล่อยว่าง = ไม่ต่อเวลา)</small>
+        <small>ต่อเวลาเมื่อมีคนประมูลในช่วงท้าย (ว่าง = ไม่ต่อ)</small>
       </div>
     </div>
 
@@ -332,7 +408,7 @@ table.lot-table tr:hover td { background: var(--primary-light); }
     <div style="margin-bottom:12px">
       <div style="font-size:11px;letter-spacing:1.5px;color:var(--ink4);text-transform:uppercase;margin-bottom:10px;font-weight:600">💰 กำหนดราคาเป็นกลุ่ม</div>
       <div id="range-rows">
-      <div class="group-section" id="rr-0">
+        <div class="group-section" id="rr-0">
           <div class="group-grid">
             <div class="group-field">
               <label>จาก (เบอร์)</label>
@@ -378,6 +454,8 @@ table.lot-table tr:hover td { background: var(--primary-light); }
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/th.js"></script>
 <script>
 const user = JSON.parse(localStorage.getItem('user') || 'null');
 const token = localStorage.getItem('token');
@@ -386,6 +464,47 @@ if (!token || !user || !['admin','seller'].includes(user.role))
 
 let coverUrl = '';
 let tableGenerated = false;
+let selectedEndDate = null; // เก็บ Date object ที่เลือก
+
+// ── Flatpickr datetime picker ──────────────────
+const picker = flatpickr('#end-datetime', {
+  locale: 'th',
+  enableTime: true,
+  dateFormat: 'Y-m-d H:i',
+  altInput: true,
+  altFormat: 'j F Y เวลา H:i น.',
+  minDate: new Date(Date.now() + 15 * 60 * 1000), // min 15 นาทีจากนี้
+  time_24hr: true,
+  minuteIncrement: 5,
+  onChange(selectedDates) {
+    selectedEndDate = selectedDates[0] || null;
+    updateEndTimePreview();
+  }
+});
+
+function updateEndTimePreview() {
+  const preview = document.getElementById('end-time-preview');
+  if (!selectedEndDate) { preview.classList.remove('show'); return; }
+
+  const now = new Date();
+  const diff = selectedEndDate - now;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+
+  let timeLeft = '';
+  if (h >= 24) timeLeft = `${Math.floor(h/24)} วัน ${h%24} ชั่วโมง`;
+  else if (h > 0) timeLeft = `${h} ชั่วโมง ${m} นาที`;
+  else timeLeft = `${m} นาที`;
+
+  const count = parseInt(document.getElementById('lot-count').value) || 0;
+  const lotText = count > 0 ? `<br>ทุก <strong>${count} เบอร์</strong> จะปิดพร้อมกัน` : '';
+
+  preview.innerHTML = `⏰ อีก <strong>${timeLeft}</strong> จากนี้${lotText}`;
+  preview.classList.add('show');
+}
+
+// อัปเดต preview เมื่อเปลี่ยนจำนวน lot
+document.getElementById('lot-count').addEventListener('input', updateEndTimePreview);
 
 // ── Upload cover ──────────────────────────────
 async function uploadCover(input) {
@@ -425,7 +544,6 @@ async function uploadCover(input) {
 function generateTable() {
   const count = parseInt(document.getElementById('lot-count').value) || 0;
   const start = parseInt(document.getElementById('lot-start').value) || 1;
-  const defDur = document.getElementById('default-dur').value || 30;
   const wrap = document.getElementById('lot-table-wrap');
 
   if (!count || count < 1) {
@@ -438,6 +556,7 @@ function generateTable() {
     return;
   }
 
+  // ตอนนี้ table ไม่มี duration แล้ว เพราะใช้ end datetime แทน
   const rows = Array.from({ length: count }, (_, i) => {
     const num = start + i;
     return `<tr>
@@ -445,7 +564,6 @@ function generateTable() {
       <td><input class="lot-input" id="p-${num}" type="number" placeholder="ราคาเริ่มต้น (฿)"></td>
       <td><input class="lot-input" id="bin-${num}" type="number" placeholder="ไม่บังคับ"></td>
       <td><input class="lot-input" id="d-${num}" type="text" placeholder="หมายเหตุ (ถ้ามี)"></td>
-      <td><input class="lot-input lot-dur-input" id="dur-${num}" type="number" value="${defDur}" min="1"></td>
     </tr>`;
   }).join('');
 
@@ -455,11 +573,11 @@ function generateTable() {
       <th>ราคาเริ่มต้น (฿)</th>
       <th>ราคาปิด BIN (฿)</th>
       <th>หมายเหตุ</th>
-      <th>เวลา (นาที)</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
   tableGenerated = true;
+  updateEndTimePreview();
 }
 
 // ── Bulk range ────────────────────────────────
@@ -520,11 +638,6 @@ function applyRange(id) {
   setTimeout(() => document.getElementById('msg').className = 'msg', 2000);
 }
 
-function applyDefaultDur() {
-  const dur = document.getElementById('default-dur').value;
-  document.querySelectorAll('[id^="dur-"]').forEach(el => el.value = dur);
-}
-
 function clearAllPrices() {
   if (!confirm('ต้องการล้างราคาทั้งหมด?')) return;
   document.querySelectorAll('[id^="p-"],[id^="bin-"]').forEach(el => el.value = '');
@@ -535,11 +648,14 @@ async function createRoom() {
   const title = document.getElementById('room-title').value.trim();
   const house = document.getElementById('room-house').value.trim();
   if (!title || !house) return showMsg('กรุณากรอกชื่อห้องและ House', 'err');
+  if (!selectedEndDate) return showMsg('กรุณาเลือกวันและเวลาปิดประมูล', 'err');
+  if (selectedEndDate <= new Date()) return showMsg('วันปิดประมูลต้องเป็นอนาคต', 'err');
   if (!tableGenerated) return showMsg('กรุณากรอกจำนวนเบอร์', 'err');
 
   const count = parseInt(document.getElementById('lot-count').value) || 0;
   const start = parseInt(document.getElementById('lot-start').value) || 1;
   const img = document.getElementById('cover-img').value;
+  const endAt = selectedEndDate.toISOString();
 
   const lots = [];
   for (let i = 0; i < count; i++) {
@@ -547,20 +663,19 @@ async function createRoom() {
     const price = parseInt(document.getElementById('p-' + num)?.value) || 0;
     const bin = parseInt(document.getElementById('bin-' + num)?.value) || null;
     const desc = document.getElementById('d-' + num)?.value.trim() || '';
-    const dur = parseInt(document.getElementById('dur-' + num)?.value) || 30;
     lots.push({
       name: String(num),
       desc,
       image: img,
       startingPrice: price,
       binPrice: bin,
-      durationMin: dur,
+      endsAt: endAt, // ← ส่ง ISO string ให้ server ใช้โดยตรง
     });
   }
 
   if (!lots.length) return showMsg('ไม่พบรายการ', 'err');
 
-  const snipeExt     = parseInt(document.getElementById('snipe-ext').value) || 0;
+  const snipeExt = parseInt(document.getElementById('snipe-ext').value) || 0;
   const snipeTrigger = snipeExt;
 
   try {
@@ -568,7 +683,7 @@ async function createRoom() {
     const r = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ title, house, lots, snipeExt, snipeTrigger })
+      body: JSON.stringify({ title, house, lots, snipeExt, snipeTrigger, endsAt: endAt })
     });
     const d = await r.json();
     if (!r.ok) return showMsg(d.error, 'err');
