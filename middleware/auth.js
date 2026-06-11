@@ -5,7 +5,7 @@ const SECRET = process.env.JWT_SECRET || "bidhaus_secret_change_in_prod";
 
 function signToken(user) {
   return jwt.sign(
-    { id: user._id, email: user.email, role: user.role, name: user.name },
+    { id: user._id.toString(), email: user.email, role: user.role, name: user.name },
     SECRET,
     { expiresIn: "7d" }
   );

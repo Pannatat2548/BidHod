@@ -313,7 +313,13 @@
       <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
       <div class="logo">Bidmai</div>
     </div>
-    <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+      <span id="nav-viewing-badge" style="display:none;font-size:11px;padding:3px 10px;
+        background:#fffbeb;color:#d97706;border:1px solid rgba(217,119,6,0.3);border-radius:999px">
+        👁 กำลังส่องโปรไฟล์คนอื่น
+      </span>
+    </div>
   </nav>
 
   <div class="profile-layout">
@@ -502,36 +508,172 @@
   <script>
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (!token || !user) location.href = '/login.html';
 
-    const userId = new URLSearchParams(location.search).get('id') || user.id;
-    const isSelf = userId === user.id;
-    document.getElementById('nav-user').textContent = user.name;
+    // ถ้าไม่มี token และไม่ได้ระบุ ?id= → redirect login
+    const _viewId = new URLSearchParams(location.search).get('id');
+    if (!token && !_viewId) location.href = '/login.html';
+
+    // รองรับทั้ง user.id และ user._id (ขึ้นอยู่กับ backend ที่ set ใน localStorage)
+    const _uid = user && (user.id || user._id);
+    const userId = _viewId || _uid;
+    const isSelf = !!(user && _uid && userId === _uid);
+    if (user) document.getElementById('nav-user').textContent = user.name;
+
+    // debug: ตรวจ key จริงใน localStorage (ลบออกได้หลัง confirm)
+    console.log('[profile] user object:', user);
+    console.log('[profile] resolved userId:', userId, '| isSelf:', isSelf);
 
     let profileData = null;
     let socials = [];
 
-    const socialIcons = { facebook:'📘', instagram:'📷', reddit:'', discord:'', phone:'📞', other:'🔗' };
+    const socialIcons = { facebook:'📘', instagram:'📷', reddit:'🤖', discord:'🎮', phone:'📞', other:'🔗' };
     const socialLabels = { facebook:'Facebook', instagram:'Instagram', reddit:'Reddit', discord:'Discord', phone:'เบอร์โทร', other:'อื่นๆ' };
 
     async function loadProfile() {
       try {
-        const res = await fetch(`/api/profile/${userId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`/api/profile/${userId}`, { headers });
         if (!res.ok) throw new Error('โหลดข้อมูลไม่ได้');
         profileData = await res.json();
-        renderProfile();
+        if (profileData.isSelf) renderPrivateProfile();
+        else renderPublicProfile();
       } catch (err) { alert(err.message); }
     }
 
-    function renderProfile() {
+    // ── โหมด PUBLIC (ส่องคนอื่น) ─────────────────────────────────────────
+    function renderPublicProfile() {
+      const { user: u, publicStats, activeRooms } = profileData;
+
+      // แสดง badge ใน nav
+      const badge = document.getElementById('nav-viewing-badge');
+      if (badge) badge.style.display = '';
+
+      document.getElementById('profile-name').textContent = u.name;
+      document.getElementById('profile-email').style.display = 'none';
+      document.getElementById('profile-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
+      document.getElementById('profile-role-wrap').innerHTML =
+        `<span class="badge badge-${u.role}">${u.role}</span>`;
+
+      // ซ่อนปุ่มแก้ไข social + form เพิ่ม
+      document.querySelector('.add-social-btn').style.display = 'none';
+      document.getElementById('add-social-form').style.display = 'none';
+
+      socials = [];
+      if (u.facebook) socials.push({ type: 'facebook', value: u.facebook });
+      if (u.instagram) socials.push({ type: 'instagram', value: u.instagram });
+      if (u.reddit) socials.push({ type: 'reddit', value: u.reddit });
+      if (u.discord) socials.push({ type: 'discord', value: u.discord });
+      if (u.phone) socials.push({ type: 'phone', value: u.phone });
+      if (u.otherSocial) socials.push({ type: 'other', value: u.otherSocial, customLabel: u.otherSocialLabel });
+      renderSocialsReadOnly();
+
+      // ── แทนที่ credit section ด้วย public view ──
+      document.querySelector('.credit-section').innerHTML = renderPublicCreditHTML(u, publicStats, activeRooms);
+    }
+
+    function renderPublicCreditHTML(u, ps, rooms) {
+      const payRateColor = ps.payRate === null ? 'var(--ink3)'
+        : ps.payRate >= 90 ? 'var(--green)' : ps.payRate >= 60 ? '#d97706' : 'var(--red)';
+      const deliveryRateColor = ps.deliveryRate === null ? 'var(--ink3)'
+        : ps.deliveryRate >= 90 ? 'var(--green)' : ps.deliveryRate >= 60 ? '#d97706' : 'var(--red)';
+
+      const payBar = ps.payRate !== null
+        ? `<div style="margin-top:4px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden">
+             <div style="height:100%;width:${ps.payRate}%;background:${payRateColor};transition:width 0.5s"></div>
+           </div>` : '';
+      const deliveryBar = ps.deliveryRate !== null
+        ? `<div style="margin-top:4px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden">
+             <div style="height:100%;width:${ps.deliveryRate}%;background:${deliveryRateColor};transition:width 0.5s"></div>
+           </div>` : '';
+
+      const roomsHTML = rooms.length === 0
+        ? `<div class="empty-credit">ไม่มีห้องที่เปิดอยู่ตอนนี้</div>`
+        : rooms.map(r => `
+          <a href="/room.html?id=${r._id}" style="display:flex;align-items:center;justify-content:space-between;
+            padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit">
+            <div>
+              <div style="font-size:13px;font-weight:600">${r.title}</div>
+              <div style="font-size:11px;color:var(--ink4)">${r.house}</div>
+            </div>
+            <span style="font-size:11px;color:var(--blue)">ดูห้อง →</span>
+          </a>`).join('');
+
+      return `
+        <div>
+          <div class="credit-header">Public Profile</div>
+          <div class="credit-title">โปรไฟล์ของ ${u.name}</div>
+        </div>
+
+        <div class="credit-block">
+          <div class="credit-block-title">⭐ Credit Score</div>
+          <div class="credit-stats" style="grid-template-columns:repeat(3,1fr)">
+            <div class="credit-stat">
+              <div class="credit-stat-label">ชนะประมูล</div>
+              <div class="credit-stat-value green">${ps.totalWon}</div>
+            </div>
+            <div class="credit-stat">
+              <div class="credit-stat-label">จ่ายเงินแล้ว</div>
+              <div class="credit-stat-value">${ps.totalPaid}</div>
+            </div>
+            <div class="credit-stat">
+              <div class="credit-stat-label">ส่งของสำเร็จ</div>
+              <div class="credit-stat-value">${ps.totalReceived}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="color:var(--ink3)">🛒 อัตราจ่าย (Buyer)</span>
+                <span style="font-weight:600;color:${payRateColor}">
+                  ${ps.payRate !== null ? ps.payRate + '%' : 'ยังไม่มีข้อมูล'}
+                </span>
+              </div>
+              ${payBar}
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="color:var(--ink3)">📦 อัตราส่งสำเร็จ (Seller)</span>
+                <span style="font-weight:600;color:${deliveryRateColor}">
+                  ${ps.deliveryRate !== null ? ps.deliveryRate + '%' : 'ยังไม่มีข้อมูล'}
+                </span>
+              </div>
+              ${deliveryBar}
+            </div>
+          </div>
+        </div>
+
+        <div class="credit-block">
+          <div class="credit-block-title">🏠 ห้องประมูลที่เปิดอยู่</div>
+          <div class="lots-list">${roomsHTML}</div>
+        </div>`;
+    }
+
+    // renderSocials แบบ read-only (ไม่มีปุ่มแก้ไข/ลบ)
+    function renderSocialsReadOnly() {
+      const list = document.getElementById('social-list');
+      if (socials.length === 0) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--ink4);padding:8px 0">ยังไม่มีข้อมูลติดต่อ</div>';
+        return;
+      }
+      list.innerHTML = socials.map(s => `
+        <div class="social-item">
+          <div class="social-icon">${socialIcons[s.type] || '🔗'}</div>
+          <div class="social-type-label">${s.customLabel || socialLabels[s.type] || s.type}</div>
+          <div class="social-value">${s.value}</div>
+        </div>
+      `).join('');
+    }
+
+    // ── โหมด PRIVATE (เจ้าของ) ───────────────────────────────────────────
+    function renderPrivateProfile() {
       const { user: u, stats } = profileData;
 
       document.getElementById('profile-name').textContent = u.name;
       document.getElementById('profile-email').textContent = u.email;
       document.getElementById('profile-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
       document.getElementById('profile-role-wrap').innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
+      document.getElementById('profile-email').style.display = '';
+      document.querySelector('.add-social-btn').style.display = '';
 
       socials = [];
       if (u.facebook) socials.push({ type: 'facebook', value: u.facebook });
@@ -661,7 +803,7 @@
       document.getElementById('summary-buy').textContent = stats.buy.totalPaid;
       document.getElementById('summary-sell').textContent = stats.sell.totalReceived;
       document.getElementById('summary-credit').textContent = stats.credit.totalScore;
-    }
+    } // end renderPrivateProfile
 
     // ── Slip confirm (seller) ──────────────────
     async function confirmSlip(lotId, lotName) {
@@ -826,6 +968,7 @@
     }
 
     // ── Social ────────────────────────────────
+    // renderSocials — เจ้าของเท่านั้น (มีปุ่ม edit/delete)
     function renderSocials() {
       const list = document.getElementById('social-list');
       if (socials.length === 0) {

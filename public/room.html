@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -13,7 +12,6 @@
       padding: 14px 20px 0;
       border-bottom: 1px solid var(--line)
     }
-
     .room-house {
       font-size: 11px;
       color: var(--ink4);
@@ -21,25 +19,21 @@
       text-transform: uppercase;
       margin-bottom: 3px
     }
-
     .room-title {
       font-size: 16px;
       font-weight: 500;
       color: var(--ink);
       margin-bottom: 12px
     }
-
     .layout {
       display: grid;
       grid-template-columns: 1fr 280px;
       min-height: calc(100vh - 148px)
     }
-
     .main {
       padding: 20px;
       border-right: 1px solid var(--line)
     }
-
     .lot-thumb {
       width: 100%;
       max-height: 340px;
@@ -54,21 +48,18 @@
       margin-bottom: 16px;
       overflow: hidden
     }
-
     .lot-badge-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 6px
     }
-
     .lot-num-label {
       font-size: 10px;
       letter-spacing: 2px;
       color: var(--ink4);
       text-transform: uppercase
     }
-
     .lot-name {
       font-size: 16px;
       font-weight: 500;
@@ -76,14 +67,12 @@
       line-height: 1.4;
       margin-bottom: 5px
     }
-
     .lot-desc {
       font-size: 12px;
       color: var(--ink3);
       line-height: 1.7;
       margin-bottom: 16px
     }
-
     .sidebar {
       padding: 16px;
       display: flex;
@@ -91,25 +80,21 @@
       gap: 10px;
       background: var(--bg2)
     }
-
     .price-big {
       font-size: 24px;
       font-weight: 500;
       color: var(--ink);
       transition: color .3s
     }
-
     .price-leader {
       font-size: 11px;
       color: var(--ink4);
       margin-top: 3px
     }
-
     .price-leader span {
       color: var(--green);
       font-weight: 500
     }
-
     .ended-block {
       background: var(--bg2);
       border: 1px solid var(--line);
@@ -117,23 +102,19 @@
       padding: 20px;
       text-align: center
     }
-
     .ended-title {
       font-size: 18px;
       font-weight: 500;
       color: var(--ink);
       margin-bottom: 6px
     }
-
     .ended-sub {
       font-size: 13px;
       color: var(--ink3)
     }
-
     .ended-sub strong {
       color: var(--green)
     }
-
     .login-prompt {
       width: 100%;
       padding: 10px;
@@ -147,25 +128,21 @@
       transition: background .15s;
       text-align: center
     }
-
     .login-prompt:hover {
       background: var(--bg2)
     }
-
     .bid-error {
       font-size: 12px;
       color: var(--red);
       min-height: 16px;
       margin-top: 4px
     }
-
     .h-list {
       display: flex;
       flex-direction: column;
       max-height: 180px;
       overflow-y: auto
     }
-
     .bin-btn {
       width: 100%;
       padding: 10px;
@@ -180,24 +157,20 @@
       cursor: pointer;
       transition: opacity .15s;
     }
-
     .bin-btn:hover {
       opacity: .85;
     }
-
     .bin-price-hint {
       font-size: 11px;
       color: var(--ink4);
       text-align: center;
       margin-top: 4px;
     }
-
     @media(max-width:680px) {
       .layout {
         grid-template-columns: 1fr
       }
     }
-
     .lot-status-card {
       background: var(--bg);
       border: 1px solid var(--line);
@@ -206,20 +179,17 @@
       margin-top: 16px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
-
     .status-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-top: 8px;
     }
-
     .status-item {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-
     .status-label {
       font-size: 11px;
       color: var(--ink4);
@@ -227,27 +197,21 @@
       letter-spacing: 0.5px;
       font-weight: 600;
     }
-
     .status-value {
       font-size: 15px;
       font-weight: 700;
       color: var(--ink);
     }
-
     .status-value.price {
       color: var(--primary);
-      /* หรือสีตามธีมของคุณ */
       font-size: 18px;
     }
-
     .status-value.leader {
       color: var(--green);
       display: flex;
       align-items: center;
       gap: 6px;
     }
-
-    /* ปรับปุ่มติดต่อ Seller ให้ดูดีขึ้นนิดหน่อย */
     .btn-contact-seller {
       display: inline-flex;
       align-items: center;
@@ -262,13 +226,46 @@
       background: var(--bg);
       transition: all 0.2s;
     }
-
     .btn-contact-seller:hover {
       background: var(--bg2);
       border-color: var(--ink3);
     }
-
-    /* ── Proof Modal ── */
+    /* ── ปุ่มส่องโปรไฟล์ ── */
+    .btn-view-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--ink3);
+      text-decoration: none;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      transition: all 0.2s;
+    }
+    .btn-view-profile:hover {
+      background: var(--bg2);
+      color: var(--ink);
+      border-color: var(--ink3);
+    }
+    .seller-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    /* ── ลิงก์ชื่อใน history ── */
+    .h-name-link {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .h-name-link:hover {
+      color: var(--blue, #3b82f6);
+      text-decoration: underline;
+    }
     .modal-overlay {
       display: none;
       position: fixed;
@@ -323,7 +320,6 @@
     .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
   </style>
 </head>
-
 <body>
   <nav>
     <div style="display:flex;align-items:center;gap:12px">
@@ -343,13 +339,11 @@
       </a>
     </div>
   </nav>
-
   <div class="room-header">
     <div class="room-house" id="room-house">กำลังโหลด...</div>
     <div class="room-title" id="room-title"></div>
     <div class="lot-tabs" id="lot-tabs"></div>
   </div>
-
   <div class="layout">
     <div class="main" id="main"></div>
     <div class="sidebar">
@@ -378,7 +372,6 @@
       </div>
     </div>
   </div>
-
   <script>
     const ROOM_ID = new URLSearchParams(location.search).get('id');
     if (!ROOM_ID) location.href = '/';
@@ -388,7 +381,6 @@
     const socket = io({ auth: { token: token || '' } });
     let roomData = null, activeLotId = null;
     const LOT_DUR = 30 * 60 * 1000;
-
     socket.on('connect', () => socket.emit('room:join', ROOM_ID));
     socket.on('room:init', d => {
       roomData = d;
@@ -420,62 +412,59 @@
     function renderTabs(lots) {
       document.getElementById('lot-tabs').innerHTML = lots.map(l =>
         `<div class="lot-tab${l._id === activeLotId ? ' active' : ''}" onclick="switchLot('${l._id}')">
-      ${l.isActive ? '<span class="dot"></span>' : '<span class="dot ended"></span>'}Lot ${l.num}
-    </div>`).join('');
+          ${l.isActive ? '<span class="dot"></span>' : '<span class="dot ended"></span>'}Lot ${l.num}
+        </div>`).join('');
     }
 
     function switchLot(lotId) {
       activeLotId = lotId;
       const lot = roomData?.lots.find(l => l._id === lotId);
       if (!lot) return;
-
       renderTabs(roomData.lots);
 
-      // ── สร้าง HTML ใหม่ที่มีกล่อง Status Card ──
-      const sellerBtnHTML = roomData.sellerId
-        ? `<a href="/messages.html?room=${roomData._id}&with=${roomData.sellerId}" class="btn-contact-seller">
-         💬 ติดต่อ Seller
-       </a>`
-        : '';
+      // ── จุดที่ 1: ปุ่มติดต่อ Seller + ปุ่มส่องโปรไฟล์ Seller ──
+      const sellerRowHTML = roomData.sellerId ? `
+        <div class="seller-row">
+          <a href="/messages.html?room=${roomData._id}&with=${roomData.sellerId}" class="btn-contact-seller">
+            💬 ติดต่อ Seller
+          </a>
+          <a href="/profile.html?id=${roomData.sellerId}" class="btn-view-profile" target="_blank">
+            👤 ดูโปรไฟล์ Seller
+          </a>
+        </div>` : '';
 
       document.getElementById('main').innerHTML = `
-    <div class="lot-thumb">
-      ${lot.image ? `<img src="${lot.image}" alt="${lot.name}">` : lotIcon(lot.name)}
-    </div>
-    
-    <div class="lot-badge-row">
-      <span class="lot-num-label">LOT ${String(lot.num).padStart(3, '0')}</span>
-      <span class="badge ${lot.isActive ? 'badge-live' : 'badge-ended'}">
-        ${lot.isActive ? '● กำลัง Live' : 'สิ้นสุดแล้ว'}
-      </span>
-    </div>
-
-    <div class="lot-name">${lot.name}</div>
-    <div class="lot-desc">${lot.desc || ''}</div>
-
-    ${sellerBtnHTML}
-
-    <!-- กล่องสรุปสถานะใหม่ -->
-    <div class="lot-status-card">
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="status-label">ราคาปัจจุบัน</div>
-          <div class="status-value price" id="s-price">฿${lot.currentPrice.toLocaleString()}</div>
+        <div class="lot-thumb">
+          ${lot.image ? `<img src="${lot.image}" alt="${lot.name}">` : lotIcon(lot.name)}
         </div>
-        <div class="status-item">
-          <div class="status-label">จำนวน Bid</div>
-          <div class="status-value" id="s-bids">${lot.bids?.length || 0}</div>
+        <div class="lot-badge-row">
+          <span class="lot-num-label">LOT ${String(lot.num).padStart(3, '0')}</span>
+          <span class="badge ${lot.isActive ? 'badge-live' : 'badge-ended'}">
+            ${lot.isActive ? '● กำลัง Live' : 'สิ้นสุดแล้ว'}
+          </span>
         </div>
-        <div class="status-item">
-          <div class="status-label">ผู้นำประมูล</div>
-          <div class="status-value leader" id="s-leader">
-            ${lot.highestBidder ? mask(lot.highestBidder) : '—'}
+        <div class="lot-name">${lot.name}</div>
+        <div class="lot-desc">${lot.desc || ''}</div>
+        ${sellerRowHTML}
+        <div class="lot-status-card">
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-label">ราคาปัจจุบัน</div>
+              <div class="status-value price" id="s-price">฿${lot.currentPrice.toLocaleString()}</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">จำนวน Bid</div>
+              <div class="status-value" id="s-bids">${lot.bids?.length || 0}</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">ผู้นำประมูล</div>
+              <div class="status-value leader" id="s-leader">
+                ${lot.highestBidder ? mask(lot.highestBidder) : '—'}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  `;
-
+      `;
       updatePrice(lot.currentPrice, lot.highestBidder);
       updateQuickBids(lot.currentPrice);
       renderHistoryFull(lot.bids || []);
@@ -486,57 +475,72 @@
       const sec = document.getElementById('bid-section');
       if (!token) {
         sec.innerHTML = `
-      <div class="s-block" style="text-align:center; padding: 24px;">
-        <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
-        <div style="font-size: 14px; color: var(--ink3); margin-bottom: 16px;">เข้าสู่ระบบเพื่อเข้าร่วมประมูล</div>
-        <button class="btn primary btn-full" onclick="location.href='/login.html?redirect=/room.html?id=${ROOM_ID}'">
-          เข้าสู่ระบบ / สมัครสมาชิก →
-        </button>
-      </div>`;
+          <div class="s-block" style="text-align:center; padding: 24px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
+            <div style="font-size: 14px; color: var(--ink3); margin-bottom: 16px;">เข้าสู่ระบบเพื่อเข้าร่วมประมูล</div>
+            <button class="btn primary btn-full" onclick="location.href='/login.html?redirect=/room.html?id=${ROOM_ID}'">
+              เข้าสู่ระบบ / สมัครสมาชิก →
+            </button>
+          </div>`;
         return;
       }
       const lot = roomData?.lots.find(l => l._id === activeLotId);
       const binHTML = lot?.binPrice ? `
-    <button class="bin-btn" onclick="buyNow()">
-      ⚡ ซื้อทันที (BIN) ฿${lot.binPrice.toLocaleString()}
-    </button>
-    <div class="bin-price-hint">กดเพื่อปิดการประมูลทันทีในราคานี้</div>
-  ` : '';
-
+        <button class="bin-btn" onclick="buyNow()">
+          ⚡ ซื้อทันที (BIN) ฿${lot.binPrice.toLocaleString()}
+        </button>
+        <div class="bin-price-hint">กดเพื่อปิดการประมูลทันทีในราคานี้</div>
+      ` : '';
       sec.innerHTML = `
-    <div class="s-block">
-      <div class="s-block-label">วางราคาประมูล</div>
-      <div class="quick-grid" id="quick-grid"></div>
-      <input class="bid-amount-input" id="bid-amount" type="number" placeholder="ระบุจำนวนเงิน (฿)" min="0">
-      <button class="btn primary btn-full" style="padding: 14px; font-size: 16px;" onclick="placeBid()">
-        🚀 ประมูลเลย
-      </button>
-      ${binHTML}
-      <div class="bid-error" id="bid-error"></div>
-    </div>
-  `;
+        <div class="s-block">
+          <div class="s-block-label">วางราคาประมูล</div>
+          <div class="quick-grid" id="quick-grid"></div>
+          <input class="bid-amount-input" id="bid-amount" type="number" placeholder="ระบุจำนวนเงิน (฿)" min="0">
+          <button class="btn primary btn-full" style="padding: 14px; font-size: 16px;" onclick="placeBid()">
+            🚀 ประมูลเลย
+          </button>
+          ${binHTML}
+          <div class="bid-error" id="bid-error"></div>
+        </div>
+      `;
       if (lot) updateQuickBids(lot.currentPrice);
     }
 
     function updateQuickBids(price) {
       const g = document.getElementById('quick-grid'); if (!g) return;
-      g.innerHTML = [1000, 5000, 10000, 50000].map(inc => { const val = price + inc; return `<button class="quick-btn" onclick="setAmount(${val})">+฿${inc.toLocaleString()}<br><span style="font-size:10px;color:var(--ink4)">฿${val.toLocaleString()}</span></button>`; }).join('');
+      g.innerHTML = [1000, 5000, 10000, 50000].map(inc => {
+        const val = price + inc;
+        return `<button class="quick-btn" onclick="setAmount(${val})">+฿${inc.toLocaleString()}<br><span style="font-size:10px;color:var(--ink4)">฿${val.toLocaleString()}</span></button>`;
+      }).join('');
     }
 
-    function setAmount(val) { const el = document.getElementById('bid-amount'); if (el) { el.value = val; const e = document.getElementById('bid-error'); if (e) e.textContent = ''; } }
+    function setAmount(val) {
+      const el = document.getElementById('bid-amount');
+      if (el) { el.value = val; const e = document.getElementById('bid-error'); if (e) e.textContent = ''; }
+    }
+
     function updatePrice(price, bidder) {
       document.getElementById('price-val').textContent = '฿' + price.toLocaleString();
       const isMe = user && bidder === user.name;
-      document.getElementById('price-leader').innerHTML = bidder ? `ผู้นำ: <span>${mask(bidder)}${isMe ? ' <span class="you-badge">คุณ</span>' : ''}</span>` : 'ยังไม่มีการประมูล';
+      document.getElementById('price-leader').innerHTML = bidder
+        ? `ผู้นำ: <span>${mask(bidder)}${isMe ? ' <span class="you-badge">คุณ</span>' : ''}</span>`
+        : 'ยังไม่มีการประมูล';
       const sp = document.getElementById('s-price'); if (sp) sp.textContent = '฿' + price.toLocaleString();
     }
+
     function updateStats() {
       const lot = roomData?.lots.find(l => l._id === activeLotId); if (!lot) return;
       const sb = document.getElementById('s-bids'); const sl = document.getElementById('s-leader');
       if (sb) sb.textContent = lot.bids?.length || 0;
       if (sl) sl.textContent = lot.highestBidder ? mask(lot.highestBidder) : '—';
     }
-    function flashPrice() { const el = document.getElementById('price-val'); el.style.color = 'var(--green)'; setTimeout(() => el.style.color = '', 500); }
+
+    function flashPrice() {
+      const el = document.getElementById('price-val');
+      el.style.color = 'var(--green)';
+      setTimeout(() => el.style.color = '', 500);
+    }
+
     function renderTimer(ms) {
       const s = Math.max(0, Math.ceil(ms / 1000));
       const tv = document.getElementById('timer'); const tb = document.getElementById('timer-bar');
@@ -552,57 +556,88 @@
         tv.textContent = min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
       }
       tb.style.width = Math.min(100, (ms / LOT_DUR) * 100) + '%';
-      const u = ms < 30000; tv.className = 'timer-val' + (u ? ' urgent' : ''); tb.className = 'timer-bar' + (u ? ' urgent' : '');
+      const u = ms < 30000;
+      tv.className = 'timer-val' + (u ? ' urgent' : '');
+      tb.className = 'timer-bar' + (u ? ' urgent' : '');
     }
-    function mask(name) { if (!name || name.length < 3) return name; return name[0] + '***' + name.slice(-1); }
-    function lotIcon(name) { const n = name.toLowerCase(); if (n.includes('rolex') || n.includes('patek') || n.includes('นาฬิกา')) return '⌚'; if (n.includes('nike') || n.includes('jordan')) return '👟'; if (n.includes('ภาพ') || n.includes('ศิลป')) return '🖼'; if (n.includes('hoodie') || n.includes('supreme')) return '👕'; return '📦'; }
+
+    function mask(name) {
+      if (!name || name.length < 3) return name;
+      return name[0] + '***' + name.slice(-1);
+    }
+
+    function lotIcon(name) {
+      const n = name.toLowerCase();
+      if (n.includes('rolex') || n.includes('patek') || n.includes('นาฬิกา')) return '⌚';
+      if (n.includes('nike') || n.includes('jordan')) return '👟';
+      if (n.includes('ภาพ') || n.includes('ศิลป')) return '🖼';
+      if (n.includes('hoodie') || n.includes('supreme')) return '👕';
+      return '📦';
+    }
+
+    // ── จุดที่ 2: history item — ชื่อ bidder คลิกส่องโปรไฟล์ได้ ──
+    // bids จาก server มี bidderId ด้วย ถ้าไม่มีก็ fallback เป็นชื่อ mask ธรรมดา
     function prependHistory(bid) {
       const list = document.getElementById('history-list');
       const empty = list.querySelector('.h-empty'); if (empty) empty.remove();
       const isMe = user && bid.bidderName === user.name;
       const t = new Date(bid.createdAt || bid.timestamp || Date.now());
       const div = document.createElement('div'); div.className = 'h-item';
-      div.innerHTML = `<div><div class="h-name">${mask(bid.bidderName)}${isMe ? '<span class="you-badge">คุณ</span>' : ''}</div><div class="h-time">${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}:${String(t.getSeconds()).padStart(2, '0')}</div></div><div class="h-amount">฿${bid.amount.toLocaleString()}</div>`;
+
+      // ถ้ามี bidderId → ทำให้คลิกส่องโปรไฟล์ได้ (ยกเว้นตัวเอง เพราะกด profile ปกติได้เลย)
+      const nameHTML = bid.bidderId
+        ? `<a href="/profile.html?id=${bid.bidderId}" class="h-name-link" target="_blank">${mask(bid.bidderName)}</a>`
+        : mask(bid.bidderName);
+
+      div.innerHTML = `
+        <div>
+          <div class="h-name">${nameHTML}${isMe ? '<span class="you-badge">คุณ</span>' : ''}</div>
+          <div class="h-time">${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}</div>
+        </div>
+        <div class="h-amount">฿${bid.amount.toLocaleString()}</div>`;
       list.prepend(div);
     }
+
     function renderHistoryFull(bids) {
       const list = document.getElementById('history-list');
       if (!bids.length) { list.innerHTML = '<div class="h-empty">ยังไม่มีการประมูล</div>'; return; }
-      list.innerHTML = '';[...bids].reverse().forEach(b => prependHistory(b));
+      list.innerHTML = '';
+      [...bids].reverse().forEach(b => prependHistory(b));
     }
+
     function showEnded(winner, price, isBin = false) {
       const lot = roomData?.lots.find(l => l._id === activeLotId);
       const isWinner = user && (winner === user.name);
       const isSeller = roomData && roomData.sellerId === user?.id;
-
       let actionButtons = '';
-
       if (isWinner && !lot?.paid) {
         actionButtons += `<button class="btn success" onclick="openRoomSlipModal('${activeLotId}')">📎 แนบสลิปยืนยันจ่าย</button>`;
       }
-
       if (isSeller && lot?.paid && !lot?.delivered) {
         actionButtons += `<button class="btn primary" onclick="openRoomTrackingModal('${activeLotId}')">📦 กรอก Tracking</button>`;
       }
-
       if (isWinner && lot?.delivered && !lot?.received) {
         actionButtons += `<button class="btn success" onclick="markReceived('${activeLotId}')">ยืนยันรับของ</button>`;
       }
-
       document.getElementById('bid-section').innerHTML = `
-    <div class="ended-block">
-      <div class="ended-title">${isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว'}</div>
-      <div class="ended-sub">
-        ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>
-        ฿${price.toLocaleString()}
-      </div>
-      ${lot.paymentSlip ? `<div style="margin:8px 0"><img src="${lot.paymentSlip}" style="max-width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--line)" title="สลิปการโอน"></div>` : ''}
-      ${lot.trackingNumber ? `<div style="margin:8px 0;font-size:12px">🚚 ${lot.shippingProvider ? lot.shippingProvider+': ' : ''}${lot.trackingNumber}</div>` : ''}
-      ${actionButtons}
-    </div>
-  `;
+        <div class="ended-block">
+          <div class="ended-title">${isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว'}</div>
+          <div class="ended-sub">
+            ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>
+            ฿${price.toLocaleString()}
+          </div>
+          ${lot.paymentSlip ? `<div style="margin:8px 0"><img src="${lot.paymentSlip}" style="max-width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--line)" title="สลิปการโอน"></div>` : ''}
+          ${lot.trackingNumber ? `<div style="margin:8px 0;font-size:12px">🚚 ${lot.shippingProvider ? lot.shippingProvider+': ' : ''}${lot.trackingNumber}</div>` : ''}
+          ${actionButtons}
+        </div>
+      `;
     }
-    function showError(msg) { const el = document.getElementById('bid-error'); if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 3000); } }
+
+    function showError(msg) {
+      const el = document.getElementById('bid-error');
+      if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 3000); }
+    }
+
     function placeBid() {
       const amount = parseInt(document.getElementById('bid-amount')?.value, 10);
       if (!amount || isNaN(amount)) return showError('กรุณาระบุจำนวนเงิน');
@@ -623,6 +658,7 @@
       renderTabs(roomData?.lots || []);
       if (lotId === activeLotId) showEnded(buyerName, finalPrice, true);
     });
+
     document.addEventListener('keydown', e => { if (e.key === 'Enter') placeBid(); });
 
     if (token && user) {
@@ -631,63 +667,22 @@
         document.getElementById('msg-badge').style.display = 'block';
       });
     }
-    async function markPaid(lotId) {
-      if (!confirm('ยืนยันว่าคุณได้ชำระเงินแล้ว?')) return;
-      try {
-        const res = await fetch(`/api/profile/lots/${lotId}/pay`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!res.ok) throw new Error('ยืนยันไม่ได้');
-        alert('ยืนยันการชำระเงินสำเร็จ!');
-        location.reload(); // โหลดใหม่เพื่อดูสถานะที่อัปเดต
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    async function markDelivered(lotId) {
-      if (!confirm('ยืนยันว่าคุณได้ส่งของให้ผู้ซื้อแล้ว?')) return;
-      try {
-        const res = await fetch(`/api/profile/lots/${lotId}/deliver`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!res.ok) throw new Error('ยืนยันไม่ได้');
-        alert('ยืนยันการส่งของสำเร็จ!');
-        location.reload();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
 
     async function markReceived(lotId) {
       if (!confirm('ยืนยันว่าคุณได้รับของแล้ว?')) return;
       try {
         const res = await fetch(`/api/profile/lots/${lotId}/receive`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('ยืนยันไม่ได้');
         alert('ยืนยันการรับของสำเร็จ! เครดิตของคุณเพิ่มขึ้น');
         location.reload();
-      } catch (err) {
-        alert(err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
     // ── Room Slip Modal ──
     let roomPayLotId = null;
-
     function openRoomSlipModal(lotId) {
       roomPayLotId = lotId;
       document.getElementById('room-slip-preview').style.display = 'none';
@@ -725,15 +720,12 @@
         });
         if (!uploadRes.ok) throw new Error('อัพโหลดรูปไม่สำเร็จ');
         const { url } = await uploadRes.json();
-
         const res = await fetch(`/api/profile/lots/${roomPayLotId}/pay`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ paymentSlip: url })
         });
         if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
-
-        // อัพเดต lot data local แล้ว re-render
         const lot = roomData?.lots.find(l => l._id === roomPayLotId);
         if (lot) { lot.paid = true; lot.paymentSlip = url; }
         closeRoomSlipModal();
@@ -747,7 +739,6 @@
 
     // ── Room Tracking Modal ──
     let roomDeliverLotId = null;
-
     function openRoomTrackingModal(lotId) {
       roomDeliverLotId = lotId;
       document.getElementById('room-tracking-input').value = '';
@@ -770,19 +761,17 @@
           body: JSON.stringify({ trackingNumber, shippingProvider })
         });
         if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'ยืนยันไม่ได้'); }
-
         const lot = roomData?.lots.find(l => l._id === roomDeliverLotId);
         if (lot) { lot.delivered = true; lot.trackingNumber = trackingNumber; lot.shippingProvider = shippingProvider; }
         closeRoomTrackingModal();
         showEnded(lot?.highestBidder, lot?.currentPrice);
-      } catch (err) {
-        alert(err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
     document.getElementById('room-slip-modal')?.addEventListener('click', e => { if (e.target.id === 'room-slip-modal') closeRoomSlipModal(); });
     document.getElementById('room-tracking-modal')?.addEventListener('click', e => { if (e.target.id === 'room-tracking-modal') closeRoomTrackingModal(); });
   </script>
+
   <!-- Room Slip Modal -->
   <div id="room-slip-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
     <div style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
@@ -820,7 +809,5 @@
       </div>
     </div>
   </div>
-
 </body>
-
 </html>

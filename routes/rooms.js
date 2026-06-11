@@ -4,7 +4,7 @@ const { requireAuth, requireSeller, requireAdmin } = require("../middleware/auth
 
 // GET /api/rooms
 router.get("/", async (req, res) => {
-  const { q } = req.query;
+  const { q, tag } = req.query;
   const rooms = await find("rooms", {}, { createdAt: -1 });
 
   const enriched = await Promise.all(rooms.map(async r => {
@@ -18,18 +18,41 @@ router.get("/", async (req, res) => {
     };
   }));
 
-  // ── ถ้ามี ?q= ให้ filter ──
+  let result = enriched;
+
+  // ── filter by ?q= (keyword search) ──
   if (q && q.trim()) {
     const kw = q.trim().toLowerCase();
-    const filtered = enriched.filter(r =>
+    result = result.filter(r =>
       r.title?.toLowerCase().includes(kw) ||
       r.house?.toLowerCase().includes(kw) ||
-      r.sellerName?.toLowerCase().includes(kw)
+      r.sellerName?.toLowerCase().includes(kw) ||
+      r.tags?.some(t => t.toLowerCase().includes(kw))
     );
-    return res.json(filtered);
   }
 
-  res.json(enriched);
+  // ── filter by ?tag= (exact tag) ──
+  if (tag && tag.trim()) {
+    const t = tag.trim().toLowerCase().replace(/^#+/, '');
+    result = result.filter(r => r.tags?.includes(t));
+  }
+
+  res.json(result);
+});
+
+// GET /api/rooms/tags — ดึง tags ทั้งหมดที่มีในระบบ
+router.get("/tags", async (req, res) => {
+  const rooms = await find("rooms", {}, {});
+  const tagMap = {};
+  for (const r of rooms) {
+    for (const t of (r.tags || [])) {
+      tagMap[t] = (tagMap[t] || 0) + 1;
+    }
+  }
+  const tags = Object.entries(tagMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag, count]) => ({ tag, count }));
+  res.json(tags);
 });
 
 // GET /api/rooms/:id
@@ -46,8 +69,13 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/rooms — seller/admin สร้างห้อง
 router.post("/", requireSeller, async (req, res) => {
-  const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0, endsAt } = req.body;
+  const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0, endsAt, tags = [] } = req.body;
   if (!title || !house) return res.status(400).json({ error: "กรุณากรอก title และ house" });
+
+  // sanitize tags
+  const cleanTags = [...new Set(
+    tags.map(t => t.toString().toLowerCase().replace(/^#+/, '').trim()).filter(Boolean)
+  )].slice(0, 10);
 
   const room = await insert("rooms", {
     title, house,
@@ -55,6 +83,7 @@ router.post("/", requireSeller, async (req, res) => {
     sellerName: req.user.name,
     snipeExt,
     snipeTrigger,
+    tags: cleanTags,
     createdAt: new Date(),
   });
 
@@ -86,8 +115,18 @@ router.patch("/:id", requireSeller, async (req, res) => {
   if (!room) return res.status(404).json({ error: "ไม่พบห้องนี้" });
   if (req.user.role !== "admin" && room.sellerId !== req.user.id)
     return res.status(403).json({ error: "ไม่มีสิทธิ์แก้ไข" });
-  const { title, house } = req.body;
-  await update("rooms", { _id: req.params.id }, { $set: { title, house } });
+
+  const { title, house, tags } = req.body;
+  const setObj = {};
+  if (title !== undefined) setObj.title = title;
+  if (house !== undefined) setObj.house = house;
+  if (tags !== undefined) {
+    setObj.tags = [...new Set(
+      tags.map(t => t.toString().toLowerCase().replace(/^#+/, '').trim()).filter(Boolean)
+    )].slice(0, 10);
+  }
+
+  await update("rooms", { _id: req.params.id }, { $set: setObj });
   res.json({ ok: true });
 });
 

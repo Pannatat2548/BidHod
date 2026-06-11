@@ -2,17 +2,80 @@ const router = require("express").Router();
 const { find, findOne, update } = require("../db");
 const { requireAuth } = require("../middleware/auth");
 
-// GET /api/profile/:userId — ดึงข้อมูลโปรไฟล์ + สถิติ
+// GET /api/profile/:userId — ดึงข้อมูลโปรไฟล์
+// - ถ้าเป็นเจ้าของ (isSelf) → ส่งข้อมูลครบ รวม lots, ราคา, สลิป
+// - ถ้าเป็นคนอื่น (public) → ส่งเฉพาะ ชื่อ/avatar/social + publicStats เท่านั้น
 router.get("/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
-        const user = await findOne("users", { _id: userId });
-        if (!user) return res.status(404).json({ error: "ไม่พบผู้ใช้" });
+        const { password: _pw, ...user } = await findOne("users", { _id: userId }) || {};
+        if (!user._id) return res.status(404).json({ error: "ไม่พบผู้ใช้" });
 
-        // ========== ฝั่ง BUYER ==========
-        const wonLots = await find("lots", { highestBidderId: userId }, { createdAt: -1 });
+        // ── ตรวจว่าเป็นเจ้าของไหมจาก JWT ──
+        // ใช้ middleware requireAuth ที่ populate req.user ให้แล้ว
+        // ถ้าไม่ได้ login → req.user จะเป็น undefined → isSelf = false
+        let isSelf = false;
+        const authHeader = req.headers.authorization || "";
+        if (authHeader.startsWith("Bearer ")) {
+            try {
+                const jwt = require("jsonwebtoken");
+                const SECRET = process.env.JWT_SECRET || "bidhaus_secret_change_in_prod";
+                const decoded = jwt.verify(authHeader.slice(7), SECRET);
+                // รองรับทั้ง id / _id และ trim ป้องกัน whitespace
+                const decodedId = (decoded.id || decoded._id || "").toString().trim();
+                const targetId = userId.toString().trim();
+                isSelf = decodedId !== "" && decodedId === targetId;
+                console.log("[profile] decoded id:", decodedId, "| param userId:", targetId, "| isSelf:", isSelf);
+            } catch (jwtErr) {
+                console.log("[profile] JWT error:", jwtErr.message);
+            }
+        }
+
+        // ========== PUBLIC STATS (ทุกคนดูได้) ==========
+        const wonLots = await find("lots", { highestBidderId: userId });
         const paidLots = wonLots.filter(l => l.paid === true);
+
+        const sellerRooms = await find("rooms", { sellerId: userId }, { createdAt: -1 });
+        const sellerLots = [];
+        for (const room of sellerRooms) {
+            const lots = await find("lots", { roomId: room._id });
+            sellerLots.push(...lots.map(l => ({ ...l, roomTitle: room.title, roomId: room._id })));
+        }
+        const receivedLots = sellerLots.filter(l => l.received === true);
+
+        // ห้องที่เปิดอยู่ตอนนี้ (สำหรับหน้า public) — ไม่เปิดเผยราคาประมูล
+        const activeRooms = sellerRooms.map(r => ({
+            _id: r._id,
+            title: r.title,
+            house: r.house,
+        }));
+
+        const publicStats = {
+            totalWon: wonLots.length,       // ชนะประมูลกี่ครั้ง
+            totalPaid: paidLots.length,       // จ่ายเงินกี่ครั้ง
+            totalReceived: receivedLots.length,   // ส่งของสำเร็จกี่ครั้ง
+            payRate: wonLots.length > 0
+                ? Math.round((paidLots.length / wonLots.length) * 100) : null,
+            deliveryRate: sellerLots.filter(l => !l.isActive && l.currentPrice > 0).length > 0
+                ? Math.round((receivedLots.length /
+                    sellerLots.filter(l => !l.isActive && l.currentPrice > 0).length) * 100) : null,
+        };
+
+        // ── ถ้าไม่ใช่เจ้าของ → ส่ง public view เท่านั้น ──
+        if (!isSelf) {
+            const { password: _p, email, ...publicUser } = user;
+            return res.json({
+                isSelf: false,
+                user: publicUser,
+                publicStats,
+                activeRooms,
+            });
+        }
+
+        // ========== PRIVATE VIEW (เจ้าของเท่านั้น) ==========
         const unpaidLots = wonLots.filter(l => l.paid !== true);
+        const activeLots = sellerLots.filter(l => l.isActive === true);
+        const deliveredLots = sellerLots.filter(l => l.delivered === true && !l.received);
 
         const resolvedWonLots = await Promise.all(wonLots.map(async l => {
             const room = await findOne("rooms", { _id: l.roomId });
@@ -25,7 +88,6 @@ router.get("/:userId", async (req, res) => {
                 delivered: l.delivered || false,
                 received: l.received || false,
                 paymentSlip: l.paymentSlip || null,
-                // ── ใหม่: สถานะการตรวจสลิป ──
                 slipConfirmed: l.slipConfirmed || false,
                 slipRejected: l.slipRejected || false,
                 slipRejectReason: l.slipRejectReason || null,
@@ -35,45 +97,28 @@ router.get("/:userId", async (req, res) => {
             };
         }));
 
-        // ========== ฝั่ง SELLER ==========
-        const sellerRooms = await find("rooms", { sellerId: userId }, { createdAt: -1 });
-        const sellerLots = [];
-        for (const room of sellerRooms) {
-            const lots = await find("lots", { roomId: room._id });
-            sellerLots.push(...lots.map(l => ({
-                ...l,
-                roomTitle: room.title,
-                roomHouse: room.house,
-            })));
-        }
-
-        const receivedLots = sellerLots.filter(l => l.received === true);
-        const deliveredLots = sellerLots.filter(l => l.delivered === true && l.received !== true);
-        const activeLots = sellerLots.filter(l => l.isActive === true);
-
-        const resolvedSellerLots = await Promise.all(sellerLots.map(async l => {
-            return {
-                _id: l._id,
-                lotName: l.name,
-                roomTitle: l.roomTitle,
-                currentPrice: l.currentPrice,
-                isActive: l.isActive,
-                paid: l.paid || false,
-                delivered: l.delivered || false,
-                received: l.received || false,
-                // ── ใหม่: ข้อมูลสลิปสำหรับ seller ──
-                paymentSlip: l.paymentSlip || null,
-                slipConfirmed: l.slipConfirmed || false,
-                slipRejected: l.slipRejected || false,
-                slipRejectReason: l.slipRejectReason || null,
-                trackingNumber: l.trackingNumber || null,
-                shippingProvider: l.shippingProvider || null,
-                bidderCount: l.bids?.length || 0
-            };
+        const resolvedSellerLots = sellerLots.map(l => ({
+            _id: l._id,
+            lotName: l.name,
+            roomTitle: l.roomTitle,
+            currentPrice: l.currentPrice,
+            isActive: l.isActive,
+            paid: l.paid || false,
+            delivered: l.delivered || false,
+            received: l.received || false,
+            paymentSlip: l.paymentSlip || null,
+            slipConfirmed: l.slipConfirmed || false,
+            slipRejected: l.slipRejected || false,
+            slipRejectReason: l.slipRejectReason || null,
+            trackingNumber: l.trackingNumber || null,
+            shippingProvider: l.shippingProvider || null,
+            bidderCount: l.bids?.length || 0,
         }));
 
         res.json({
-            user: { ...user, password: undefined },
+            isSelf: true,
+            user,
+            publicStats,
             stats: {
                 buy: {
                     totalBids: wonLots.length,
@@ -96,8 +141,8 @@ router.get("/:userId", async (req, res) => {
                     buyerScore: paidLots.length,
                     sellerScore: receivedLots.length,
                     totalScore: paidLots.length + receivedLots.length,
-                }
-            }
+                },
+            },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

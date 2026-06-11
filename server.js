@@ -120,6 +120,7 @@ io.on("connection", (socket) => {
       lotId, bid,
       currentPrice: amount,
       highestBidder: user.name,
+      highestBidderId: user.id,  // ← เพิ่มบรรทัดนี้
     });
   });
 
@@ -239,13 +240,13 @@ app.get('/api/profile/:userId', async (req, res) => {
 
     // ดึง bids ที่ user นี้ทำ (ฝั่ง buyer)
     const bids = await find('bids', { bidderId: userId }, { createdAt: -1 });
-    
+
     // ดึง lots ที่ user นี้ชนะ (highestBidderId = userId)
     const wonLots = await find('lots', { highestBidderId: userId, isActive: false }, { createdAt: -1 });
-    
+
     // ดึง rooms ที่ user นี้เป็น seller
     const sellerRooms = await find('rooms', { sellerId: userId }, { createdAt: -1 });
-    
+
     // ดึง lots ทั้งหมดใน rooms ที่ user เป็น seller
     const sellerLots = [];
     for (const room of sellerRooms) {
@@ -294,8 +295,8 @@ app.patch('/api/profile/:userId', require('./middleware/auth').requireAuth, asyn
       return res.status(403).json({ error: 'ไม่มีสิทธิ์แก้ไข' });
     }
     const { facebook, instagram, discord } = req.body;
-    await update('users', { _id: req.params.userId }, { 
-      $set: { facebook, instagram, discord } 
+    await update('users', { _id: req.params.userId }, {
+      $set: { facebook, instagram, discord }
     });
     res.json({ ok: true });
   } catch (err) {

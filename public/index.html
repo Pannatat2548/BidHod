@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -22,7 +23,11 @@
       z-index: 999;
       max-width: 280px;
     }
-    #toast.show { opacity: 1; }
+
+    #toast.show {
+      opacity: 1;
+    }
+
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -34,6 +39,7 @@
       width: fit-content;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
+
     .filter-btn {
       padding: 8px 20px;
       font-size: 13px;
@@ -46,13 +52,19 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .filter-btn:hover { color: var(--ink); background: var(--bg2); }
+
+    .filter-btn:hover {
+      color: var(--ink);
+      background: var(--bg2);
+    }
+
     .filter-btn.on {
       background: var(--ink);
       color: #fff;
       font-weight: 600;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
+
     .filter-btn.on::before {
       content: '';
       display: inline-block;
@@ -63,11 +75,13 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+
     /* ── Search bar ── */
     .search-wrap {
       position: relative;
       margin-bottom: 16px;
     }
+
     .search-wrap .search-icon {
       position: absolute;
       left: 14px;
@@ -76,6 +90,7 @@
       font-size: 16px;
       pointer-events: none;
     }
+
     .search-wrap input {
       width: 100%;
       padding: 11px 40px 11px 40px;
@@ -89,7 +104,11 @@
       box-sizing: border-box;
       transition: border-color .15s;
     }
-    .search-wrap input:focus { border-color: var(--primary); }
+
+    .search-wrap input:focus {
+      border-color: var(--primary);
+    }
+
     .search-wrap .search-clear {
       display: none;
       position: absolute;
@@ -104,7 +123,76 @@
       line-height: 1;
       padding: 4px;
     }
-    .search-wrap .search-clear.show { display: block; }
+
+    .search-wrap .search-clear.show {
+      display: block;
+    }
+
+    /* ── Tag chips ── */
+    .tag-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .tag-filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--line2);
+      background: var(--bg);
+      color: var(--ink3);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .tag-filter-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .tag-filter-chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .tag-filter-chip .tag-count {
+      font-size: 10px;
+      opacity: 0.75;
+      font-weight: 400;
+    }
+
+    .feed-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .feed-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid rgba(79, 70, 229, .2);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .12s;
+    }
+
+    .feed-tag:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
     @media (max-width: 640px) {
       .filter-bar {
         width: 100%;
@@ -115,12 +203,21 @@
         gap: 4px;
         scrollbar-width: none;
       }
-      .filter-bar::-webkit-scrollbar { display: none; }
-      .filter-btn { padding: 7px 14px; font-size: 12px; white-space: nowrap; }
+
+      .filter-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .filter-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
     }
   </style>
   <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
   <nav>
     <a href="/" class="logo">BIDMAI</a>
@@ -161,12 +258,7 @@
     <!-- ── Search bar ── -->
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input
-        id="search-input"
-        type="text"
-        placeholder="ค้นหาชื่อห้อง, House, ผู้ขาย..."
-        oninput="onSearch(this.value)"
-      >
+      <input id="search-input" type="text" placeholder="ค้นหาชื่อห้อง, House, ผู้ขาย..." oninput="onSearch(this.value)">
       <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
     </div>
 
@@ -175,6 +267,8 @@
       <button class="filter-btn" onclick="filterRooms('live', this)">กำลัง Live 🔴</button>
       <button class="filter-btn" onclick="filterRooms('ended', this)">สิ้นสุดแล้ว</button>
     </div>
+    <!-- ── Tag filter row ── -->
+    <div class="tag-filter-row" id="tag-filter-row" style="display:none"></div>
     <div class="feed-grid" id="rooms-grid">
       <div class="empty">กำลังโหลด...</div>
     </div>
@@ -187,6 +281,7 @@
   <script>
     let allRooms = [];
     let currentFilter = 'all';
+    let currentTag = null;
     let searchTimer = null;
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -241,7 +336,7 @@
         loadUnreadCount();
         showToast(`ข้อความใหม่: ${preview}`);
       });
-      socket.on('disconnect', () => {});
+      socket.on('disconnect', () => { });
     }
 
     // ── Search ──────────────────────────────────
@@ -259,7 +354,10 @@
 
     async function doSearch(q) {
       try {
-        const url = q.trim() ? `/api/rooms?q=${encodeURIComponent(q.trim())}` : '/api/rooms';
+        const clean = q.trim().replace(/^#+/, ''); // ← ตัด # นำหน้าออก
+        const params = new URLSearchParams();
+        if (clean) params.set('q', clean);
+        const url = params.toString() ? `/api/rooms?${params}` : '/api/rooms';
         const r = await fetch(url);
         allRooms = await r.json();
         applyFilter();
@@ -267,12 +365,34 @@
         document.getElementById('rooms-grid').innerHTML = '<div class="empty">ค้นหาไม่ได้</div>';
       }
     }
+    // ── Tags ─────────────────────────────────────
+    async function loadTags() {
+      try {
+        const r = await fetch('/api/rooms/tags');
+        const tags = await r.json();
+        const row = document.getElementById('tag-filter-row');
+        if (!tags.length) { row.style.display = 'none'; return; }
+        row.style.display = 'flex';
+        row.innerHTML = tags.map(({ tag, count }) =>
+          `<span class="tag-filter-chip${currentTag === tag ? ' active' : ''}"
+            onclick="filterByTag('${tag}')">#${tag} <span class="tag-count">${count}</span></span>`
+        ).join('');
+      } catch { }
+    }
+
+    function filterByTag(tag) {
+      currentTag = currentTag === tag ? null : tag; // toggle
+      loadTags(); // re-render chips
+      doSearch(document.getElementById('search-input').value);
+    }
 
     // ── Filter ──────────────────────────────────
     function applyFilter() {
-      if (currentFilter === 'live') renderRooms(allRooms.filter(r => r.activeLots > 0));
-      else if (currentFilter === 'ended') renderRooms(allRooms.filter(r => r.activeLots === 0));
-      else renderRooms(allRooms);
+      let rooms = allRooms;
+      if (currentTag) rooms = rooms.filter(r => r.tags?.includes(currentTag));
+      if (currentFilter === 'live') renderRooms(rooms.filter(r => r.activeLots > 0));
+      else if (currentFilter === 'ended') renderRooms(rooms.filter(r => r.activeLots === 0));
+      else renderRooms(rooms);
     }
 
     function filterRooms(type, btn) {
@@ -321,6 +441,9 @@
             <div class="feed-body">
               <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
               <div class="feed-title">${r.title}</div>
+              ${r.tags?.length ? `<div class="feed-tags">${r.tags.map(t =>
+          `<span class="feed-tag" onclick="event.preventDefault();filterByTag('${t}')">#${t}</span>`
+        ).join('')}</div>` : ''}
               <div class="feed-bottom">
                 <div>
                   <div class="price-label">ราคาเริ่มจาก</div>
@@ -344,12 +467,12 @@
       if (menu) menu.classList.toggle('open');
     }
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const menu = document.getElementById('userMenu');
       if (menu && !menu.contains(e.target)) menu.classList.remove('open');
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         const menu = document.getElementById('userMenu');
         if (menu) menu.classList.remove('open');
@@ -358,10 +481,12 @@
 
     // ── Init ─────────────────────────────────────
     loadRooms();
+    loadTags();
     loadUnreadCount();
     initIndexNotifications();
     setInterval(loadRooms, 15000);
   </script>
   <div id="toast"></div>
 </body>
+
 </html>
