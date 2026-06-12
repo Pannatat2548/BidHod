@@ -239,6 +239,9 @@
           <a href="/messages.html?admin=1" class="dropdown-item">
             <span class="dropdown-icon">🛡️</span> ติดต่อ Admin
           </a>
+          <a href="/admin.html" class="dropdown-item" id="admin-panel-link" style="display:none">
+            <span class="dropdown-icon">⚙️</span> Admin Panel
+          </a>
           <a href="/create-room.html" class="dropdown-item">
             <span class="dropdown-icon">➕</span> ลงของ
           </a>
@@ -288,6 +291,12 @@
     if (user) {
       const navUsername = document.getElementById('nav-username');
       if (navUsername) navUsername.textContent = user.name || 'โปรไฟล์';
+
+      // แสดงปุ่ม Admin Panel เฉพาะ role === 'admin'
+      if (user.role === 'admin') {
+        const adminLink = document.getElementById('admin-panel-link');
+        if (adminLink) adminLink.style.display = '';
+      }
     }
 
     function logout() {

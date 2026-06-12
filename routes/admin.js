@@ -23,10 +23,20 @@ router.delete("/users/:id", requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
-// GET /api/admin/rooms — ดูห้องทั้งหมด
+// GET /api/admin/rooms — ดูห้องทั้งหมด (พร้อม activeLots/totalLots)
 router.get("/rooms", requireAdmin, async (req, res) => {
   const rooms = await find("rooms", {}, { createdAt: -1 });
-  res.json(rooms);
+
+  const enriched = await Promise.all(rooms.map(async r => {
+    const lots = await find("lots", { roomId: r._id });
+    return {
+      ...r,
+      totalLots: lots.length,
+      activeLots: lots.filter(l => l.isActive).length,
+    };
+  }));
+
+  res.json(enriched);
 });
 
 // DELETE /api/admin/rooms/:id

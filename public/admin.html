@@ -7,136 +7,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css" />
   <style>
-    /* ── Admin Specific Styles ── */
-    .stat-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+    .stat-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:32px; }
+    .stat-card { background:var(--bg); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02); transition:transform 0.2s; }
+    .stat-card:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+    .stat-card-label { font-size:11px; letter-spacing:0.5px; color:var(--ink3); text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+    .stat-card-val { font-size:28px; font-weight:700; color:var(--ink); line-height:1; }
+    .page-tabs { display:flex; gap:24px; border-bottom:1px solid var(--line); margin-bottom:24px; }
+    .page-tab { padding:12px 4px; font-size:14px; color:var(--ink3); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; font-weight:500; margin-bottom:-1px; }
+    .page-tab:hover { color:var(--ink); }
+    .page-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--bg); box-shadow:0 1px 3px rgba(0,0,0,0.02); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { text-align:left; padding:16px; font-size:11px; letter-spacing:0.5px; color:var(--ink3); text-transform:uppercase; border-bottom:1px solid var(--line); background:var(--bg2); font-weight:600; }
+    td { padding:16px; border-bottom:1px solid var(--line); vertical-align:middle; color:var(--ink2); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#fafafa; }
+    .action-row { display:flex; gap:8px; }
+    .btn-sm { padding:6px 12px; font-size:12px; border-radius:6px; font-weight:600; }
+    .badge { font-size:11px; padding:4px 8px; border-radius:99px; }
+    .badge-ended { background:#fef2f2; color:#dc2626; border:1px solid rgba(220,38,38,0.2); }
+    .badge-live { background:#f0fdf4; color:#16a34a; border:1px solid rgba(22,163,74,0.2); }
+    .empty-state { padding:40px; text-align:center; color:var(--ink4); font-size:13px; }
+    .section { display:none; animation:fadeIn 0.3s ease; }
+    .section.active { display:block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+    /* bulk action bar */
+    .bulk-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      background:#fff8f8; border:1px solid rgba(220,38,38,0.2);
+      border-radius:var(--radius); padding:12px 16px; margin-bottom:16px;
+      font-size:13px; color:var(--ink2);
     }
-
-    .stat-card {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-      transition: transform 0.2s;
-    }
-    
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-
-    .stat-card-label {
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      color: var(--ink3);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .stat-card-val {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-    }
-
-    /* Tabs Modernized */
-    .page-tabs {
-      display: flex;
-      gap: 24px;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 24px;
-    }
-
-    .page-tab {
-      padding: 12px 4px;
-      font-size: 14px;
-      color: var(--ink3);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-      font-weight: 500;
-      margin-bottom: -1px; /* Overlap border */
-    }
-
-    .page-tab:hover { color: var(--ink); }
-
-    .page-tab.active {
-      color: var(--primary); /* หรือสีธีมหลัก */
-      border-bottom-color: var(--primary);
-      font-weight: 600;
-    }
-
-    /* Table Styling */
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--bg);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    
-    th {
-      text-align: left;
-      padding: 16px;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      color: var(--ink3);
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--line);
-      background: var(--bg2);
-      font-weight: 600;
-    }
-
-    td {
-      padding: 16px;
-      border-bottom: 1px solid var(--line);
-      vertical-align: middle;
-      color: var(--ink2);
-    }
-
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafafa; }
-
-    /* Action Buttons */
-    .action-row { display: flex; gap: 8px; }
-    
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    /* Badge Tweaks */
-    .badge { font-size: 11px; padding: 4px 8px; border-radius: 99px; }
-    
-    /* Empty State */
-    .empty-state {
-      padding: 40px;
-      text-align: center;
-      color: var(--ink4);
-      font-size: 13px;
-    }
-
-    /* Section Visibility */
-    .section { display: none; animation: fadeIn 0.3s ease; }
-    .section.active { display: block; }
-    
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ---- MOBILE RESPONSIVE ---- */
-    @media (max-width: 640px) {
-      .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
-      .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
-      .tab-bar::-webkit-scrollbar { display: none; }
-      table { font-size: 12px; }
-      table th, table td { padding: 8px 6px; }
-      .action-row { flex-wrap: wrap; gap: 4px; }
+    .bulk-bar strong { color:#dc2626; }
+    @media (max-width:640px) {
+      .stat-row { grid-template-columns:repeat(2,1fr) !important; gap:10px; }
+      .page-tabs { overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+      .page-tabs::-webkit-scrollbar { display:none; }
+      table { font-size:12px; }
+      table th, table td { padding:8px 6px; }
+      .action-row { flex-wrap:wrap; gap:4px; }
     }
   </style>
 </head>
@@ -154,7 +63,6 @@
     <div class="page-label">Dashboard</div>
     <h1>ภาพรวมระบบ</h1>
 
-    <!-- Stats Cards -->
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-card-label">Users ทั้งหมด</div>
@@ -168,9 +76,12 @@
         <div class="stat-card-label">ห้องประมูล</div>
         <div class="stat-card-val" id="s-rooms">—</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-card-label">ห้องที่จบแล้ว</div>
+        <div class="stat-card-val" id="s-ended" style="color:var(--ink3)">—</div>
+      </div>
     </div>
 
-    <!-- Tabs -->
     <div class="page-tabs">
       <div class="page-tab active" onclick="switchTab('sellers')">Seller รออนุมัติ</div>
       <div class="page-tab" onclick="switchTab('users')">Users ทั้งหมด</div>
@@ -183,9 +94,7 @@
         <table>
           <thead>
             <tr>
-              <th>ชื่อ</th>
-              <th>อีเมล</th>
-              <th>วันที่สมัคร</th>
+              <th>ชื่อ</th><th>อีเมล</th><th>วันที่สมัคร</th>
               <th style="text-align:right">การจัดการ</th>
             </tr>
           </thead>
@@ -202,10 +111,7 @@
         <table>
           <thead>
             <tr>
-              <th>ชื่อ</th>
-              <th>อีเมล</th>
-              <th>Role</th>
-              <th>Status</th>
+              <th>ชื่อ</th><th>อีเมล</th><th>Role</th><th>Status</th>
               <th style="text-align:right">การจัดการ</th>
             </tr>
           </thead>
@@ -218,18 +124,21 @@
 
     <!-- Section: Rooms -->
     <div class="section" id="tab-rooms">
+      <!-- bulk action bar — ซ่อนไว้ก่อน แสดงเมื่อมีห้องที่จบแล้ว -->
+      <div class="bulk-bar" id="ended-bar" style="display:none">
+        <span>พบ <strong id="ended-count">0</strong> ห้องที่จบแล้ว (lots ไม่ active ทั้งหมด)</span>
+        <button class="btn danger btn-sm" onclick="deleteAllEnded()">🗑 ลบห้องที่จบแล้วทั้งหมด</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>ชื่อห้อง</th>
-              <th>House</th>
-              <th>โดย</th>
+              <th>ชื่อห้อง</th><th>House</th><th>โดย</th><th>สถานะ</th>
               <th style="text-align:right">การจัดการ</th>
             </tr>
           </thead>
           <tbody id="rooms-tbody">
-            <tr><td colspan="4" class="empty-state">กำลังโหลด...</td></tr>
+            <tr><td colspan="5" class="empty-state">กำลังโหลด...</td></tr>
           </tbody>
         </table>
       </div>
@@ -243,19 +152,65 @@
     document.getElementById('nav-name').textContent = user?.name || '';
     const H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
+    let endedRoomIds = []; // เก็บ id ห้องที่จบแล้วไว้ bulk delete
+
+    // ฟังก์ชันตรวจสอบว่าห้องนี้จบแล้วหรือยัง
+    // รองรับหลาย field ที่ backend อาจส่งมา
+    function isRoomEnded(r) {
+      // Debug: ดู field จริงที่ API ส่งมา (ลบออกได้หลัง confirm แล้ว)
+      console.log('[room]', r.title, {
+        status: r.status,
+        isEnded: r.isEnded,
+        activeLots: r.activeLots,
+        totalLots: r.totalLots,
+        active_lots: r.active_lots,
+        total_lots: r.total_lots,
+      });
+
+      // เช็ค field status ตรงๆ จาก backend
+      if (r.status === 'ended' || r.status === 'closed' || r.status === 'completed') return true;
+
+      // เช็ค boolean field isEnded
+      if (r.isEnded === true) return true;
+
+      // เช็คจาก activeLots / totalLots (camelCase)
+      if (typeof r.activeLots === 'number' && typeof r.totalLots === 'number') {
+        return r.totalLots > 0 && r.activeLots === 0;
+      }
+
+      // เช็คจาก active_lots / total_lots (snake_case — fallback)
+      if (typeof r.active_lots === 'number' && typeof r.total_lots === 'number') {
+        return r.total_lots > 0 && r.active_lots === 0;
+      }
+
+      return false;
+    }
+
     async function loadAll() {
       try {
         const [uR, pR, rR] = await Promise.all([
-          fetch('/api/admin/users', { headers: H }), 
-          fetch('/api/admin/pending', { headers: H }), 
+          fetch('/api/admin/users', { headers: H }),
+          fetch('/api/admin/pending', { headers: H }),
           fetch('/api/admin/rooms', { headers: H })
         ]);
-        
         const users = await uR.json(), pending = await pR.json(), rooms = await rR.json();
-        
+
         document.getElementById('s-users').textContent = users.length;
         document.getElementById('s-pending').textContent = pending.length;
         document.getElementById('s-rooms').textContent = rooms.length;
+
+        // แยกห้องที่จบแล้วด้วยฟังก์ชัน isRoomEnded ที่ robust กว่าเดิม
+        endedRoomIds = rooms.filter(r => isRoomEnded(r)).map(r => r._id);
+        document.getElementById('s-ended').textContent = endedRoomIds.length;
+
+        // แสดง bulk bar เมื่อมีห้องที่จบแล้ว
+        const bar = document.getElementById('ended-bar');
+        if (endedRoomIds.length > 0) {
+          bar.style.display = '';
+          document.getElementById('ended-count').textContent = endedRoomIds.length;
+        } else {
+          bar.style.display = 'none';
+        }
 
         // Render Pending Sellers
         document.getElementById('pending-tbody').innerHTML = pending.length
@@ -280,46 +235,72 @@
             <td><span class="badge badge-${u.status}">${u.status}</span></td>
             <td style="text-align:right">
               <div class="action-row" style="justify-content:flex-end">
-                ${u.role === 'seller' && u.status === 'pending' ? `<button class="btn success btn-sm" onclick="setStatus('${u._id}','approved')">อนุมัติ</button>` : ''}
-                ${u.role !== 'admin' ? `<button class="btn danger btn-sm" onclick="deleteUser('${u._id}')">ลบ</button>` : ''}
+                ${u.role === 'seller' && u.status === 'pending'
+                  ? `<button class="btn success btn-sm" onclick="setStatus('${u._id}','approved')">อนุมัติ</button>` : ''}
+                ${u.role !== 'admin'
+                  ? `<button class="btn danger btn-sm" onclick="deleteUser('${u._id}')">ลบ</button>` : ''}
               </div>
             </td>
           </tr>`).join('');
 
         // Render Rooms
         document.getElementById('rooms-tbody').innerHTML = rooms.length
-          ? rooms.map(r => `<tr>
-              <td style="font-weight:600;color:var(--ink)">${r.title}</td>
-              <td style="color:var(--ink3)">${r.house}</td>
-              <td style="color:var(--ink4)">${r.sellerName || '—'}</td>
-              <td style="text-align:right">
-                <button class="btn danger btn-sm" onclick="deleteRoom('${r._id}')">ลบห้อง</button>
-              </td>
-            </tr>`).join('')
-          : '<tr><td colspan="4" class="empty-state">ยังไม่มีห้องประมูล</td></tr>';
-          
+          ? rooms.map(r => {
+              const ended = isRoomEnded(r);
+              const statusBadge = ended
+                ? '<span class="badge badge-ended">จบแล้ว</span>'
+                : '<span class="badge badge-live">Live</span>';
+              return `<tr>
+                <td style="font-weight:600;color:var(--ink)">${r.title}</td>
+                <td style="color:var(--ink3)">${r.house}</td>
+                <td style="color:var(--ink4)">${r.sellerName || '—'}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align:right">
+                  <button class="btn danger btn-sm" onclick="deleteRoom('${r._id}')">ลบห้อง</button>
+                </td>
+              </tr>`;
+            }).join('')
+          : '<tr><td colspan="5" class="empty-state">ยังไม่มีห้องประมูล</td></tr>';
+
       } catch (err) {
         console.error(err);
         alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       }
     }
 
-    async function setStatus(id, status) { 
-      if(!confirm(`ยืนยันการเปลี่ยนสถานะเป็น ${status}?`)) return;
-      await fetch(`/api/admin/users/${id}/status`, { method: 'PATCH', headers: H, body: JSON.stringify({ status }) }); 
-      loadAll(); 
+    async function deleteAllEnded() {
+      if (endedRoomIds.length === 0) return;
+      if (!confirm(`ลบห้องที่จบแล้วทั้งหมด ${endedRoomIds.length} ห้อง? \nการกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+
+      try {
+        await Promise.all(
+          endedRoomIds.map(id =>
+            fetch(`/api/admin/rooms/${id}`, { method: 'DELETE', headers: H })
+          )
+        );
+        alert(`ลบสำเร็จ ${endedRoomIds.length} ห้อง`);
+        loadAll();
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดระหว่างลบ: ' + err.message);
+      }
     }
-    
-    async function deleteUser(id) { 
-      if (!confirm('ลบ user นี้ถาวร?')) return; 
-      await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: H }); 
-      loadAll(); 
+
+    async function setStatus(id, status) {
+      if (!confirm(`ยืนยันการเปลี่ยนสถานะเป็น ${status}?`)) return;
+      await fetch(`/api/admin/users/${id}/status`, { method: 'PATCH', headers: H, body: JSON.stringify({ status }) });
+      loadAll();
     }
-    
-    async function deleteRoom(id) { 
-      if (!confirm('ลบห้องประมูลนี้และ Lot ทั้งหมดภายใน?')) return; 
-      await fetch(`/api/admin/rooms/${id}`, { method: 'DELETE', headers: H }); 
-      loadAll(); 
+
+    async function deleteUser(id) {
+      if (!confirm('ลบ user นี้ถาวร?')) return;
+      await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: H });
+      loadAll();
+    }
+
+    async function deleteRoom(id) {
+      if (!confirm('ลบห้องประมูลนี้และ Lot ทั้งหมดภายใน?')) return;
+      await fetch(`/api/admin/rooms/${id}`, { method: 'DELETE', headers: H });
+      loadAll();
     }
 
     function switchTab(name) {
@@ -328,7 +309,7 @@
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
     }
-    
+
     loadAll();
   </script>
 </body>
