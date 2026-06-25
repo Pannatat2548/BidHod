@@ -61,6 +61,20 @@ router.get("/:userId", async (req, res) => {
                     sellerLots.filter(l => !l.isActive && l.currentPrice > 0).length) * 100) : null,
         };
 
+        // ── Rating summary (ดาว 1-5 จากทั้ง buyer และ seller ที่เคยซื้อขายด้วยกัน) ──
+        const userRatings = await find("ratings", { targetId: userId }, { createdAt: -1 });
+        publicStats.ratingCount = userRatings.length;
+        publicStats.ratingAverage = userRatings.length
+            ? Math.round((userRatings.reduce((sum, r) => sum + r.score, 0) / userRatings.length) * 10) / 10
+            : null;
+        const recentRatings = userRatings.slice(0, 10).map(r => ({
+            score: r.score,
+            comment: r.comment || "",
+            raterName: r.raterName,
+            raterRole: r.raterRole,
+            createdAt: r.createdAt,
+        }));
+
         // ── ถ้าไม่ใช่เจ้าของ → ส่ง public view เท่านั้น ──
         if (!isSelf) {
             const { password: _p, email, ...publicUser } = user;
@@ -69,6 +83,7 @@ router.get("/:userId", async (req, res) => {
                 user: publicUser,
                 publicStats,
                 activeRooms,
+                recentRatings,
             });
         }
 
@@ -82,7 +97,10 @@ router.get("/:userId", async (req, res) => {
             return {
                 _id: l._id,
                 lotName: l.name,
+                roomId: room ? room._id : null,  // ← เพิ่มบรรทัดนี้
                 roomTitle: room ? room.title : "ไม่ระบุห้อง",
+                sellerId: room ? room.sellerId : null,
+                sellerName: room ? room.sellerName : null,
                 price: l.currentPrice,
                 paid: l.paid || false,
                 delivered: l.delivered || false,
@@ -119,6 +137,7 @@ router.get("/:userId", async (req, res) => {
             isSelf: true,
             user,
             publicStats,
+            recentRatings,
             stats: {
                 buy: {
                     totalBids: wonLots.length,
@@ -183,6 +202,11 @@ router.patch("/lots/:id/pay", requireAuth, async (req, res) => {
 
         if (lot.highestBidderId !== req.user.id && req.user.role !== "admin") {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+        }
+
+        // ── ต้องประมูลจบก่อนถึงจ่ายเงินได้ ──
+        if (lot.isActive) {
+            return res.status(400).json({ error: "Lot นี้ยังประมูลไม่จบ กรุณารอให้การประมูลสิ้นสุดก่อน" });
         }
 
         const { paymentSlip } = req.body;
@@ -264,6 +288,75 @@ router.patch("/lots/:id/reject-slip", requireAuth, async (req, res) => {
         });
 
         res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/profile/rooms/:roomId/pending-delivery — Seller: รวม lot ที่จ่ายแล้ว+ยืนยันสลิปแล้ว
+// แต่ยังไม่ส่ง ของห้องนี้ จัดกลุ่มตาม buyer คนเดียวกัน เพื่อกรอก tracking ทีเดียว
+router.get("/rooms/:roomId/pending-delivery", requireAuth, async (req, res) => {
+    try {
+        const room = await findOne("rooms", { _id: req.params.roomId });
+        if (!room) return res.status(404).json({ error: "ไม่พบห้อง" });
+        if (room.sellerId !== req.user.id && req.user.role !== "admin") {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+        }
+
+        const lots = await find("lots", { roomId: req.params.roomId });
+        const eligible = lots.filter(l =>
+            !l.isActive && l.slipConfirmed === true && l.delivered !== true && l.highestBidderId
+        );
+
+        const groups = {};
+        for (const l of eligible) {
+            const key = l.highestBidderId;
+            if (!groups[key]) groups[key] = { buyerId: key, buyerName: l.highestBidder, lots: [] };
+            groups[key].lots.push({
+                _id: l._id, name: l.name, desc: l.desc,
+                currentPrice: l.currentPrice,
+                shippingOption: l.shippingOption || null,
+            });
+        }
+
+        res.json({ groups: Object.values(groups) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH /api/profile/lots/deliver-merged — Seller กรอก tracking ครั้งเดียว ใช้กับหลาย lot ของ buyer คนเดียวกัน
+router.patch("/lots/deliver-merged", requireAuth, async (req, res) => {
+    try {
+        const { lotIds, trackingNumber, shippingProvider } = req.body;
+        if (!Array.isArray(lotIds) || !lotIds.length) {
+            return res.status(400).json({ error: "ไม่ได้ระบุ lot" });
+        }
+        if (!trackingNumber) return res.status(400).json({ error: "กรุณากรอกเลข tracking" });
+
+        // ตรวจสิทธิ์ + สถานะของทุก lot ก่อนอัปเดตจริง (NeDB ไม่รองรับ $in — loop findOne)
+        const lots = [];
+        for (const id of lotIds) {
+            const lot = await findOne("lots", { _id: id });
+            if (!lot) return res.status(404).json({ error: `ไม่พบ lot: ${id}` });
+            const room = await findOne("rooms", { _id: lot.roomId });
+            if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+                return res.status(403).json({ error: "ไม่มีสิทธิ์กับ lot บางรายการ" });
+            }
+            if (!lot.slipConfirmed) {
+                return res.status(400).json({ error: `Lot "${lot.name}" ยังไม่ยืนยันสลิป` });
+            }
+            lots.push(lot);
+        }
+
+        const deliveredAt = new Date();
+        for (const lot of lots) {
+            await update("lots", { _id: lot._id }, {
+                $set: { delivered: true, deliveredAt, trackingNumber, shippingProvider: shippingProvider || "" }
+            });
+        }
+
+        res.json({ ok: true, count: lots.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

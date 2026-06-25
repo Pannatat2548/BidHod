@@ -44,6 +44,26 @@ function requireSeller(req, res, next) {
   });
 }
 
+// middleware: ต้องไม่ถูก blacklist — ใช้คุม "การกระทำ" เช่น bid, สร้างห้อง
+// (login ได้ปกติ แต่ทำสิ่งเหล่านี้ไม่ได้) — เช็คจาก DB ตรงๆ เพราะ JWT อาจออกไปก่อนถูกแบน
+async function requireNotBlacklisted(req, res, next) {
+  try {
+    const u = await findOne("users", { _id: req.user.id });
+    if (u?.blacklisted) {
+      return res.status(403).json({ error: "บัญชีนี้ถูกระงับการประมูล/สร้างห้อง เนื่องจากถูกแบน (Blacklist)" });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// เวอร์ชันสำหรับ Socket.io (ไม่มี req/res) — คืน true ถ้าแบนอยู่
+async function isBlacklisted(userId) {
+  const u = await findOne("users", { _id: userId });
+  return !!u?.blacklisted;
+}
+
 // parse token จาก socket handshake
 function authSocket(token) {
   if (!token) return null;
@@ -51,4 +71,4 @@ function authSocket(token) {
   catch { return null; }
 }
 
-module.exports = { signToken, requireAuth, requireAdmin, requireSeller, authSocket };
+module.exports = { signToken, requireAuth, requireAdmin, requireSeller, requireNotBlacklisted, isBlacklisted, authSocket };

@@ -318,6 +318,9 @@ input:focus, textarea:focus, select:focus {
   gap: 20px;
 }
 .feed-card {
+  display: flex;           /* ← เปลี่ยนจาก block เป็น flex */
+  flex-direction: column;  /* ← เรียงแนวตั้ง */
+  height: 100%;            /* ← ให้สูงเต็ม grid cell */
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -344,10 +347,20 @@ input:focus, textarea:focus, select:focus {
 }
 .feed-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .feed-card:hover .feed-thumb img { transform: scale(1.05); }
-.feed-body { padding: 16px; }
+.feed-body {
+  padding: 16px;
+  flex: 1;                    /* ← เพิ่ม: ขยายเต็มพื้นที่ที่เหลือ */
+  display: flex;              /* ← เพิ่ม */
+  flex-direction: column;     /* ← เพิ่ม */
+}
 .feed-house { font-size: 12px; color: var(--ink3); font-weight: 500; margin-bottom: 4px; }
 .feed-title { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.feed-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.feed-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;           /* ← เพิ่ม: ดันไปด้านล่าง */
+}
 .price-label { font-size: 11px; color: var(--ink4); margin-bottom: 2px; font-weight: 500; }
 .price-val { font-size: 16px; font-weight: 700; color: var(--primary); }
 

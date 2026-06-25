@@ -141,4 +141,23 @@ router.delete("/:id", requireSeller, async (req, res) => {
   res.json({ ok: true });
 });
 
+// GET /api/rooms/:id/my-wins
+router.get("/:id/my-wins", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const roomId = req.params.id;
+    const room = await findOne("rooms", { _id: roomId });
+    if (!room) return res.status(404).json({ error: "ไม่พบห้องนี้" });
+    const lots = await find("lots", {
+      roomId,
+      highestBidderId: userId,
+      isActive: false,
+      paid: { $ne: true },
+    });
+    res.json({ lots, room });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

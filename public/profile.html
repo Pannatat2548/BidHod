@@ -45,95 +45,327 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    .profile-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-    .profile-email { font-size: 12px; color: var(--ink4); margin-bottom: 16px; word-break: break-all; }
+    .profile-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .profile-email {
+      font-size: 12px;
+      color: var(--ink4);
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
 
     /* ── Social Section ── */
-    .profile-social { text-align: left; border-top: 1px solid var(--line); padding-top: 18px; }
+    .profile-social {
+      text-align: left;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
     .profile-social-label {
-      font-size: 10px; letter-spacing: 1px; color: var(--ink4);
-      text-transform: uppercase; margin-bottom: 12px; font-weight: 500;
-      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
     .add-social-btn {
-      background: var(--bg2); border: 1px solid var(--line); border-radius: 4px;
-      padding: 3px 10px; font-size: 11px; color: var(--ink2); cursor: pointer; transition: all 0.15s;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--ink2);
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .add-social-btn:hover { background: var(--bg3); border-color: var(--ink3); }
-    .social-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .add-social-btn:hover {
+      background: var(--bg3);
+      border-color: var(--ink3);
+    }
+
+    .social-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     .social-item {
-      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-      background: var(--bg2); border: 1px solid var(--line); border-radius: 6px;
-      font-size: 12px; transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 12px;
+      transition: all 0.15s;
     }
-    .social-item:hover { border-color: var(--ink3); }
+
+    .social-item:hover {
+      border-color: var(--ink3);
+    }
+
     .social-icon {
-      width: 26px; height: 26px; border-radius: 4px; background: var(--bg);
-      display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
     }
-    .social-type-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.5px; min-width: 70px; }
-    .social-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); font-weight: 500; }
+
+    .social-type-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 70px;
+    }
+
+    .social-value {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--ink2);
+      font-weight: 500;
+    }
+
     .social-edit-btn {
-      background: none; border: none; color: var(--blue); cursor: pointer; font-size: 11px;
-      padding: 2px 6px; border-radius: 4px; transition: background 0.15s;
+      background: none;
+      border: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
     }
-    .social-edit-btn:hover { background: var(--blue-bg); }
+
+    .social-edit-btn:hover {
+      background: var(--blue-bg);
+    }
+
     .social-delete-btn {
-      background: none; border: none; color: var(--red); cursor: pointer; font-size: 12px;
-      padding: 2px 6px; border-radius: 4px; transition: background 0.15s;
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
     }
-    .social-delete-btn:hover { background: var(--red-bg); }
+
+    .social-delete-btn:hover {
+      background: var(--red-bg);
+    }
+
     .add-social-form {
-      display: none; margin-top: 10px; padding: 12px; background: var(--bg2);
-      border: 1px solid var(--line); border-radius: 10px; gap: 8px;
+      display: none;
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      gap: 8px;
     }
-    .add-social-form.show { display: flex; flex-direction: column; }
-    .add-social-form select, .add-social-form input {
-      padding: 10px 12px; font-size: 13px; border: 1px solid var(--line2);
-      border-radius: 10px; background: var(--bg); outline: none; transition: border-color 0.15s;
+
+    .add-social-form.show {
+      display: flex;
+      flex-direction: column;
     }
-    .add-social-form select:focus, .add-social-form input:focus { border-color: var(--ink2); }
-    .add-social-actions { display: flex; gap: 6px; justify-content: flex-end; }
-    .add-social-actions button { padding: 8px 16px; font-size: 12px; border-radius: 10px; cursor: pointer; }
+
+    .add-social-form select,
+    .add-social-form input {
+      padding: 10px 12px;
+      font-size: 13px;
+      border: 1px solid var(--line2);
+      border-radius: 10px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .add-social-form select:focus,
+    .add-social-form input:focus {
+      border-color: var(--ink2);
+    }
+
+    .add-social-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .add-social-actions button {
+      padding: 8px 16px;
+      font-size: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
 
     /* ── Right: Credit Section ── */
-    .credit-section { display: flex; flex-direction: column; gap: 20px; }
-    .credit-header { font-size: 10px; letter-spacing: 2px; color: var(--ink4); text-transform: uppercase; font-weight: 500; }
-    .credit-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+    .credit-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .credit-header {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .credit-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
     .credit-block {
-      background: var(--bg); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 20px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
     }
-    .credit-block-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    .credit-block-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .credit-stats {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-      margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
     }
-    .credit-stat { text-align: center; }
-    .credit-stat-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; margin-bottom: 4px; }
-    .credit-stat-value { font-size: 18px; font-weight: 600; color: var(--ink); }
-    .credit-stat-value.green { color: var(--green); }
-    .lots-list { max-height: 340px; overflow-y: auto; padding-right: 4px; }
-    .lots-list::-webkit-scrollbar { width: 4px; }
-    .lots-list::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+    .credit-stat {
+      text-align: center;
+    }
+
+    .credit-stat-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .credit-stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .credit-stat-value.green {
+      color: var(--green);
+    }
+
+    .lots-list {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .lots-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .lots-list::-webkit-scrollbar-thumb {
+      background: var(--line2);
+      border-radius: 2px;
+    }
 
     .lot-item {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 12px 0; border-bottom: 1px solid var(--line); gap: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      gap: 12px;
     }
-    .lot-item:last-child { border-bottom: none; }
-    .lot-info { flex: 1; min-width: 0; }
-    .lot-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lot-room { font-size: 11px; color: var(--ink4); }
-    .lot-price { font-size: 14px; font-weight: 600; margin-right: 12px; white-space: nowrap; }
+
+    .lot-item:last-child {
+      border-bottom: none;
+    }
+
+    .lot-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lot-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lot-room {
+      font-size: 11px;
+      color: var(--ink4);
+    }
+
+    .lot-price {
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 12px;
+      white-space: nowrap;
+    }
+
     .lot-status {
-      font-size: 11px; padding: 3px 10px; border-radius: 999px;
-      font-weight: 500; white-space: nowrap;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 500;
+      white-space: nowrap;
     }
-    .lot-status.paid { background: var(--green-bg); color: var(--green); }
-    .lot-status.unpaid { background: var(--red-bg); color: var(--red); }
-    .lot-status.active { background: var(--blue-bg); color: var(--blue); }
-    .lot-status.ended { background: var(--bg3); color: var(--ink3); }
+
+    .lot-status.paid {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .lot-status.unpaid {
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .lot-status.active {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .lot-status.ended {
+      background: var(--bg3);
+      color: var(--ink3);
+    }
 
     /* ── Slip display (seller view) ── */
     .slip-viewer {
@@ -143,6 +375,7 @@
       overflow: hidden;
       background: var(--bg2);
     }
+
     .slip-viewer-header {
       display: flex;
       align-items: center;
@@ -153,6 +386,7 @@
       color: var(--ink3);
       font-weight: 500;
     }
+
     .slip-viewer-img {
       width: 100%;
       max-height: 200px;
@@ -162,7 +396,11 @@
       cursor: pointer;
       transition: opacity 0.15s;
     }
-    .slip-viewer-img:hover { opacity: 0.85; }
+
+    .slip-viewer-img:hover {
+      opacity: 0.85;
+    }
+
     .slip-actions {
       display: flex;
       gap: 8px;
@@ -170,6 +408,7 @@
       border-top: 1px solid var(--line);
       background: var(--bg);
     }
+
     .slip-confirm-btn {
       flex: 1;
       padding: 8px 0;
@@ -178,12 +417,17 @@
       font-family: inherit;
       background: var(--green-bg);
       color: var(--green);
-      border: 1.5px solid rgba(34,197,94,0.3);
+      border: 1.5px solid rgba(34, 197, 94, 0.3);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .slip-confirm-btn:hover { background: var(--green); color: #fff; }
+
+    .slip-confirm-btn:hover {
+      background: var(--green);
+      color: #fff;
+    }
+
     .slip-reject-btn {
       flex: 1;
       padding: 8px 0;
@@ -192,12 +436,17 @@
       font-family: inherit;
       background: var(--red-bg);
       color: var(--red);
-      border: 1.5px solid rgba(239,68,68,0.3);
+      border: 1.5px solid rgba(239, 68, 68, 0.3);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .slip-reject-btn:hover { background: var(--red); color: #fff; }
+
+    .slip-reject-btn:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
     .slip-status-badge {
       display: inline-flex;
       align-items: center;
@@ -207,14 +456,17 @@
       padding: 2px 8px;
       border-radius: 999px;
     }
+
     .slip-status-badge.confirmed {
       background: var(--green-bg);
       color: var(--green);
     }
+
     .slip-status-badge.rejected {
       background: var(--red-bg);
       color: var(--red);
     }
+
     .slip-status-badge.pending {
       background: #fffbeb;
       color: #d97706;
@@ -230,80 +482,288 @@
       justify-content: space-between;
       align-items: center;
     }
-    .summary-item { text-align: center; }
-    .summary-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; margin-bottom: 4px; }
-    .summary-value { font-size: 20px; font-weight: 600; }
-    .summary-value.buy { color: var(--blue); }
-    .summary-value.sell { color: var(--green); }
-    .summary-value.credit { color: #d97706; }
-    .empty-credit { padding: 28px; text-align: center; color: var(--ink4); font-size: 12px; }
+
+    .summary-item {
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 10px;
+      color: var(--ink4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .summary-value.buy {
+      color: var(--blue);
+    }
+
+    .summary-value.sell {
+      color: var(--green);
+    }
+
+    .summary-value.credit {
+      color: #d97706;
+    }
+
+    .empty-credit {
+      padding: 28px;
+      text-align: center;
+      color: var(--ink4);
+      font-size: 12px;
+    }
 
     @media (max-width: 768px) {
-      .profile-layout { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
-      .profile-card { position: static; }
-      .credit-stats { grid-template-columns: repeat(2, 1fr); }
+      .profile-layout {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .profile-card {
+        position: static;
+      }
+
+      .credit-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     /* ── Modals ── */
     .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 1000;
-      align-items: center; justify-content: center;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
     }
-    .modal-overlay.show { display: flex; }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
     .modal-box {
-      background: var(--bg); border-radius: var(--radius); padding: 28px;
-      width: 100%; max-width: 420px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       animation: fadeUp 0.2s ease;
     }
-    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-    .modal-sub { font-size: 12px; color: var(--ink4); margin-bottom: 20px; line-height: 1.6; }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .modal-sub {
+      font-size: 12px;
+      color: var(--ink4);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
     .modal-upload-area {
-      border: 2px dashed var(--line2); border-radius: var(--radius-sm);
-      padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;
-      margin-bottom: 12px; position: relative;
+      border: 2px dashed var(--line2);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      position: relative;
     }
-    .modal-upload-area:hover { border-color: var(--primary); background: var(--primary-light, #eef2ff); }
-    .modal-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .modal-upload-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-bottom: 12px; display: none; }
+
+    .modal-upload-area:hover {
+      border-color: var(--primary);
+      background: var(--primary-light, #eef2ff);
+    }
+
+    .modal-upload-area input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .modal-upload-preview {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
     .modal-input {
-      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
-      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
-      background: var(--bg); outline: none; margin-bottom: 8px;
-      transition: border-color 0.2s; box-sizing: border-box;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
     }
-    .modal-input:focus { border-color: var(--primary); }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-    .modal-slip-img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); margin-top: 6px; }
+
+    .modal-input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .modal-slip-img {
+      width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      margin-top: 6px;
+    }
+
     .tracking-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #eff6ff; color: #1d4ed8; border-radius: 999px;
-      padding: 3px 10px; font-size: 11px; font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 500;
     }
 
     /* ── Slip fullscreen modal ── */
     .slip-fullscreen {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-      z-index: 2000; align-items: center; justify-content: center;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
     }
-    .slip-fullscreen.show { display: flex; }
-    .slip-fullscreen img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; }
+
+    .slip-fullscreen.show {
+      display: flex;
+    }
+
+    .slip-fullscreen img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
     .slip-fullscreen-close {
-      position: absolute; top: 20px; right: 20px; color: #fff;
-      font-size: 28px; cursor: pointer; line-height: 1;
-      background: rgba(0,0,0,0.5); width: 44px; height: 44px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+      background: rgba(0, 0, 0, 0.5);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* ── Reject reason modal ── */
     .reject-reason-input {
-      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
-      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
-      background: var(--bg); outline: none; resize: vertical; min-height: 80px;
-      transition: border-color 0.2s; box-sizing: border-box; margin-top: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+      margin-top: 8px;
     }
-    .reject-reason-input:focus { border-color: var(--red); }
+
+    .reject-reason-input:focus {
+      border-color: var(--red);
+    }
+
+    /* ── Rating block (profile card) ── */
+    .rating-block {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg2);
+      border-radius: var(--radius-sm);
+    }
+    .rating-stars { font-size: 18px; letter-spacing: 2px; color: #f59e0b; line-height: 1; }
+    .rating-stars .star-empty { color: var(--line2); }
+    .rating-summary-text { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+    .rating-empty-text { font-size: 12px; color: var(--ink4); }
+    .rating-list { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+    .rating-item { padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+    .rating-item-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .rating-item-stars { font-size: 13px; color: #f59e0b; }
+    .rating-item-rater { font-size: 11px; color: var(--ink4); }
+    .rating-item-comment { font-size: 12px; color: var(--ink2); line-height: 1.5; }
+
+    .btn-report {
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1.5px solid rgba(239, 68, 68, .25);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-report:hover { background: var(--red); color: #fff; }
+
+    /* ── Rate-trade modal ── */
+    .star-picker { display: flex; gap: 6px; justify-content: center; margin: 14px 0; }
+    .star-picker span { font-size: 32px; cursor: pointer; color: var(--line2); transition: color .15s; }
+    .star-picker span.on { color: #f59e0b; }
+
+    /* ── Report image attach ── */
+    .slip-upload-area {
+      border: 2px dashed var(--line2); border-radius: var(--radius);
+      padding: 16px; background: var(--bg2); transition: border-color .15s; margin-top: 10px;
+    }
+    .slip-upload-area:hover { border-color: var(--primary); }
+    .slip-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; min-height: 72px; align-items: flex-start; }
+    .slip-thumb { width: 72px; height: 72px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--bg); overflow: hidden; position: relative; flex-shrink: 0; }
+    .slip-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-remove { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border-radius: 50%; background: rgba(239,68,68,.9); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
+    .slip-add-btn { width: 72px; height: 72px; border-radius: var(--radius-sm); border: 2px dashed var(--line2); background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: var(--ink4); font-size: 11px; font-weight: 600; transition: all .15s; flex-shrink: 0; }
+    .slip-add-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .slip-add-btn .plus-icon { font-size: 22px; line-height: 1; }
+    .slip-hint { font-size: 11px; color: var(--ink4); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .slip-count-badge { background: var(--primary-light); color: var(--primary); border-radius: 999px; font-size: 11px; font-weight: 700; padding: 1px 8px; }
   </style>
 </head>
 
@@ -329,6 +789,13 @@
       <div class="profile-name" id="profile-name">กำลังโหลด...</div>
       <div class="profile-email" id="profile-email"></div>
       <div id="profile-role-wrap" style="margin-bottom:16px"></div>
+
+      <div class="rating-block" id="rating-block">
+        <div class="rating-stars" id="rating-stars-display">☆☆☆☆☆</div>
+        <div class="rating-summary-text" id="rating-summary-text">ยังไม่มีคะแนน</div>
+        <div class="rating-list" id="rating-list"></div>
+      </div>
+      <button class="btn-report" id="report-btn" onclick="openReportModal()" style="display:none">🚩 รายงานผู้ใช้นี้</button>
 
       <div class="profile-social">
         <div class="profile-social-label">
@@ -491,10 +958,44 @@
     <div class="modal-box">
       <div class="modal-title">✕ ปฏิเสธสลิป</div>
       <div class="modal-sub" id="reject-modal-sub">แจ้งให้ buyer ส่งสลิปใหม่ กรุณาระบุเหตุผล</div>
-      <textarea class="reject-reason-input" id="reject-reason" placeholder="เช่น สลิปไม่ชัด, ยอดเงินไม่ตรง, สลิปซ้ำ..."></textarea>
+      <textarea class="reject-reason-input" id="reject-reason"
+        placeholder="เช่น สลิปไม่ชัด, ยอดเงินไม่ตรง, สลิปซ้ำ..."></textarea>
       <div class="modal-actions">
         <button class="btn" onclick="closeRejectModal()">ยกเลิก</button>
-        <button class="btn" style="background:var(--red);color:#fff;border:none" onclick="confirmReject()">✕ ปฏิเสธสลิป</button>
+        <button class="btn" style="background:var(--red);color:#fff;border:none" onclick="confirmReject()">✕
+          ปฏิเสธสลิป</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Report Modal ── -->
+  <div class="modal-overlay" id="report-modal">
+    <div class="modal-box">
+      <div class="modal-title">🚩 รายงานผู้ใช้</div>
+      <div class="modal-sub" id="report-modal-sub">แจ้งปัญหาเกี่ยวกับผู้ใช้นี้ให้ admin ตรวจสอบ</div>
+      <select class="modal-input" id="report-reason">
+        <option value="">เลือกเหตุผล</option>
+        <option value="ไม่จ่ายเงิน">ไม่จ่ายเงิน</option>
+        <option value="ไม่ส่งของ">ไม่ส่งของ / ส่งของไม่ครบ</option>
+        <option value="ของไม่ตรงปก">ของไม่ตรงปก / ของปลอม</option>
+        <option value="หลอกลวง">หลอกลวง / โกง</option>
+        <option value="พฤติกรรมไม่เหมาะสม">พฤติกรรมไม่เหมาะสม / หยาบคาย</option>
+        <option value="อื่นๆ">อื่นๆ</option>
+      </select>
+      <textarea class="reject-reason-input" id="report-detail" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+      <div class="slip-upload-area">
+        <div class="slip-thumbs" id="report-img-thumbs">
+          <div class="slip-add-btn" onclick="document.getElementById('report-img-input').click()">
+            <div class="plus-icon">+</div>
+            <div>เพิ่มรูป</div>
+          </div>
+        </div>
+        <div class="slip-hint">หลักฐาน (ถ้ามี) • <span class="slip-count-badge" id="report-img-count">0 รูป</span></div>
+      </div>
+      <input type="file" id="report-img-input" accept="image/*" multiple style="display:none" onchange="handleReportImgSelect(this)">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeReportModal()">ยกเลิก</button>
+        <button class="btn" id="report-submit-btn" style="background:var(--red);color:#fff;border:none" onclick="submitReport()">🚩 ส่งรายงาน</button>
       </div>
     </div>
   </div>
@@ -526,8 +1027,8 @@
     let profileData = null;
     let socials = [];
 
-    const socialIcons = { facebook:'📘', instagram:'📷', reddit:'🤖', discord:'🎮', phone:'📞', other:'🔗' };
-    const socialLabels = { facebook:'Facebook', instagram:'Instagram', reddit:'Reddit', discord:'Discord', phone:'เบอร์โทร', other:'อื่นๆ' };
+    const socialIcons = { facebook: '📘', instagram: '📷', reddit: '🤖', discord: '🎮', phone: '📞', other: '🔗' };
+    const socialLabels = { facebook: 'Facebook', instagram: 'Instagram', reddit: 'Reddit', discord: 'Discord', phone: 'เบอร์โทร', other: 'อื่นๆ' };
 
     async function loadProfile() {
       try {
@@ -537,26 +1038,48 @@
         profileData = await res.json();
         if (profileData.isSelf) renderPrivateProfile();
         else renderPublicProfile();
+        renderRating();
+        // ปุ่มรายงานแสดงเมื่อ login แล้วและไม่ใช่โปรไฟล์ตัวเอง
+        document.getElementById('report-btn').style.display = (token && !isSelf) ? '' : 'none';
       } catch (err) { alert(err.message); }
     }
 
-    // ── โหมด PUBLIC (ส่องคนอื่น) ─────────────────────────────────────────
-    function renderPublicProfile() {
-      const { user: u, publicStats, activeRooms } = profileData;
+    // ── Rating: แสดงดาวเฉลี่ย + รายการรีวิวล่าสุด (ใช้ทั้ง private/public view) ──
+    function renderRating() {
+      const ps = profileData.publicStats || {};
+      const avg = ps.ratingAverage;
+      const count = ps.ratingCount || 0;
 
-      // แสดง badge ใน nav
-      const badge = document.getElementById('nav-viewing-badge');
-      if (badge) badge.style.display = '';
+      const starsHtml = Array.from({ length: 5 }, (_, i) =>
+        avg && i < Math.round(avg) ? '★' : '<span class="star-empty">☆</span>'
+      ).join('');
+      document.getElementById('rating-stars-display').innerHTML = starsHtml;
+      document.getElementById('rating-summary-text').textContent = count
+        ? `${avg} / 5 (${count} รีวิว)`
+        : 'ยังไม่มีคะแนน';
+
+      const list = profileData.recentRatings || [];
+      const listEl = document.getElementById('rating-list');
+      listEl.innerHTML = list.length ? list.slice(0, 5).map(r => `
+        <div class="rating-item">
+          <div class="rating-item-head">
+            <span class="rating-item-stars">${'★'.repeat(r.score)}${'☆'.repeat(5 - r.score)}</span>
+            <span class="rating-item-rater">${r.raterName || 'ไม่ระบุ'} (${r.raterRole === 'buyer' ? 'ผู้ซื้อ' : 'ผู้ขาย'})</span>
+          </div>
+          ${r.comment ? `<div class="rating-item-comment">${r.comment}</div>` : ''}
+        </div>`).join('') : '';
+    }
+
+    // ── แสดงโปรไฟล์ของคนอื่น (public view) — ข้อมูลพื้นฐาน + publicStats เท่านั้น ──
+    function renderPublicProfile() {
+      const { user: u, publicStats: ps, activeRooms } = profileData;
 
       document.getElementById('profile-name').textContent = u.name;
-      document.getElementById('profile-email').style.display = 'none';
       document.getElementById('profile-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
-      document.getElementById('profile-role-wrap').innerHTML =
-        `<span class="badge badge-${u.role}">${u.role}</span>`;
-
-      // ซ่อนปุ่มแก้ไข social + form เพิ่ม
+      document.getElementById('profile-role-wrap').innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
+      document.getElementById('profile-email').style.display = 'none';
       document.querySelector('.add-social-btn').style.display = 'none';
-      document.getElementById('add-social-form').style.display = 'none';
+      document.getElementById('nav-viewing-badge').style.display = '';
 
       socials = [];
       if (u.facebook) socials.push({ type: 'facebook', value: u.facebook });
@@ -567,101 +1090,138 @@
       if (u.otherSocial) socials.push({ type: 'other', value: u.otherSocial, customLabel: u.otherSocialLabel });
       renderSocialsReadOnly();
 
-      // ── แทนที่ credit section ด้วย public view ──
-      document.querySelector('.credit-section').innerHTML = renderPublicCreditHTML(u, publicStats, activeRooms);
-    }
+      // ── แทน credit section ด้วย public stats สรุปย่อ + ห้องที่เปิดอยู่ ──
+      const creditSection = document.querySelector('.credit-section');
+      const winRate = ps.totalWon ? `${ps.payRate ?? '—'}%` : '—';
+      const deliverRate = ps.deliveryRate != null ? `${ps.deliveryRate}%` : '—';
 
-    function renderPublicCreditHTML(u, ps, rooms) {
-      const payRateColor = ps.payRate === null ? 'var(--ink3)'
-        : ps.payRate >= 90 ? 'var(--green)' : ps.payRate >= 60 ? '#d97706' : 'var(--red)';
-      const deliveryRateColor = ps.deliveryRate === null ? 'var(--ink3)'
-        : ps.deliveryRate >= 90 ? 'var(--green)' : ps.deliveryRate >= 60 ? '#d97706' : 'var(--red)';
-
-      const payBar = ps.payRate !== null
-        ? `<div style="margin-top:4px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden">
-             <div style="height:100%;width:${ps.payRate}%;background:${payRateColor};transition:width 0.5s"></div>
-           </div>` : '';
-      const deliveryBar = ps.deliveryRate !== null
-        ? `<div style="margin-top:4px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden">
-             <div style="height:100%;width:${ps.deliveryRate}%;background:${deliveryRateColor};transition:width 0.5s"></div>
-           </div>` : '';
-
-      const roomsHTML = rooms.length === 0
-        ? `<div class="empty-credit">ไม่มีห้องที่เปิดอยู่ตอนนี้</div>`
-        : rooms.map(r => `
-          <a href="/room.html?id=${r._id}" style="display:flex;align-items:center;justify-content:space-between;
-            padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit">
-            <div>
-              <div style="font-size:13px;font-weight:600">${r.title}</div>
-              <div style="font-size:11px;color:var(--ink4)">${r.house}</div>
-            </div>
-            <span style="font-size:11px;color:var(--blue)">ดูห้อง →</span>
-          </a>`).join('');
-
-      return `
+      creditSection.innerHTML = `
         <div>
-          <div class="credit-header">Public Profile</div>
-          <div class="credit-title">โปรไฟล์ของ ${u.name}</div>
+          <div class="credit-header">Public Stats</div>
+          <div class="credit-title">ข้อมูลสาธารณะของ ${esc(u.name)}</div>
         </div>
-
         <div class="credit-block">
-          <div class="credit-block-title">⭐ Credit Score</div>
-          <div class="credit-stats" style="grid-template-columns:repeat(3,1fr)">
+          <div class="credit-block-title">📊 สถิติโดยรวม</div>
+          <div class="credit-stats">
             <div class="credit-stat">
               <div class="credit-stat-label">ชนะประมูล</div>
-              <div class="credit-stat-value green">${ps.totalWon}</div>
+              <div class="credit-stat-value">${ps.totalWon ?? 0}</div>
             </div>
             <div class="credit-stat">
-              <div class="credit-stat-label">จ่ายเงินแล้ว</div>
-              <div class="credit-stat-value">${ps.totalPaid}</div>
+              <div class="credit-stat-label">อัตราจ่ายเงิน</div>
+              <div class="credit-stat-value green">${winRate}</div>
             </div>
             <div class="credit-stat">
-              <div class="credit-stat-label">ส่งของสำเร็จ</div>
-              <div class="credit-stat-value">${ps.totalReceived}</div>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px">
-                <span style="color:var(--ink3)">🛒 อัตราจ่าย (Buyer)</span>
-                <span style="font-weight:600;color:${payRateColor}">
-                  ${ps.payRate !== null ? ps.payRate + '%' : 'ยังไม่มีข้อมูล'}
-                </span>
-              </div>
-              ${payBar}
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:12px">
-                <span style="color:var(--ink3)">📦 อัตราส่งสำเร็จ (Seller)</span>
-                <span style="font-weight:600;color:${deliveryRateColor}">
-                  ${ps.deliveryRate !== null ? ps.deliveryRate + '%' : 'ยังไม่มีข้อมูล'}
-                </span>
-              </div>
-              ${deliveryBar}
+              <div class="credit-stat-label">อัตราส่งสำเร็จ</div>
+              <div class="credit-stat-value" style="color:var(--blue)">${deliverRate}</div>
             </div>
           </div>
         </div>
-
         <div class="credit-block">
-          <div class="credit-block-title">🏠 ห้องประมูลที่เปิดอยู่</div>
-          <div class="lots-list">${roomsHTML}</div>
-        </div>`;
+          <div class="credit-block-title">🏪 ห้องประมูลที่เปิดอยู่</div>
+          <div class="lots-list">
+            ${activeRooms && activeRooms.length
+              ? activeRooms.map(r => `
+                <div class="lot-item">
+                  <div class="lot-info">
+                    <div class="lot-name">${esc(r.title)}</div>
+                    <div class="lot-room">${esc(r.house || '')}</div>
+                  </div>
+                  <a class="btn" style="padding:4px 10px;font-size:11px" href="/room.html?id=${r._id}">เข้าห้อง →</a>
+                </div>`).join('')
+              : '<div class="empty-credit">ยังไม่มีห้องที่เปิดอยู่</div>'}
+          </div>
+        </div>
+      `;
     }
 
-    // renderSocials แบบ read-only (ไม่มีปุ่มแก้ไข/ลบ)
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // social list แบบอ่านอย่างเดียว (ไม่มีปุ่มแก้ไข/ลบ) สำหรับ public view
     function renderSocialsReadOnly() {
       const list = document.getElementById('social-list');
-      if (socials.length === 0) {
-        list.innerHTML = '<div style="font-size:11px;color:var(--ink4);padding:8px 0">ยังไม่มีข้อมูลติดต่อ</div>';
-        return;
-      }
-      list.innerHTML = socials.map(s => `
-        <div class="social-item">
-          <div class="social-icon">${socialIcons[s.type] || '🔗'}</div>
-          <div class="social-type-label">${s.customLabel || socialLabels[s.type] || s.type}</div>
-          <div class="social-value">${s.value}</div>
-        </div>
-      `).join('');
+      if (!socials.length) { list.innerHTML = '<div class="empty-credit" style="padding:12px 0">ไม่มีข้อมูลติดต่อ</div>'; return; }
+      list.innerHTML = socials.map(s => {
+        const label = s.type === 'other' ? (s.customLabel || 'อื่นๆ') : socialLabels[s.type];
+        const icon = socialIcons[s.type];
+        return `<div class="social-item"><span class="social-icon">${icon}</span><span class="social-label">${label}</span><span class="social-value">${esc(s.value)}</span></div>`;
+      }).join('');
+    }
+
+    // ── Report modal ──
+    let reportTargetId = null;
+    let reportImgFiles = [];
+    function openReportModal() {
+      reportTargetId = userId;
+      document.getElementById('report-modal-sub').textContent = `แจ้งปัญหาเกี่ยวกับ ${profileData?.user?.name || 'ผู้ใช้นี้'} ให้ admin ตรวจสอบ`;
+      document.getElementById('report-reason').value = '';
+      document.getElementById('report-detail').value = '';
+      reportImgFiles = [];
+      document.getElementById('report-img-thumbs').querySelectorAll('.slip-thumb').forEach(el => el.remove());
+      document.getElementById('report-img-count').textContent = '0 รูป';
+      document.getElementById('report-modal').classList.add('show');
+    }
+    function closeReportModal() {
+      document.getElementById('report-modal').classList.remove('show');
+    }
+    function handleReportImgSelect(input) {
+      Array.from(input.files).forEach(f => {
+        if (f.size > 5 * 1024 * 1024) { alert(`${f.name}: ไฟล์ใหญ่เกิน 5MB`); return; }
+        const idx = reportImgFiles.length;
+        reportImgFiles.push(f);
+        const reader = new FileReader();
+        reader.onload = e => {
+          const thumb = document.createElement('div');
+          thumb.className = 'slip-thumb';
+          thumb.id = `report-img-thumb-${idx}`;
+          thumb.innerHTML = `<img src="${e.target.result}" alt="หลักฐาน ${idx + 1}"><div class="thumb-remove" onclick="removeReportImg(${idx})">✕</div>`;
+          const addBtn = document.querySelector('#report-img-thumbs .slip-add-btn');
+          document.getElementById('report-img-thumbs').insertBefore(thumb, addBtn);
+        };
+        reader.readAsDataURL(f);
+      });
+      input.value = '';
+      setTimeout(updateReportImgCount, 100);
+    }
+    function removeReportImg(idx) {
+      reportImgFiles[idx] = null;
+      document.getElementById(`report-img-thumb-${idx}`)?.remove();
+      updateReportImgCount();
+    }
+    function updateReportImgCount() {
+      document.getElementById('report-img-count').textContent = `${reportImgFiles.filter(Boolean).length} รูป`;
+    }
+    async function submitReport() {
+      const reason = document.getElementById('report-reason').value;
+      const detail = document.getElementById('report-detail').value.trim();
+      if (!reason) { alert('กรุณาเลือกเหตุผล'); return; }
+
+      const btn = document.getElementById('report-submit-btn');
+      btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...';
+      try {
+        const imageUrls = [];
+        for (const f of reportImgFiles.filter(Boolean)) {
+          const fd = new FormData();
+          fd.append('image', f);
+          const ur = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+          const ud = await ur.json();
+          if (!ur.ok) throw new Error(ud.error || 'อัปโหลดรูปไม่สำเร็จ');
+          imageUrls.push(ud.url);
+        }
+
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ targetId: reportTargetId, reason, detail, imageUrls }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeReportModal();
+        alert('ขอบคุณสำหรับคำแนะนำ');
+      } catch (e) { alert(e.message); }
+      finally { btn.disabled = false; btn.textContent = '🚩 ส่งรายงาน'; }
     }
 
     // ── โหมด PRIVATE (เจ้าของ) ───────────────────────────────────────────
@@ -1062,4 +1622,5 @@
     loadProfile();
   </script>
 </body>
+
 </html>

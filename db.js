@@ -9,14 +9,25 @@ const db = {
   rooms: new Datastore({ filename: path.join(DB_DIR, "rooms.db"), autoload: true }),
   lots:  new Datastore({ filename: path.join(DB_DIR, "lots.db"),  autoload: true }),
   bids:  new Datastore({ filename: path.join(DB_DIR, "bids.db"),  autoload: true }),
-  messages: new Datastore({ filename: path.join(__dirname, 'data/messages.db'), autoload: true })
+  messages: new Datastore({ filename: path.join(__dirname, 'data/messages.db'), autoload: true }),
+  payments: new Datastore({ filename: path.join(DB_DIR, "payments.db"), autoload: true }),
+  ratings: new Datastore({ filename: path.join(DB_DIR, "ratings.db"), autoload: true }),
+  reports: new Datastore({ filename: path.join(DB_DIR, "reports.db"), autoload: true }),
 };
 
 // indexes
 db.users.ensureIndex({ fieldName: "email", unique: true });
+db.users.ensureIndex({ fieldName: "blacklisted" });
 db.rooms.ensureIndex({ fieldName: "createdAt" });
 db.lots.ensureIndex({ fieldName: "roomId" });
 db.bids.ensureIndex({ fieldName: "lotId" });
+db.payments.ensureIndex({ fieldName: "roomId" });
+db.payments.ensureIndex({ fieldName: "buyerId" });
+db.ratings.ensureIndex({ fieldName: "lotId" });
+db.ratings.ensureIndex({ fieldName: "targetId" });
+db.ratings.ensureIndex({ fieldName: "raterId" });
+db.reports.ensureIndex({ fieldName: "targetId" });
+db.reports.ensureIndex({ fieldName: "status" });
 
 // seed admin ถ้ายังไม่มี
 db.users.findOne({ role: "admin" }, (err, doc) => {

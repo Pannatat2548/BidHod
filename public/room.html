@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,6 +13,7 @@
       padding: 14px 20px 0;
       border-bottom: 1px solid var(--line)
     }
+
     .room-house {
       font-size: 11px;
       color: var(--ink4);
@@ -19,21 +21,25 @@
       text-transform: uppercase;
       margin-bottom: 3px
     }
+
     .room-title {
       font-size: 16px;
       font-weight: 500;
       color: var(--ink);
       margin-bottom: 12px
     }
+
     .layout {
       display: grid;
       grid-template-columns: 1fr 280px;
       min-height: calc(100vh - 148px)
     }
+
     .main {
       padding: 20px;
       border-right: 1px solid var(--line)
     }
+
     .lot-thumb {
       width: 100%;
       max-height: 340px;
@@ -48,18 +54,21 @@
       margin-bottom: 16px;
       overflow: hidden
     }
+
     .lot-badge-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 6px
     }
+
     .lot-num-label {
       font-size: 10px;
       letter-spacing: 2px;
       color: var(--ink4);
       text-transform: uppercase
     }
+
     .lot-name {
       font-size: 16px;
       font-weight: 500;
@@ -67,12 +76,14 @@
       line-height: 1.4;
       margin-bottom: 5px
     }
+
     .lot-desc {
       font-size: 12px;
       color: var(--ink3);
       line-height: 1.7;
       margin-bottom: 16px
     }
+
     .sidebar {
       padding: 16px;
       display: flex;
@@ -80,21 +91,25 @@
       gap: 10px;
       background: var(--bg2)
     }
+
     .price-big {
       font-size: 24px;
       font-weight: 500;
       color: var(--ink);
       transition: color .3s
     }
+
     .price-leader {
       font-size: 11px;
       color: var(--ink4);
       margin-top: 3px
     }
+
     .price-leader span {
       color: var(--green);
       font-weight: 500
     }
+
     .ended-block {
       background: var(--bg2);
       border: 1px solid var(--line);
@@ -102,19 +117,23 @@
       padding: 20px;
       text-align: center
     }
+
     .ended-title {
       font-size: 18px;
       font-weight: 500;
       color: var(--ink);
       margin-bottom: 6px
     }
+
     .ended-sub {
       font-size: 13px;
       color: var(--ink3)
     }
+
     .ended-sub strong {
       color: var(--green)
     }
+
     .login-prompt {
       width: 100%;
       padding: 10px;
@@ -128,21 +147,25 @@
       transition: background .15s;
       text-align: center
     }
+
     .login-prompt:hover {
       background: var(--bg2)
     }
+
     .bid-error {
       font-size: 12px;
       color: var(--red);
       min-height: 16px;
       margin-top: 4px
     }
+
     .h-list {
       display: flex;
       flex-direction: column;
       max-height: 180px;
       overflow-y: auto
     }
+
     .bin-btn {
       width: 100%;
       padding: 10px;
@@ -157,20 +180,24 @@
       cursor: pointer;
       transition: opacity .15s;
     }
+
     .bin-btn:hover {
       opacity: .85;
     }
+
     .bin-price-hint {
       font-size: 11px;
       color: var(--ink4);
       text-align: center;
       margin-top: 4px;
     }
+
     @media(max-width:680px) {
       .layout {
         grid-template-columns: 1fr
       }
     }
+
     .lot-status-card {
       background: var(--bg);
       border: 1px solid var(--line);
@@ -179,17 +206,20 @@
       margin-top: 16px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
+
     .status-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-top: 8px;
     }
+
     .status-item {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
+
     .status-label {
       font-size: 11px;
       color: var(--ink4);
@@ -197,21 +227,25 @@
       letter-spacing: 0.5px;
       font-weight: 600;
     }
+
     .status-value {
       font-size: 15px;
       font-weight: 700;
       color: var(--ink);
     }
+
     .status-value.price {
       color: var(--primary);
       font-size: 18px;
     }
+
     .status-value.leader {
       color: var(--green);
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .btn-contact-seller {
       display: inline-flex;
       align-items: center;
@@ -226,10 +260,12 @@
       background: var(--bg);
       transition: all 0.2s;
     }
+
     .btn-contact-seller:hover {
       background: var(--bg2);
       border-color: var(--ink3);
     }
+
     /* ── ปุ่มส่องโปรไฟล์ ── */
     .btn-view-profile {
       display: inline-flex;
@@ -244,11 +280,13 @@
       background: var(--bg);
       transition: all 0.2s;
     }
+
     .btn-view-profile:hover {
       background: var(--bg2);
       color: var(--ink);
       border-color: var(--ink3);
     }
+
     .seller-row {
       display: flex;
       align-items: center;
@@ -256,26 +294,33 @@
       margin-bottom: 16px;
       flex-wrap: wrap;
     }
+
     /* ── ลิงก์ชื่อใน history ── */
     .h-name-link {
       color: inherit;
       text-decoration: none;
       transition: color 0.15s;
     }
+
     .h-name-link:hover {
       color: var(--blue, #3b82f6);
       text-decoration: underline;
     }
+
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       align-items: center;
       justify-content: center;
     }
-    .modal-overlay.show { display: flex; }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
     .modal-box {
       background: var(--bg);
       border-radius: var(--radius);
@@ -283,15 +328,35 @@
       width: 100%;
       max-width: 400px;
       margin: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       animation: fadeUp 0.2s ease;
     }
+
     @keyframes fadeUp {
-      from { opacity:0; transform:translateY(12px); }
-      to   { opacity:1; transform:translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .modal-title { font-size:15px; font-weight:600; margin-bottom:6px; }
-    .modal-sub { font-size:12px; color:var(--ink4); margin-bottom:16px; line-height:1.6; }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .modal-sub {
+      font-size: 12px;
+      color: var(--ink4);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
     .modal-upload-area {
       border: 2px dashed var(--line2);
       border-radius: var(--radius-sm);
@@ -302,24 +367,53 @@
       margin-bottom: 12px;
       position: relative;
     }
-    .modal-upload-area:hover { border-color: var(--primary); }
+
+    .modal-upload-area:hover {
+      border-color: var(--primary);
+    }
+
     .modal-upload-area input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
     }
+
     .modal-upload-preview {
-      width: 100%; max-height: 160px; object-fit: contain;
-      border-radius: 8px; margin-bottom: 12px; display: none;
+      width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
     }
+
     .modal-input {
-      width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
-      border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
-      background: var(--bg); outline: none; margin-bottom: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1.5px solid var(--line2);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      outline: none;
+      margin-bottom: 8px;
       transition: border-color 0.2s;
     }
-    .modal-input:focus { border-color: var(--primary); }
-    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+
+    .modal-input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
   </style>
 </head>
+
 <body>
   <nav>
     <div style="display:flex;align-items:center;gap:12px">
@@ -592,7 +686,7 @@
       div.innerHTML = `
         <div>
           <div class="h-name">${nameHTML}${isMe ? '<span class="you-badge">คุณ</span>' : ''}</div>
-          <div class="h-time">${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}</div>
+          <div class="h-time">${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}:${String(t.getSeconds()).padStart(2, '0')}</div>
         </div>
         <div class="h-amount">฿${bid.amount.toLocaleString()}</div>`;
       list.prepend(div);
@@ -605,32 +699,71 @@
       [...bids].reverse().forEach(b => prependHistory(b));
     }
 
+    // ── แทนที่ฟังก์ชัน showEnded เดิมใน room.html ด้วยอันนี้ ──
+    // เปลี่ยนจาก "แนบสลิป" modal → redirect ไป checkout-merged.html
+
     function showEnded(winner, price, isBin = false) {
       const lot = roomData?.lots.find(l => l._id === activeLotId);
       const isWinner = user && (winner === user.name);
-      const isSeller = roomData && roomData.sellerId === user?.id;
+      const isSeller = roomData && roomData.sellerId === (user?.id || user?._id);
+
       let actionButtons = '';
+
+      // ── Buyer: ปุ่มไปชำระเงิน (แทน modal เก่า) ──
       if (isWinner && !lot?.paid) {
-        actionButtons += `<button class="btn success" onclick="openRoomSlipModal('${activeLotId}')">📎 แนบสลิปยืนยันจ่าย</button>`;
+        actionButtons += `
+      <a class="btn success" href="/checkout-merged.html?room=${ROOM_ID}"
+         style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+        💳 ไปชำระเงิน
+      </a>`;
       }
+
+      // ── Buyer: ชำระแล้ว รอ seller ยืนยัน ──
+      if (isWinner && lot?.paid && !lot?.slipConfirmed && !lot?.slipRejected) {
+        actionButtons += `
+      <div style="background:var(--blue-bg);border:1px solid rgba(59,130,246,.2);
+                  border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;
+                  color:var(--blue);text-align:center;">
+        ⏳ ส่งสลิปแล้ว — รอ Seller ยืนยัน
+      </div>`;
+      }
+
+      // ── Buyer: Seller ปฏิเสธสลิป → ให้ส่งใหม่ผ่าน checkout ──
+      if (isWinner && lot?.slipRejected) {
+        actionButtons += `
+      <div style="background:var(--red-bg);border:1px solid rgba(239,68,68,.2);
+                  border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--red);">
+        ❌ สลิปถูกปฏิเสธ: ${lot.slipRejectReason || ''}
+      </div>
+      <a class="btn danger" href="/checkout-merged.html?room=${ROOM_ID}"
+         style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+        🔄 ส่งสลิปใหม่
+      </a>`;
+      }
+
+      // ── Seller: กรอก Tracking ──
       if (isSeller && lot?.paid && !lot?.delivered) {
         actionButtons += `<button class="btn primary" onclick="openRoomTrackingModal('${activeLotId}')">📦 กรอก Tracking</button>`;
       }
+
+      // ── Buyer: ยืนยันรับของ ──
       if (isWinner && lot?.delivered && !lot?.received) {
-        actionButtons += `<button class="btn success" onclick="markReceived('${activeLotId}')">ยืนยันรับของ</button>`;
+        actionButtons += `<button class="btn success" onclick="markReceived('${activeLotId}')">✅ ยืนยันรับของ</button>`;
       }
+
       document.getElementById('bid-section').innerHTML = `
-        <div class="ended-block">
-          <div class="ended-title">${isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว'}</div>
-          <div class="ended-sub">
-            ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>
-            ฿${price.toLocaleString()}
-          </div>
-          ${lot.paymentSlip ? `<div style="margin:8px 0"><img src="${lot.paymentSlip}" style="max-width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--line)" title="สลิปการโอน"></div>` : ''}
-          ${lot.trackingNumber ? `<div style="margin:8px 0;font-size:12px">🚚 ${lot.shippingProvider ? lot.shippingProvider+': ' : ''}${lot.trackingNumber}</div>` : ''}
-          ${actionButtons}
-        </div>
-      `;
+    <div class="ended-block">
+      <div class="ended-title">${isBin ? '⚡ ซื้อทันที' : 'Lot สิ้นสุดแล้ว'}</div>
+      <div class="ended-sub">
+        ผู้ชนะ: <strong>${winner ? mask(winner) : 'ไม่มีผู้ประมูล'}</strong><br>
+        ฿${price.toLocaleString()}
+      </div>
+      ${lot?.trackingNumber ? `<div style="margin:8px 0;font-size:12px">🚚 ${lot.shippingProvider ? lot.shippingProvider + ': ' : ''}${lot.trackingNumber}</div>` : ''}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        ${actionButtons}
+      </div>
+    </div>
+  `;
     }
 
     function showError(msg) {
@@ -773,26 +906,35 @@
   </script>
 
   <!-- Room Slip Modal -->
-  <div id="room-slip-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
-    <div style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
+  <div id="room-slip-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div
+      style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
       <div style="font-size:15px;font-weight:600;margin-bottom:16px;">📎 แนบสลิปการชำระเงิน</div>
-      <div id="room-slip-placeholder" style="border:2px dashed var(--line2);border-radius:8px;padding:32px;text-align:center;color:var(--ink4);font-size:13px;margin-bottom:12px;">
+      <div id="room-slip-placeholder"
+        style="border:2px dashed var(--line2);border-radius:8px;padding:32px;text-align:center;color:var(--ink4);font-size:13px;margin-bottom:12px;">
         คลิกเพื่อเลือกรูปสลิป
       </div>
-      <img id="room-slip-preview" style="display:none;width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;" />
-      <input id="room-slip-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px;font-size:13px;" onchange="roomPreviewSlip(this)">
+      <img id="room-slip-preview"
+        style="display:none;width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;" />
+      <input id="room-slip-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px;font-size:13px;"
+        onchange="roomPreviewSlip(this)">
       <div style="display:flex;gap:8px;">
         <button class="btn" onclick="closeRoomSlipModal()" style="flex:1;">ยกเลิก</button>
-        <button id="room-slip-confirm-btn" class="btn success" onclick="confirmRoomPaid()" style="flex:1;">✓ ยืนยันการชำระเงิน</button>
+        <button id="room-slip-confirm-btn" class="btn success" onclick="confirmRoomPaid()" style="flex:1;">✓
+          ยืนยันการชำระเงิน</button>
       </div>
     </div>
   </div>
 
   <!-- Room Tracking Modal -->
-  <div id="room-tracking-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
-    <div style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
+  <div id="room-tracking-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div
+      style="background:var(--bg);border-radius:var(--radius);padding:24px;width:90%;max-width:400px;position:relative;">
       <div style="font-size:15px;font-weight:600;margin-bottom:16px;">📦 กรอกเลข Tracking</div>
-      <select id="room-shipping-provider" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:10px;">
+      <select id="room-shipping-provider"
+        style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:10px;">
         <option value="">-- เลือกขนส่ง --</option>
         <option value="Kerry">Kerry Express</option>
         <option value="Flash">Flash Express</option>
@@ -802,7 +944,8 @@
         <option value="DHL">DHL</option>
         <option value="Other">อื่นๆ</option>
       </select>
-      <input id="room-tracking-input" type="text" placeholder="เลข Tracking เช่น TH123456789" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:12px;">
+      <input id="room-tracking-input" type="text" placeholder="เลข Tracking เช่น TH123456789"
+        style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg);border:1px solid var(--line2);border-radius:var(--radius-sm);color:var(--ink);margin-bottom:12px;">
       <div style="display:flex;gap:8px;">
         <button class="btn" onclick="closeRoomTrackingModal()" style="flex:1;">ยกเลิก</button>
         <button class="btn primary" onclick="confirmRoomDelivered()" style="flex:1;">📦 ยืนยันจัดส่ง</button>
@@ -810,4 +953,5 @@
     </div>
   </div>
 </body>
+
 </html>

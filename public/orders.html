@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bidmai — Orders</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+body { background: var(--bg2); }
+
+/* ── Tabs ── */
+.view-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px; width: fit-content; margin-bottom: 24px;
+}
+.view-tab {
+  padding: 8px 22px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  font-family: inherit; border: none; background: transparent;
+  color: var(--ink3); cursor: pointer; transition: all .18s;
+}
+.view-tab.active { background: var(--ink); color: #fff; }
+
+/* ── Room selector ── */
+.room-select-wrap { margin-bottom: 20px; }
+.room-select-wrap select {
+  padding: 10px 16px; font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--line2); border-radius: var(--radius);
+  background: var(--bg); color: var(--ink); outline: none;
+  min-width: 280px; cursor: pointer;
+}
+.room-select-wrap select:focus { border-color: var(--primary); }
+
+/* ── Stats bar ── */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.stat-pill {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-pill-label { font-size: 10px; letter-spacing: 1px; color: var(--ink4); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+.stat-pill-val { font-size: 22px; font-weight: 700; color: var(--ink); }
+.stat-pill-val.green { color: var(--green); }
+.stat-pill-val.orange { color: #d97706; }
+.stat-pill-val.red { color: var(--red); }
+.stat-pill-val.blue { color: var(--blue); }
+
+/* ── Order cards ── */
+.orders-grid { display: flex; flex-direction: column; gap: 12px; }
+
+.order-card {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow-sm); transition: box-shadow .15s;
+}
+.order-card:hover { box-shadow: var(--shadow-md); }
+
+.order-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+}
+.order-buyer-info { display: flex; align-items: center; gap: 10px; }
+.order-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--primary-light); color: var(--primary);
+  font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.order-buyer-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.order-buyer-sub { font-size: 11px; color: var(--ink4); margin-top: 1px; }
+.order-total { font-size: 16px; font-weight: 700; color: var(--primary); }
+
+.order-card-body { padding: 14px 18px; }
+
+/* lot rows inside a payment */
+.lot-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid var(--line); gap: 12px;
+}
+.lot-row:last-child { border-bottom: none; }
+.lot-num { font-size: 11px; font-weight: 700; color: var(--primary);
+  background: var(--primary-light); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.lot-name-text { font-size: 13px; color: var(--ink2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lot-price-text { font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+/* shipping row */
+.ship-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  padding: 8px 12px; background: var(--bg2); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--ink3);
+}
+
+/* slip thumbnails */
+.slip-thumbs-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.slip-thumb-mini {
+  width: 60px; height: 60px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); overflow: hidden; cursor: pointer;
+  transition: opacity .15s;
+}
+.slip-thumb-mini:hover { opacity: .8; }
+.slip-thumb-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* order footer actions */
+.order-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-top: 1px solid var(--line); gap: 10px;
+  flex-wrap: wrap;
+}
+.foot-status { display: flex; align-items: center; gap: 6px; }
+
+/* status badges */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+}
+.status-pill.pending    { background: #fffbeb; color: #d97706; border: 1px solid rgba(217,119,6,.2); }
+.status-pill.paid       { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(59,130,246,.2); }
+.status-pill.confirmed  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16,185,129,.2); }
+.status-pill.rejected   { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+.status-pill.shipped    { background: #f0fdf4; color: #15803d; border: 1px solid rgba(21,128,61,.2); }
+.status-pill.received   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16,185,129,.2); }
+
+/* action buttons */
+.action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-confirm {
+  padding: 8px 16px; font-size: 12px; font-weight: 700; font-family: inherit;
+  background: var(--green-bg); color: var(--green);
+  border: 1.5px solid rgba(16,185,129,.3); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.btn-confirm:hover { background: var(--green); color: #fff; }
+.btn-reject {
+  padding: 8px 16px; font-size: 12px; font-weight: 700; font-family: inherit;
+  background: var(--red-bg); color: var(--red);
+  border: 1.5px solid rgba(239,68,68,.3); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.btn-reject:hover { background: var(--red); color: #fff; }
+.btn-track {
+  padding: 8px 16px; font-size: 12px; font-weight: 700; font-family: inherit;
+  background: var(--primary-light); color: var(--primary);
+  border: 1.5px solid rgba(79,70,229,.2); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.btn-track:hover { background: var(--primary); color: #fff; }
+.btn-rate {
+  padding: 8px 16px; font-size: 12px; font-weight: 700; font-family: inherit;
+  background: #fffbeb; color: #d97706;
+  border: 1.5px solid rgba(217,119,6,.3); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.btn-rate:hover { background: #d97706; color: #fff; }
+.btn-rate:disabled { opacity: .55; cursor: default; }
+.btn-flag {
+  padding: 8px 16px; font-size: 12px; font-weight: 700; font-family: inherit;
+  background: var(--red-bg); color: var(--red);
+  border: 1.5px solid rgba(239,68,68,.25); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.btn-flag:hover { background: var(--red); color: #fff; }
+.star-picker { display: flex; gap: 6px; justify-content: center; margin: 14px 0; }
+.star-picker span { font-size: 32px; cursor: pointer; color: var(--line2); transition: color .15s; }
+.star-picker span.on { color: #f59e0b; }
+.rated-badge { font-size: 12px; color: #d97706; font-weight: 600; }
+
+/* ── Buyer view: timeline ── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-step {
+  display: flex; gap: 16px; padding: 14px 0;
+  border-bottom: 1px solid var(--line); align-items: flex-start;
+}
+.tl-step:last-child { border-bottom: none; }
+.tl-icon {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; border: 2px solid var(--line);
+  background: var(--bg2);
+}
+.tl-icon.done { background: var(--green-bg); border-color: var(--green); }
+.tl-icon.active { background: var(--blue-bg); border-color: var(--blue); }
+.tl-icon.warn { background: #fffbeb; border-color: #d97706; }
+.tl-icon.err { background: var(--red-bg); border-color: var(--red); }
+.tl-content { flex: 1; }
+.tl-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.tl-sub { font-size: 11px; color: var(--ink4); margin-top: 2px; line-height: 1.6; }
+
+/* ── Empty / Loading ── */
+.empty-box {
+  text-align: center; padding: 60px 20px; color: var(--ink4);
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.empty-box .empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-box .empty-text { font-size: 14px; font-weight: 500; }
+.skeleton { background: var(--line); border-radius: var(--radius-sm); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── Modals ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--bg); border-radius: var(--radius); padding: 28px;
+  width: 100%; max-width: 420px; margin: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: fadeUp .2s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--ink4); margin-bottom: 18px; line-height: 1.6; }
+.modal-input {
+  width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
+  background: var(--bg); outline: none; margin-bottom: 10px;
+  transition: border-color .2s; box-sizing: border-box;
+}
+.modal-input:focus { border-color: var(--primary); }
+.modal-textarea {
+  width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--line2); border-radius: var(--radius-sm);
+  background: var(--bg); outline: none; resize: vertical; min-height: 80px;
+  transition: border-color .2s; box-sizing: border-box; margin-bottom: 10px;
+}
+.modal-textarea:focus { border-color: var(--red); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+/* slip fullscreen */
+.slip-fs {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92);
+  z-index: 2000; align-items: center; justify-content: center;
+}
+.slip-fs.show { display: flex; }
+.slip-fs img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; }
+.slip-fs-close {
+  position: absolute; top: 20px; right: 20px; color: #fff;
+  font-size: 24px; cursor: pointer; background: rgba(0,0,0,.5);
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .stats-bar { grid-template-columns: repeat(2,1fr); }
+  .order-card-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .order-card-foot { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+    <div class="logo">Bidmai</div>
+  </div>
+  <span style="font-size:12px;color:var(--ink3)" id="nav-user"></span>
+</nav>
+
+<div class="container-narrow">
+  <div class="page-label">Orders</div>
+  <h1>สถานะคำสั่งซื้อ</h1>
+
+  <!-- View tabs -->
+  <div class="view-tabs">
+    <button class="view-tab active" id="tab-seller" onclick="switchView('seller')">🏪 ฉันเป็น Seller</button>
+    <button class="view-tab" id="tab-buyer" onclick="switchView('buyer')">🛒 ฉันเป็น Buyer</button>
+  </div>
+
+  <!-- ── SELLER VIEW ── -->
+  <div id="view-seller">
+    <div class="room-select-wrap">
+      <select id="seller-room-select" onchange="loadSellerOrders()">
+        <option value="">— เลือกห้องที่ต้องการดู —</option>
+      </select>
+    </div>
+
+    <div class="stats-bar" id="seller-stats" style="display:none">
+      <div class="stat-pill">
+        <div class="stat-pill-label">ชำระแล้ว</div>
+        <div class="stat-pill-val green" id="ss-paid">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">รอตรวจสลิป</div>
+        <div class="stat-pill-val orange" id="ss-pending">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">ยังไม่จ่าย</div>
+        <div class="stat-pill-val red" id="ss-unpaid">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">ส่งของแล้ว</div>
+        <div class="stat-pill-val blue" id="ss-shipped">0</div>
+      </div>
+    </div>
+
+    <div id="merged-deliver-link-wrap" style="display:none;margin-bottom:14px">
+      <a id="merged-deliver-link" class="btn-track" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none" href="#">
+        📦 กรอก Tracking ทีเดียวหลาย Lot →
+      </a>
+    </div>
+
+    <div class="orders-grid" id="seller-orders-wrap">
+      <div class="empty-box">
+        <div class="empty-icon">🏪</div>
+        <div class="empty-text">เลือกห้องประมูลที่ต้องการดู</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BUYER VIEW ── -->
+  <div id="view-buyer" style="display:none">
+    <div class="stats-bar" id="buyer-stats">
+      <div class="stat-pill">
+        <div class="stat-pill-label">ชนะประมูล</div>
+        <div class="stat-pill-val" id="bs-won">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">รอตรวจสลิป</div>
+        <div class="stat-pill-val orange" id="bs-pending">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">ยืนยันแล้ว</div>
+        <div class="stat-pill-val green" id="bs-confirmed">0</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-label">กำลังจัดส่ง</div>
+        <div class="stat-pill-val blue" id="bs-shipped">0</div>
+      </div>
+    </div>
+    <div class="orders-grid" id="buyer-orders-wrap">
+      <div class="empty-box"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>กำลังโหลด...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tracking Modal ── -->
+<div class="modal-overlay" id="track-modal">
+  <div class="modal-box">
+    <div class="modal-title">📦 กรอกเลข Tracking</div>
+    <div class="modal-sub" id="track-modal-sub"></div>
+    <select class="modal-input" id="track-provider">
+      <option value="">เลือกขนส่ง (ไม่บังคับ)</option>
+      <option value="ไปรษณีย์ไทย">ไปรษณีย์ไทย</option>
+      <option value="Kerry">Kerry Express</option>
+      <option value="Flash">Flash Express</option>
+      <option value="J&T">J&T Express</option>
+      <option value="Ninja Van">Ninja Van</option>
+      <option value="DHL">DHL</option>
+    </select>
+    <input class="modal-input" type="text" id="track-number" placeholder="เลข Tracking เช่น TH123456789">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeTrackModal()">ยกเลิก</button>
+      <button class="btn primary" onclick="submitTracking()">📦 ยืนยันจัดส่ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reject Modal ── -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal-box">
+    <div class="modal-title">✕ ปฏิเสธสลิป</div>
+    <div class="modal-sub">ระบุเหตุผลเพื่อแจ้ง buyer</div>
+    <textarea class="modal-textarea" id="reject-reason" placeholder="เช่น สลิปไม่ชัด, ยอดเงินไม่ตรง..."></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeRejectModal()">ยกเลิก</button>
+      <button class="btn danger" onclick="submitReject()">✕ ปฏิเสธ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Rate Modal ── -->
+<div class="modal-overlay" id="rate-modal">
+  <div class="modal-box">
+    <div class="modal-title">⭐ ให้คะแนน</div>
+    <div class="modal-sub" id="rate-modal-sub"></div>
+    <div class="star-picker" id="rate-star-picker">
+      <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+    </div>
+    <textarea class="modal-textarea" id="rate-comment" placeholder="ความคิดเห็น (ไม่บังคับ)"></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeRateModal()">ยกเลิก</button>
+      <button class="btn primary" onclick="submitRating()">⭐ ส่งคะแนน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Report Modal ── -->
+<div class="modal-overlay" id="report-modal">
+  <div class="modal-box">
+    <div class="modal-title">🚩 รายงานผู้ใช้</div>
+    <div class="modal-sub" id="report-modal-sub">แจ้งปัญหาให้ admin ตรวจสอบ</div>
+    <select class="modal-input" id="report-reason">
+      <option value="">เลือกเหตุผล</option>
+      <option value="ไม่จ่ายเงิน">ไม่จ่ายเงิน</option>
+      <option value="ไม่ส่งของ">ไม่ส่งของ / ส่งของไม่ครบ</option>
+      <option value="ของไม่ตรงปก">ของไม่ตรงปก / ของปลอม</option>
+      <option value="หลอกลวง">หลอกลวง / โกง</option>
+      <option value="พฤติกรรมไม่เหมาะสม">พฤติกรรมไม่เหมาะสม / หยาบคาย</option>
+      <option value="อื่นๆ">อื่นๆ</option>
+    </select>
+    <textarea class="modal-textarea" id="report-detail" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+    <div class="slip-upload-area" style="margin-top:10px">
+      <div class="slip-thumbs" id="report-img-thumbs">
+        <div class="slip-add-btn" onclick="document.getElementById('report-img-input').click()">
+          <div class="plus-icon">+</div>
+          <div>เพิ่มรูป</div>
+        </div>
+      </div>
+      <div class="slip-hint">หลักฐาน (ถ้ามี) • <span class="slip-count-badge" id="report-img-count">0 รูป</span></div>
+    </div>
+    <input type="file" id="report-img-input" accept="image/*" multiple style="display:none" onchange="handleReportImgSelect(this)">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeReportModal()">ยกเลิก</button>
+      <button class="btn danger" id="report-submit-btn" onclick="submitReport()">🚩 ส่งรายงาน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Slip fullscreen ── -->
+<div class="slip-fs" id="slip-fs" onclick="closeFs()">
+  <div class="slip-fs-close">✕</div>
+  <img id="slip-fs-img" src="" alt="slip">
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token || !user) location.href = '/login.html?redirect=' + encodeURIComponent(location.href);
+if (user) document.getElementById('nav-user').textContent = user.name;
+
+let currentView = 'seller';
+let sellerRooms = [];
+let currentTrackLotId = null;
+let currentRejectLotId = null;
+
+// ── Rating / Report state ──
+let rateCtx = null; // { lotId, targetId, targetName }
+let rateScore = 0;
+let reportCtx = null; // { targetId, targetName, lotId, roomId }
+
+// ── Helper: ดึง roomId จาก lot object (รองรับหลาย field name) ──
+function getRoomId(lot) {
+  return lot.roomId || lot.room || lot.room_id || lot.roomId_str || lot.roomRef || '';
+}
+
+// ── Switch view ──
+function switchView(v) {
+  currentView = v;
+  document.getElementById('view-seller').style.display = v === 'seller' ? '' : 'none';
+  document.getElementById('view-buyer').style.display  = v === 'buyer'  ? '' : 'none';
+  document.getElementById('tab-seller').classList.toggle('active', v === 'seller');
+  document.getElementById('tab-buyer').classList.toggle('active', v === 'buyer');
+  if (v === 'buyer') loadBuyerOrders();
+}
+
+// ─────────────────────────────────────────
+// SELLER SIDE
+// ─────────────────────────────────────────
+async function loadSellerRooms() {
+  try {
+    const r = await fetch('/api/rooms', { headers: { 'Authorization': 'Bearer ' + token } });
+    const rooms = await r.json();
+    // กรองเฉพาะห้องที่ user เป็น seller
+    const uid = user.id || user._id;
+    sellerRooms = rooms.filter(rm => rm.sellerId === uid);
+    const sel = document.getElementById('seller-room-select');
+    sel.innerHTML = '<option value="">— เลือกห้องที่ต้องการดู —</option>' +
+      sellerRooms.map(rm => `<option value="${rm._id}">${rm.title} (${rm.totalLots} lots)</option>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function loadSellerOrders() {
+  const roomId = document.getElementById('seller-room-select').value;
+  if (!roomId) return;
+
+  const wrap = document.getElementById('seller-orders-wrap');
+  wrap.innerHTML = `<div class="skeleton" style="height:80px"></div><div class="skeleton" style="height:80px;margin-top:10px"></div>`;
+  document.getElementById('seller-stats').style.display = 'none';
+
+  try {
+    // ดึง lots ทุกตัวในห้อง + payments ในห้อง
+    const [roomRes, paymentsRes] = await Promise.all([
+      fetch(`/api/rooms/${roomId}`, { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(`/api/payments/room/${roomId}`, { headers: { 'Authorization': 'Bearer ' + token } }),
+    ]);
+    const roomData = await roomRes.json();
+    const payments = paymentsRes.ok ? await paymentsRes.json() : [];
+    const lots = roomData.lots || [];
+
+    // lots ที่จบแล้ว (isActive = false) และมี winner
+    const endedLots = lots.filter(l => !l.isActive && l.highestBidderId);
+
+    // สร้าง map lotId → payment record
+    const paymentByLot = {};
+    for (const p of payments) {
+      for (const lid of (p.lotIds || [])) {
+        paymentByLot[lid] = p;
+      }
+    }
+
+    // stats
+    let sPaid = 0, sPending = 0, sUnpaid = 0, sShipped = 0;
+    for (const l of endedLots) {
+      if (l.received) { sPaid++; sShipped++; }
+      else if (l.delivered) { sShipped++; sPaid++; }
+      else if (l.slipConfirmed) sPaid++;
+      else if (l.paid && !l.slipRejected) sPending++;
+      else sUnpaid++;
+    }
+    document.getElementById('ss-paid').textContent    = sPaid;
+    document.getElementById('ss-pending').textContent = sPending;
+    document.getElementById('ss-unpaid').textContent  = sUnpaid;
+    document.getElementById('ss-shipped').textContent = sShipped;
+    document.getElementById('seller-stats').style.display = '';
+
+    if (!endedLots.length) {
+      wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">🎉</div><div class="empty-text">ยังไม่มี lot ที่จบการประมูล</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = endedLots.map(l => {
+      const payment = paymentByLot[l._id];
+      const slips = l.paymentSlips?.length ? l.paymentSlips : (l.paymentSlip ? [l.paymentSlip] : []);
+
+      // status
+      let statusHtml = '', actionHtml = '';
+      if (l.received) {
+        statusHtml = `<span class="status-pill received">✓ ผู้ซื้อรับแล้ว</span>`;
+        actionHtml = `
+          <button class="btn-rate" onclick="openRateModal('${l._id}','${l.highestBidderId}','${esc(l.highestBidder)}')">⭐ ให้คะแนนผู้ซื้อ</button>
+          <button class="btn-flag" onclick="openReportModal('${l.highestBidderId}','${esc(l.highestBidder)}','${l._id}','${roomId}')">🚩 รายงาน</button>`;
+      } else if (l.delivered) {
+        statusHtml = `<span class="status-pill shipped">🚚 จัดส่งแล้ว รอผู้ซื้อยืนยัน</span>`;
+      } else if (l.slipConfirmed) {
+        statusHtml = `<span class="status-pill confirmed">✓ ยืนยันสลิปแล้ว</span>`;
+        actionHtml = `<button class="btn-track" onclick="openTrackModal('${l._id}','${esc(l.name)}')">📦 กรอก Tracking</button>`;
+      } else if (l.slipRejected) {
+        statusHtml = `<span class="status-pill rejected">✕ ปฏิเสธสลิปแล้ว</span>`;
+      } else if (l.paid && slips.length) {
+        statusHtml = `<span class="status-pill pending">⏳ รอตรวจสลิป</span>`;
+        actionHtml = `
+          <button class="btn-confirm" onclick="confirmSlip('${l._id}')">✓ ยืนยันรับเงิน</button>
+          <button class="btn-reject" onclick="openRejectModal('${l._id}')">✕ ปฏิเสธ</button>`;
+      } else {
+        statusHtml = `<span class="status-pill rejected">⏳ ยังไม่ชำระเงิน</span>`;
+      }
+
+      const slipThumbsHtml = slips.length
+        ? `<div class="slip-thumbs-row">
+            ${slips.map(u => `<div class="slip-thumb-mini" onclick="openFs('${u}')"><img src="${u}" alt="slip"></div>`).join('')}
+          </div>` : '';
+
+      const trackingHtml = l.trackingNumber
+        ? `<div style="margin-top:8px;font-size:12px;color:var(--ink3)">
+            🚚 ${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}
+           </div>` : '';
+
+      const shippingHtml = payment?.shippingOption
+        ? `<div class="ship-row">🚚 ${esc(payment.shippingOption.name)} ${payment.shippingOption.price > 0 ? '฿' + payment.shippingOption.price.toLocaleString() : '(ฟรี)'}</div>`
+        : '';
+
+      return `
+        <div class="order-card">
+          <div class="order-card-head">
+            <div class="order-buyer-info">
+              <div class="order-avatar">${(l.highestBidder||'?').charAt(0).toUpperCase()}</div>
+              <div>
+                <div class="order-buyer-name">${esc(l.highestBidder || '—')}</div>
+                <div class="order-buyer-sub">ผู้ชนะการประมูล</div>
+              </div>
+            </div>
+            <div class="order-total">฿${Number(l.currentPrice).toLocaleString()}</div>
+          </div>
+          <div class="order-card-body">
+            <div class="lot-row">
+              <span class="lot-num">Lot ${l.num}</span>
+              <span class="lot-name-text">${esc(l.name)}</span>
+              <span class="lot-price-text">฿${Number(l.currentPrice).toLocaleString()}</span>
+            </div>
+            ${shippingHtml}
+            ${slipThumbsHtml}
+            ${trackingHtml}
+          </div>
+          <div class="order-card-foot">
+            <div class="foot-status">${statusHtml}</div>
+            <div class="action-btns">${actionHtml}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    updateMergedDeliverLink(roomId);
+
+  } catch(e) {
+    wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">❌</div><div class="empty-text">${e.message}</div></div>`;
+  }
+}
+
+// แสดงลิงก์ "กรอก Tracking ทีเดียวหลาย Lot" เมื่อห้องนี้มี lot ที่จ่าย+ยืนยันสลิปแล้วแต่ยังไม่ส่ง
+async function updateMergedDeliverLink(roomId) {
+  const wrap = document.getElementById('merged-deliver-link-wrap');
+  try {
+    const r = await fetch(`/api/profile/rooms/${roomId}/pending-delivery`, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await r.json();
+    const hasGroups = r.ok && data.groups && data.groups.length > 0;
+    wrap.style.display = hasGroups ? '' : 'none';
+    if (hasGroups) document.getElementById('merged-deliver-link').href = `/deliver-merged.html?room=${roomId}`;
+  } catch (e) {
+    wrap.style.display = 'none';
+  }
+}
+
+// ─────────────────────────────────────────
+// BUYER SIDE
+// ─────────────────────────────────────────
+async function loadBuyerOrders() {
+  const wrap = document.getElementById('buyer-orders-wrap');
+  wrap.innerHTML = `<div class="skeleton" style="height:120px"></div>`;
+
+  try {
+    const uid = user.id || user._id;
+    const r = await fetch(`/api/profile/${uid}`, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await r.json();
+    const lots = data.stats?.buy?.lots || [];
+
+    // Debug: ดูว่า API return อะไรบ้าง
+    console.log('Lots data:', lots);
+    if (lots.length > 0) console.log('First lot:', lots[0]);
+
+    // stats
+    let bWon = lots.length, bPending = 0, bConfirmed = 0, bShipped = 0;
+    for (const l of lots) {
+      if (l.slipConfirmed && !l.delivered) bConfirmed++;
+      else if (!l.slipConfirmed && l.paid) bPending++;
+      if (l.delivered) bShipped++;
+    }
+    document.getElementById('bs-won').textContent       = bWon;
+    document.getElementById('bs-pending').textContent   = bPending;
+    document.getElementById('bs-confirmed').textContent = bConfirmed;
+    document.getElementById('bs-shipped').textContent   = bShipped;
+
+    if (!lots.length) {
+      wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">🛒</div><div class="empty-text">ยังไม่มีประวัติการประมูล</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = lots.map(l => {
+      const roomId = getRoomId(l); // ← ใช้ helper function
+      
+      // สร้าง timeline steps
+      const steps = [
+        {
+          icon: l.paid ? '✓' : '1',
+          cls: l.paid ? 'done' : (l.slipRejected ? 'err' : 'active'),
+          label: l.slipRejected ? 'สลิปถูกปฏิเสธ' : (l.paid ? 'ชำระเงินแล้ว' : 'รอการชำระเงิน'),
+          sub: l.slipRejected
+            ? `เหตุผล: ${l.slipRejectReason || 'กรุณาส่งสลิปใหม่'} — ${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ส่งสลิปใหม่ →</a>` : 'ไม่พบข้อมูลห้อง'}`
+            : (l.paid ? 'ส่งสลิปให้ seller แล้ว' : `${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ไปชำระเงิน →</a>` : 'ไม่พบข้อมูลห้อง'}`)
+        },
+        {
+          icon: l.slipConfirmed ? '✓' : '2',
+          cls: l.slipConfirmed ? 'done' : (l.paid && !l.slipRejected ? 'active' : ''),
+          label: l.slipConfirmed ? 'Seller ยืนยันรับเงินแล้ว' : 'รอ Seller ตรวจสลิป',
+          sub: l.slipConfirmed ? '' : (l.paid ? 'Seller กำลังตรวจสอบสลิป' : 'ยังไม่ได้ชำระเงิน')
+        },
+        {
+          icon: l.delivered ? '✓' : '3',
+          cls: l.delivered ? 'done' : (l.slipConfirmed && !l.delivered ? 'active' : ''),
+          label: l.delivered ? `จัดส่งแล้ว` : 'รอ Seller จัดส่ง',
+          sub: l.trackingNumber
+            ? `${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}`
+            : (l.slipConfirmed ? 'Seller กำลังเตรียมของ' : '')
+        },
+        {
+          icon: l.received ? '✓' : '4',
+          cls: l.received ? 'done' : (l.delivered && !l.received ? 'active' : ''),
+          label: l.received ? 'รับของแล้ว ✓' : 'ยืนยันรับของ',
+          sub: l.received ? '' : (l.delivered ? 'กดยืนยันเมื่อได้รับของแล้ว' : '')
+        },
+      ];
+
+      const tlHtml = steps.map(s => `
+        <div class="tl-step">
+          <div class="tl-icon ${s.cls}">${s.icon}</div>
+          <div class="tl-content">
+            <div class="tl-label">${s.label}</div>
+            ${s.sub ? `<div class="tl-sub">${s.sub}</div>` : ''}
+          </div>
+        </div>`).join('');
+
+      const receiveBtn = (l.delivered && !l.received)
+        ? `<button class="btn-confirm" onclick="markReceived('${l._id}')">✓ ยืนยันรับของแล้ว</button>` : '';
+
+      const rateReportBtns = l.received
+        ? `<button class="btn-rate" onclick="openRateModal('${l._id}','${l.sellerId}','${esc(l.sellerName)}')">⭐ ให้คะแนนผู้ขาย</button>
+           <button class="btn-flag" onclick="openReportModal('${l.sellerId}','${esc(l.sellerName)}','${l._id}','${l.roomId}')">🚩 รายงาน</button>`
+        : '';
+
+      return `
+        <div class="order-card">
+          <div class="order-card-head">
+            <div class="order-buyer-info">
+              <div class="order-avatar" style="background:var(--blue-bg);color:var(--blue)">🃏</div>
+              <div>
+                <div class="order-buyer-name">${esc(l.lotName)}</div>
+                <div class="order-buyer-sub">${esc(l.roomTitle)}</div>
+              </div>
+            </div>
+            <div class="order-total">฿${Number(l.price).toLocaleString()}</div>
+          </div>
+          <div class="order-card-body">
+            <div class="timeline">${tlHtml}</div>
+          </div>
+          ${(receiveBtn || rateReportBtns) ? `<div class="order-card-foot"><div></div><div class="action-btns">${receiveBtn}${rateReportBtns}</div></div>` : ''}
+        </div>`;
+    }).join('');
+
+  } catch(e) {
+    wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">❌</div><div class="empty-text">${e.message}</div></div>`;
+  }
+}
+
+// ─────────────────────────────────────────
+// Actions
+// ─────────────────────────────────────────
+async function confirmSlip(lotId) {
+  if (!confirm('ยืนยันว่าได้รับเงินแล้ว?')) return;
+  try {
+    const r = await fetch(`/api/profile/lots/${lotId}/confirm-slip`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+    loadSellerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+function openRejectModal(lotId) {
+  currentRejectLotId = lotId;
+  document.getElementById('reject-reason').value = '';
+  document.getElementById('reject-modal').classList.add('show');
+}
+function closeRejectModal() {
+  document.getElementById('reject-modal').classList.remove('show');
+  currentRejectLotId = null;
+}
+async function submitReject() {
+  if (!currentRejectLotId) return;
+  const reason = document.getElementById('reject-reason').value.trim();
+  try {
+    const r = await fetch(`/api/profile/lots/${currentRejectLotId}/reject-slip`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ reason })
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+    closeRejectModal(); loadSellerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+function openTrackModal(lotId, lotName) {
+  currentTrackLotId = lotId;
+  document.getElementById('track-modal-sub').textContent = `สำหรับ "${lotName}"`;
+  document.getElementById('track-number').value = '';
+  document.getElementById('track-provider').value = '';
+  document.getElementById('track-modal').classList.add('show');
+}
+function closeTrackModal() {
+  document.getElementById('track-modal').classList.remove('show');
+  currentTrackLotId = null;
+}
+async function submitTracking() {
+  if (!currentTrackLotId) return;
+  const trackingNumber = document.getElementById('track-number').value.trim();
+  const shippingProvider = document.getElementById('track-provider').value;
+  if (!trackingNumber) { alert('กรุณากรอกเลข tracking'); return; }
+  try {
+    const r = await fetch(`/api/profile/lots/${currentTrackLotId}/deliver`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ trackingNumber, shippingProvider })
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+    closeTrackModal(); loadSellerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+async function markReceived(lotId) {
+  if (!confirm('ยืนยันว่าได้รับของแล้ว?')) return;
+  try {
+    const r = await fetch(`/api/profile/lots/${lotId}/receive`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+    });
+    if (!r.ok) throw new Error('ยืนยันไม่ได้');
+    loadBuyerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+// ─────────────────────────────────────────
+// Rating
+// ─────────────────────────────────────────
+async function openRateModal(lotId, targetId, targetName) {
+  try {
+    const r = await fetch(`/api/ratings/lot/${lotId}/can-rate`, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await r.json();
+    if (!data.canRate) {
+      alert(data.existing ? 'คุณให้คะแนน lot นี้ไปแล้ว' : (data.reason || 'ให้คะแนนไม่ได้ตอนนี้'));
+      return;
+    }
+  } catch (e) { alert(e.message); return; }
+
+  rateCtx = { lotId, targetId, targetName };
+  rateScore = 0;
+  document.getElementById('rate-modal-sub').textContent = `ให้คะแนน ${targetName || 'คู่ค้า'}`;
+  document.getElementById('rate-comment').value = '';
+  updateStarPicker();
+  document.getElementById('rate-modal').classList.add('show');
+}
+function closeRateModal() {
+  document.getElementById('rate-modal').classList.remove('show');
+  rateCtx = null;
+}
+function updateStarPicker() {
+  document.querySelectorAll('#rate-star-picker span').forEach(s => {
+    s.classList.toggle('on', Number(s.dataset.v) <= rateScore);
+  });
+}
+document.getElementById('rate-star-picker').addEventListener('click', e => {
+  const v = e.target?.dataset?.v;
+  if (!v) return;
+  rateScore = Number(v);
+  updateStarPicker();
+});
+async function submitRating() {
+  if (!rateCtx) return;
+  if (!rateScore) { alert('กรุณาเลือกจำนวนดาว'); return; }
+  try {
+    const r = await fetch('/api/ratings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ lotId: rateCtx.lotId, score: rateScore, comment: document.getElementById('rate-comment').value })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    closeRateModal();
+    alert('ขอบคุณสำหรับคำแนะนำ');
+    if (currentView === 'seller') loadSellerOrders(); else loadBuyerOrders();
+  } catch (e) { alert(e.message); }
+}
+
+// ─────────────────────────────────────────
+// Report
+// ─────────────────────────────────────────
+let reportImgFiles = [];
+
+function openReportModal(targetId, targetName, lotId, roomId) {
+  reportCtx = { targetId, targetName, lotId, roomId };
+  document.getElementById('report-modal-sub').textContent = `แจ้งปัญหาเกี่ยวกับ ${targetName || 'ผู้ใช้นี้'} ให้ admin ตรวจสอบ`;
+  document.getElementById('report-reason').value = '';
+  document.getElementById('report-detail').value = '';
+  reportImgFiles = [];
+  document.getElementById('report-img-thumbs').querySelectorAll('.slip-thumb').forEach(el => el.remove());
+  document.getElementById('report-img-count').textContent = '0 รูป';
+  document.getElementById('report-modal').classList.add('show');
+}
+function closeReportModal() {
+  document.getElementById('report-modal').classList.remove('show');
+  reportCtx = null;
+}
+function handleReportImgSelect(input) {
+  Array.from(input.files).forEach(f => {
+    if (f.size > 5 * 1024 * 1024) { alert(`${f.name}: ไฟล์ใหญ่เกิน 5MB`); return; }
+    const idx = reportImgFiles.length;
+    reportImgFiles.push(f);
+    const reader = new FileReader();
+    reader.onload = e => {
+      const thumb = document.createElement('div');
+      thumb.className = 'slip-thumb';
+      thumb.id = `report-img-thumb-${idx}`;
+      thumb.innerHTML = `<img src="${e.target.result}" alt="หลักฐาน ${idx + 1}"><div class="thumb-remove" onclick="removeReportImg(${idx})">✕</div>`;
+      const addBtn = document.querySelector('#report-img-thumbs .slip-add-btn');
+      document.getElementById('report-img-thumbs').insertBefore(thumb, addBtn);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value = '';
+  setTimeout(updateReportImgCount, 100);
+}
+function removeReportImg(idx) {
+  reportImgFiles[idx] = null;
+  document.getElementById(`report-img-thumb-${idx}`)?.remove();
+  updateReportImgCount();
+}
+function updateReportImgCount() {
+  document.getElementById('report-img-count').textContent = `${reportImgFiles.filter(Boolean).length} รูป`;
+}
+async function submitReport() {
+  if (!reportCtx) return;
+  const reason = document.getElementById('report-reason').value;
+  const detail = document.getElementById('report-detail').value.trim();
+  if (!reason) { alert('กรุณาเลือกเหตุผล'); return; }
+
+  const btn = document.getElementById('report-submit-btn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...';
+  try {
+    // อัปโหลดรูปหลักฐานก่อน (ถ้ามี)
+    const imageUrls = [];
+    for (const f of reportImgFiles.filter(Boolean)) {
+      const fd = new FormData();
+      fd.append('image', f);
+      const ur = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+      const ud = await ur.json();
+      if (!ur.ok) throw new Error(ud.error || 'อัปโหลดรูปไม่สำเร็จ');
+      imageUrls.push(ud.url);
+    }
+
+    const r = await fetch('/api/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ targetId: reportCtx.targetId, reason, detail, lotId: reportCtx.lotId, roomId: reportCtx.roomId, imageUrls })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    closeReportModal();
+    alert('ขอบคุณสำหรับคำแนะนำ');
+  } catch (e) { alert(e.message); }
+  finally { btn.disabled = false; btn.textContent = '🚩 ส่งรายงาน'; }
+}
+
+// slip fullscreen
+function openFs(url) { document.getElementById('slip-fs-img').src = url; document.getElementById('slip-fs').classList.add('show'); }
+function closeFs() { document.getElementById('slip-fs').classList.remove('show'); }
+
+// close modals on backdrop
+document.getElementById('track-modal').addEventListener('click', e => { if (e.target.id === 'track-modal') closeTrackModal(); });
+document.getElementById('reject-modal').addEventListener('click', e => { if (e.target.id === 'reject-modal') closeRejectModal(); });
+document.getElementById('rate-modal').addEventListener('click', e => { if (e.target.id === 'rate-modal') closeRateModal(); });
+document.getElementById('report-modal').addEventListener('click', e => { if (e.target.id === 'report-modal') closeReportModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeTrackModal(); closeRejectModal(); closeRateModal(); closeReportModal(); closeFs(); } });
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ──
+loadSellerRooms();
+</script>
+</body>
+</html>

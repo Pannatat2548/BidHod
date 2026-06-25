@@ -76,7 +76,6 @@
       vertical-align: middle;
     }
 
-    /* ── Search bar ── */
     .search-wrap {
       position: relative;
       margin-bottom: 16px;
@@ -128,7 +127,6 @@
       display: block;
     }
 
-    /* ── Tag chips ── */
     .tag-filter-row {
       display: flex;
       flex-wrap: wrap;
@@ -193,6 +191,12 @@
       color: #fff;
     }
 
+    /* ── ปุ่มชำระเงินบน card ── */
+  
+
+    /* badge จำนวน lot ที่ค้างชำระ */
+    
+
     @media (max-width: 640px) {
       .filter-bar {
         width: 100%;
@@ -213,6 +217,66 @@
         font-size: 12px;
         white-space: nowrap;
       }
+    }
+
+    /* ── Sticky bottom orders bar ── */
+    #orders-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      padding: 12px 16px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    #orders-bar.show {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    #orders-bar .orders-bar-text {
+      font-size: 13px;
+      color: var(--ink2);
+      flex: 1;
+    }
+
+    #orders-bar .orders-bar-text strong {
+      color: var(--ink);
+    }
+
+    #orders-bar a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: opacity .15s;
+    }
+
+    #orders-bar a:hover {
+      opacity: 0.88;
+    }
+
+    #orders-bar .orders-bar-badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
     }
   </style>
   <script src="/socket.io/socket.io.js"></script>
@@ -236,6 +300,9 @@
           <a href="/profile.html" class="dropdown-item">
             <span class="dropdown-icon">👤</span> โปรไฟล์
           </a>
+          <a href="/orders.html" class="dropdown-item" id="orders-link">
+            <span class="dropdown-icon">📦</span> คำสั่งซื้อ
+          </a>
           <a href="/messages.html?admin=1" class="dropdown-item">
             <span class="dropdown-icon">🛡️</span> ติดต่อ Admin
           </a>
@@ -258,7 +325,6 @@
     <div class="page-label">Auctions</div>
     <h1>รายการประมูลทั้งหมด</h1>
 
-    <!-- ── Search bar ── -->
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input id="search-input" type="text" placeholder="ค้นหาชื่อห้อง, House, ผู้ขาย..." oninput="onSearch(this.value)">
@@ -270,7 +336,6 @@
       <button class="filter-btn" onclick="filterRooms('live', this)">กำลัง Live 🔴</button>
       <button class="filter-btn" onclick="filterRooms('ended', this)">สิ้นสุดแล้ว</button>
     </div>
-    <!-- ── Tag filter row ── -->
     <div class="tag-filter-row" id="tag-filter-row" style="display:none"></div>
     <div class="feed-grid" id="rooms-grid">
       <div class="empty">กำลังโหลด...</div>
@@ -286,13 +351,16 @@
     let currentFilter = 'all';
     let currentTag = null;
     let searchTimer = null;
+    // Map ของ roomId → จำนวน lot ที่ค้างชำระของ user คนนี้
+    // { "roomId": 3, ... }
+    let unpaidMap = {};
+
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
 
     if (user) {
       const navUsername = document.getElementById('nav-username');
       if (navUsername) navUsername.textContent = user.name || 'โปรไฟล์';
-
-      // แสดงปุ่ม Admin Panel เฉพาะ role === 'admin'
       if (user.role === 'admin') {
         const adminLink = document.getElementById('admin-panel-link');
         if (adminLink) adminLink.style.display = '';
@@ -317,10 +385,10 @@
     }
 
     async function loadUnreadCount() {
-      if (!localStorage.getItem('token')) return;
+      if (!token) return;
       try {
         const res = await fetch('/api/messages/conversations', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) return;
         const conv = await res.json();
@@ -329,26 +397,50 @@
         if (msgBtn && unreadMessages > 0) {
           msgBtn.innerHTML = `💬 ข้อความ <span style="background:#ef4444;color:#fff;border-radius:999px;font-size:10px;padding:2px 6px;margin-left:4px;font-weight:700;">${unreadMessages > 9 ? '9+' : unreadMessages}</span>`;
         }
-      } catch (err) {
-        console.warn('Unread load failed', err);
-      }
+      } catch (err) { console.warn('Unread load failed', err); }
     }
 
     async function initIndexNotifications() {
       if (!user || (!user.id && !user._id)) return;
       const socket = io();
-      socket.on('connect', () => {
-        socket.emit('user:join', user.id || user._id);
-      });
+      socket.on('connect', () => { socket.emit('user:join', user.id || user._id); });
       socket.on('chat:notification', ({ fromId, preview }) => {
         unreadMessages += 1;
         loadUnreadCount();
         showToast(`ข้อความใหม่: ${preview}`);
       });
-      socket.on('disconnect', () => { });
     }
 
-    // ── Search ──────────────────────────────────
+    async function loadUnpaidLots() {
+      if (!token || !user) return;
+      try {
+        const r = await fetch('/api/payments/my-unpaid', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        // data = [{ roomId: "xxx", count: 2 }, ...]
+        unpaidMap = {};
+        (Array.isArray(data) ? data : []).forEach(item => {
+          unpaidMap[item.roomId] = item.count || item.lots?.length || 1;
+        });
+
+        // อัปเดต sticky bottom bar
+        const total = Object.values(unpaidMap).reduce((s, n) => s + n, 0);
+        const bar = document.getElementById('orders-bar');
+        if (bar) {
+          if (total > 0) {
+            bar.classList.add('show');
+            document.getElementById('orders-bar-total').textContent = `${total} รายการ`;
+            document.getElementById('orders-bar-badge').textContent = total;
+          } else {
+            bar.classList.remove('show');
+          }
+        }
+      } catch { /* endpoint ยังไม่มี — ไม่แสดงปุ่ม */ }
+    }
+
+    // ── Search ──
     function onSearch(val) {
       document.getElementById('search-clear').classList.toggle('show', !!val);
       clearTimeout(searchTimer);
@@ -363,10 +455,10 @@
 
     async function doSearch(q) {
       try {
-        const clean = q.trim().replace(/^#+/, ''); // ← ตัด # นำหน้าออก
-        const params = new URLSearchParams();
-        if (clean) params.set('q', clean);
-        const url = params.toString() ? `/api/rooms?${params}` : '/api/rooms';
+        const clean = q.trim().replace(/^#+/, '');
+        const p = new URLSearchParams();
+        if (clean) p.set('q', clean);
+        const url = p.toString() ? `/api/rooms?${p}` : '/api/rooms';
         const r = await fetch(url);
         allRooms = await r.json();
         applyFilter();
@@ -374,7 +466,8 @@
         document.getElementById('rooms-grid').innerHTML = '<div class="empty">ค้นหาไม่ได้</div>';
       }
     }
-    // ── Tags ─────────────────────────────────────
+
+    // ── Tags ──
     async function loadTags() {
       try {
         const r = await fetch('/api/rooms/tags');
@@ -390,12 +483,12 @@
     }
 
     function filterByTag(tag) {
-      currentTag = currentTag === tag ? null : tag; // toggle
-      loadTags(); // re-render chips
+      currentTag = currentTag === tag ? null : tag;
+      loadTags();
       doSearch(document.getElementById('search-input').value);
     }
 
-    // ── Filter ──────────────────────────────────
+    // ── Filter ──
     function applyFilter() {
       let rooms = allRooms;
       if (currentTag) rooms = rooms.filter(r => r.tags?.includes(currentTag));
@@ -411,9 +504,8 @@
       applyFilter();
     }
 
-    // ── Load & Render ────────────────────────────
+    // ── Load & Render ──
     async function loadRooms() {
-      // ถ้ากำลัง search อยู่ ไม่ refresh ทับ
       const q = document.getElementById('search-input').value.trim();
       if (q) return;
       try {
@@ -432,55 +524,67 @@
       document.getElementById('live-rooms').textContent = live;
 
       if (!rooms.length) {
-        document.getElementById('rooms-grid').innerHTML = '<div class="empty" style="grid-column:1/-1;padding:60px;">ไม่พบรายการประมูลในขณะนี้</div>';
+        document.getElementById('rooms-grid').innerHTML =
+          '<div class="empty" style="grid-column:1/-1;padding:60px;">ไม่พบรายการประมูลในขณะนี้</div>';
         return;
       }
 
       document.getElementById('rooms-grid').innerHTML = rooms.map(r => {
         const isLive = r.activeLots > 0;
         const thumb = r.coverImage ? `<img src="${r.coverImage}" alt="${r.title}">` : '🏛️';
+        const roomId = r._id;
+        const unpaid = unpaidMap[roomId] || 0;
+
+        // Badge ค้างชำระ (แสดงเฉพาะห้องที่จบแล้ว + มี lot ค้าง)
+        const unpaidBadge = (!isLive && unpaid > 0 && token)
+          ? `<span style="position:absolute;top:12px;right:12px;" 
+           class="badge" 
+           style="background:#ef4444;color:#fff;border-color:rgba(239,68,68,0.3);">
+           💳 ค้างชำระ ${unpaid} รายการ
+         </span>`
+          : '';
+
         return `
-          <a class="feed-card" href="/room.html?id=${r._id}">
-            <div class="feed-thumb">
-              ${thumb}
-              <span style="position:absolute;top:12px;left:12px;" class="badge ${isLive ? 'badge-live' : 'badge-ended'}">
-                ${isLive ? '● LIVE' : 'สิ้นสุด'}
-              </span>
-            </div>
-            <div class="feed-body">
-              <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
-              <div class="feed-title">${r.title}</div>
-              ${r.tags?.length ? `<div class="feed-tags">${r.tags.map(t =>
+      <a class="feed-card" href="/room.html?id=${roomId}">
+        <div class="feed-thumb">
+          ${thumb}
+          <span style="position:absolute;top:12px;left:12px;"
+            class="badge ${isLive ? 'badge-live' : 'badge-ended'}">
+            ${isLive ? '● LIVE' : 'สิ้นสุด'}
+          </span>
+          ${unpaidBadge}
+        </div>
+        <div class="feed-body">
+          <div class="feed-house">${r.house || 'ไม่ระบุ House'}</div>
+          <div class="feed-title">${r.title}</div>
+          ${r.tags?.length ? `<div class="feed-tags">${r.tags.map(t =>
           `<span class="feed-tag" onclick="event.preventDefault();filterByTag('${t}')">#${t}</span>`
         ).join('')}</div>` : ''}
-              <div class="feed-bottom">
-                <div>
-                  <div class="price-label">ราคาเริ่มจาก</div>
-                  <div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div>
-                </div>
-                <div style="font-size:12px;color:var(--ink4);text-align:right;">
-                  <div>${r.totalLots} Lots</div>
-                  <div style="margin-top:2px;">โดย ${r.sellerName || '—'}</div>
-                </div>
-              </div>
+          <div class="feed-bottom">
+            <div>
+              <div class="price-label">ราคาเริ่มจาก</div>
+              <div class="price-val">฿${(r.lowestPrice || 0).toLocaleString()}</div>
             </div>
-          </a>
-        `;
+            <div style="font-size:12px;color:var(--ink4);text-align:right;">
+              <div>${r.totalLots} Lots</div>
+              <div style="margin-top:2px;">โดย ${r.sellerName || '—'}</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
       }).join('');
     }
-
-    // ── Dropdown ─────────────────────────────────
+    // ── Dropdown ──
     function toggleUserMenu(e) {
       if (e) e.stopPropagation();
       const menu = document.getElementById('userMenu');
       if (menu) menu.classList.toggle('open');
     }
-
     document.addEventListener('click', function (e) {
       const menu = document.getElementById('userMenu');
       if (menu && !menu.contains(e.target)) menu.classList.remove('open');
     });
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         const menu = document.getElementById('userMenu');
@@ -488,13 +592,21 @@
       }
     });
 
-    // ── Init ─────────────────────────────────────
-    loadRooms();
+    // ── Init ──
+    loadUnpaidLots().then(() => loadRooms()); // โหลด unpaid ก่อน แล้วค่อย render rooms
     loadTags();
     loadUnreadCount();
     initIndexNotifications();
-    setInterval(loadRooms, 15000);
+    setInterval(() => {
+      loadUnpaidLots().then(() => loadRooms());
+    }, 15000);
   </script>
+  <div id="orders-bar">
+    <div class="orders-bar-text">
+      คุณมีรายการที่ชนะการประมูล <strong id="orders-bar-total">0 รายการ</strong> รอชำระเงิน
+    </div>
+    <a href="/orders.html">📦 ดูสถานะคำสั่งซื้อ <span class="orders-bar-badge" id="orders-bar-badge">0</span></a>
+  </div>
   <div id="toast"></div>
 </body>
 

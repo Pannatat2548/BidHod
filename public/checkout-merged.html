@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bidmai — ชำระเงิน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+body { background: var(--bg2); }
+
+.page-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  border-radius: var(--radius);
+  padding: 28px 28px 24px;
+  margin-bottom: 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.page-hero::before {
+  content: '🧾';
+  position: absolute; right: 24px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 64px; opacity: 0.15;
+}
+.page-hero .label {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  opacity: 0.75; margin-bottom: 6px;
+}
+.page-hero h1 {
+  font-size: 22px; font-weight: 700; margin: 0;
+  color: #fff; border: none; padding: 0;
+}
+.page-hero .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+.section-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.section-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; letter-spacing: 2px; color: var(--ink4);
+  text-transform: uppercase; font-weight: 600;
+  margin-bottom: 18px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.section-head .icon { font-size: 16px; }
+
+.merge-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid rgba(34,197,94,.2);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; margin-bottom: 14px;
+}
+
+.order-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.order-table th {
+  text-align: left; padding: 6px 8px;
+  font-size: 10px; letter-spacing: 1px; color: var(--ink4);
+  text-transform: uppercase; border-bottom: 2px solid var(--line);
+  font-weight: 600; white-space: nowrap; background: var(--bg2);
+}
+.order-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.order-table tr:last-child td { border-bottom: none; }
+.order-table tr:hover td { background: var(--primary-light); }
+.lot-badge {
+  display: inline-block; background: var(--primary-light); color: var(--primary);
+  border-radius: 999px; font-size: 11px; font-weight: 700; padding: 2px 8px;
+}
+.price-cell { font-weight: 600; color: var(--ink); white-space: nowrap; text-align: right; }
+
+.summary-box {
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 14px;
+}
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; padding: 4px 0; color: var(--ink2);
+}
+.summary-row.total {
+  font-size: 16px; font-weight: 700; color: var(--primary);
+  padding-top: 10px; margin-top: 6px;
+  border-top: 1.5px solid var(--line2);
+}
+
+.shipping-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border: 1.5px solid var(--line2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: all .15s; margin-bottom: 8px; background: var(--bg);
+}
+.shipping-option:last-child { margin-bottom: 0; }
+.shipping-option:hover { border-color: var(--primary); background: var(--primary-light); }
+.shipping-option.selected {
+  border-color: var(--primary); background: var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.radio-circle {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--line2); flex-shrink: 0;
+  transition: all .15s; display: flex; align-items: center; justify-content: center;
+}
+.shipping-option.selected .radio-circle { border-color: var(--primary); background: var(--primary); }
+.radio-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; display: none; }
+.shipping-option.selected .radio-dot { display: block; }
+.opt-info { flex: 1; }
+.opt-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.opt-desc { font-size: 11px; color: var(--ink4); margin-top: 1px; }
+.opt-price { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.shipping-option.selected .opt-price { color: var(--primary); }
+.free-tag {
+  background: var(--green-bg); color: var(--green);
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+}
+
+.slip-upload-area {
+  border: 2px dashed var(--line2); border-radius: var(--radius);
+  padding: 16px; background: var(--bg2); transition: border-color .15s;
+}
+.slip-upload-area:hover { border-color: var(--primary); }
+.slip-thumbs {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 10px; min-height: 72px; align-items: flex-start;
+}
+.slip-thumb {
+  width: 72px; height: 72px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--bg);
+  overflow: hidden; position: relative; flex-shrink: 0;
+}
+.slip-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-remove {
+  position: absolute; top: 3px; right: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(239,68,68,.9); color: #fff;
+  font-size: 10px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-weight: 700;
+}
+.slip-add-btn {
+  width: 72px; height: 72px; border-radius: var(--radius-sm);
+  border: 2px dashed var(--line2); background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; cursor: pointer;
+  color: var(--ink4); font-size: 11px; font-weight: 600;
+  transition: all .15s; flex-shrink: 0;
+}
+.slip-add-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.slip-add-btn .plus-icon { font-size: 22px; line-height: 1; }
+.slip-hint { font-size: 11px; color: var(--ink4); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.slip-count-badge {
+  background: var(--primary-light); color: var(--primary);
+  border-radius: 999px; font-size: 11px; font-weight: 700; padding: 1px 8px;
+}
+
+.hint-box {
+  background: var(--blue-bg); border: 1px solid rgba(59,130,246,.2);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: 12px; color: var(--blue); margin-top: 12px;
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.6;
+}
+
+.seller-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg2);
+  border-radius: var(--radius-sm); border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+.seller-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--primary-light); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--primary); flex-shrink: 0;
+}
+.seller-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.seller-label { font-size: 11px; color: var(--ink4); }
+
+.btn-submit {
+  width: 100%; padding: 16px; font-size: 15px; font-weight: 700;
+  font-family: inherit;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 12px rgba(79,70,229,.35); margin-top: 6px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.45); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.msg { min-height: 20px; font-size: 13px; margin-top: 10px; text-align: center; border-radius: var(--radius-sm); padding: 0; transition: all .2s; }
+.msg.ok { color: var(--green); background: var(--green-bg); padding: 10px; }
+.msg.err { color: var(--red); background: var(--red-bg); padding: 10px; }
+
+.skeleton { background: var(--line); border-radius: var(--radius-sm); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+@media (max-width: 640px) {
+  .page-hero { padding: 20px; }
+  .page-hero h1 { font-size: 18px; }
+  .section-card { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" style="font-size:12px;color:var(--ink3)">← กลับ</a>
+    <div class="logo">Bidmai</div>
+  </div>
+</nav>
+
+<div class="container-narrow">
+
+  <div class="page-hero">
+    <div class="label">Checkout</div>
+    <h1>ชำระเงิน</h1>
+    <div class="subtitle" id="hero-subtitle">กำลังโหลดรายการ...</div>
+  </div>
+
+  <div id="loading-state">
+    <div class="section-card">
+      <div class="skeleton" style="height:14px;width:40%;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:40px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:40px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:40px"></div>
+    </div>
+  </div>
+
+  <div id="main-content" style="display:none">
+
+    <!-- รายการที่ประมูลได้ -->
+    <div class="section-card">
+      <div class="section-head"><span class="icon">🏆</span> รายการที่ประมูลได้</div>
+      <div class="seller-row">
+        <div class="seller-avatar" id="seller-avatar">?</div>
+        <div>
+          <div class="seller-name" id="seller-name">—</div>
+          <div class="seller-label">ผู้ขาย</div>
+        </div>
+      </div>
+      <div class="merge-badge">🔗 รวม <span id="lot-count-text">0</span> รายการ จ่ายครั้งเดียว</div>
+      <div style="overflow-x:auto">
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>เบอร์</th>
+              <th>รายการ</th>
+              <th style="text-align:right">ราคา</th>
+            </tr>
+          </thead>
+          <tbody id="order-tbody"></tbody>
+        </table>
+      </div>
+      <div class="summary-box">
+        <div class="summary-row"><span>ราคาสินค้ารวม</span><span id="subtotal-text">฿ 0</span></div>
+        <div class="summary-row"><span>ค่าส่ง</span><span id="shipping-price-text">—</span></div>
+        <div class="summary-row total"><span>ยอดรวมทั้งหมด</span><span id="total-text">฿ 0</span></div>
+      </div>
+    </div>
+
+    <!-- เลือกการจัดส่ง -->
+    <div class="section-card">
+      <div class="section-head"><span class="icon">🚚</span> เลือกการจัดส่ง</div>
+      <div id="shipping-options-wrap"></div>
+    </div>
+
+    <!-- แนบสลิป -->
+    <div class="section-card">
+      <div class="section-head"><span class="icon">📎</span> แนบสลิปโอนเงิน</div>
+      <div class="slip-upload-area">
+        <div class="slip-thumbs" id="slip-thumbs">
+          <div class="slip-add-btn" onclick="document.getElementById('slip-input').click()">
+            <div class="plus-icon">+</div>
+            <div>เพิ่มสลิป</div>
+          </div>
+        </div>
+        <div class="slip-hint">
+          แนบได้หลายรูป •
+          <span class="slip-count-badge" id="slip-count-badge">0 รูป</span>
+          • JPG, PNG, WEBP ไม่เกิน 5MB/รูป
+        </div>
+      </div>
+      <input type="file" id="slip-input" accept="image/*" multiple style="display:none" onchange="handleSlipSelect(this)">
+      <div class="hint-box">💡 ถ้าโอนหลายรอบ สามารถแนบสลิปได้หลายรูป — ผู้ขายจะเห็นทุกรูปพร้อมกัน</div>
+    </div>
+
+    <button class="btn-submit" id="submit-btn" onclick="submitPayment()" disabled>✅ ยืนยันการชำระเงิน</button>
+    <div class="msg" id="msg"></div>
+    <div style="height:40px"></div>
+
+  </div>
+</div>
+
+<script>
+// ── Auth guard (ใช้ pattern เดียวกับ create-room.html) ──
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+const token = localStorage.getItem('token');
+if (!token || !user) location.href = '/login.html?redirect=' + encodeURIComponent(location.href);
+
+// ── Params — รับ ?room=ID มาจาก index.html ──
+const params   = new URLSearchParams(location.search);
+const roomId   = params.get('room');
+if (!roomId) { location.href = '/'; }
+
+// ── State ──
+let wonLots      = [];
+let shippingOpts = [];
+let selectedShip = null;
+let slipFiles    = [];
+
+// ── Boot ──
+window.addEventListener('DOMContentLoaded', loadData);
+
+async function loadData() {
+  try {
+    // 1) ดึง lot ที่ user ชนะในห้องนี้  →  GET /api/rooms/:id/my-wins
+    const wonRes = await fetch(`/api/rooms/${roomId}/my-wins`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!wonRes.ok) throw new Error('โหลดรายการไม่สำเร็จ');
+    const wonData = await wonRes.json();
+    // รองรับทั้ง { lots: [...] } และ [...]
+    wonLots = Array.isArray(wonData) ? wonData : (wonData.lots || []);
+
+    if (!wonLots.length) {
+      document.getElementById('loading-state').innerHTML =
+        '<div class="hint-box">ℹ️ ไม่พบรายการที่ประมูลได้ในห้องนี้</div>';
+      return;
+    }
+
+    // 2) ดึงข้อมูลห้อง (shipping options อยู่ใน room)  →  GET /api/rooms/:id
+    const roomRes = await fetch(`/api/rooms/${roomId}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!roomRes.ok) throw new Error('โหลดข้อมูลห้องไม่สำเร็จ');
+    const roomData = await roomRes.json();
+
+    // รองรับทั้ง shippingOptions และ shipping_options
+    shippingOpts = (roomData.shippingOptions || roomData.shipping_options || [])
+      .filter(o => o.enabled !== false); // เอาเฉพาะที่ enabled
+
+    renderPage(roomData);
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('main-content').style.display  = 'block';
+
+  } catch(e) {
+    document.getElementById('loading-state').innerHTML =
+      `<div class="hint-box">❌ ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ── Render ──
+function renderPage(room) {
+  document.getElementById('hero-subtitle').textContent = `ห้อง: ${room.title || roomId}`;
+
+  const sellerName = room.house || room.sellerName || 'ผู้ขาย';
+  document.getElementById('seller-name').textContent    = sellerName;
+  document.getElementById('seller-avatar').textContent  = sellerName.charAt(0).toUpperCase();
+  document.getElementById('lot-count-text').textContent = wonLots.length;
+
+  // order rows
+  document.getElementById('order-tbody').innerHTML = wonLots.map(lot => `
+    <tr>
+      <td><span class="lot-badge">เบอร์ ${escHtml(lot.name)}</span></td>
+      <td style="color:var(--ink2)">${escHtml(lot.desc || lot.name)}</td>
+      <td class="price-cell">฿ ${fmt(lot.currentPrice ?? lot.startingPrice ?? 0)}</td>
+    </tr>
+  `).join('');
+
+  const subtotal = calcSubtotal();
+  document.getElementById('subtotal-text').textContent = `฿ ${fmt(subtotal)}`;
+
+  renderShippingOptions();
+}
+
+function renderShippingOptions() {
+  const wrap = document.getElementById('shipping-options-wrap');
+  if (!shippingOpts.length) {
+    // ถ้า seller ไม่ได้ตั้ง shipping ไว้ → ใช้ default
+    shippingOpts = [
+      { name: 'ส่งพัสดุ (standard)', price: 0, desc: 'ติดต่อผู้ขายเพื่อนัดค่าส่ง' },
+      { name: 'นัดรับ', price: 0, desc: 'ไม่มีค่าส่ง' },
+    ];
+  }
+  wrap.innerHTML = shippingOpts.map((opt, i) => {
+    const isFree = !opt.price;
+    return `
+      <div class="shipping-option" id="ship-opt-${i}" onclick="selectShipping(${i})">
+        <div class="radio-circle"><div class="radio-dot"></div></div>
+        <div class="opt-info">
+          <div class="opt-name">${escHtml(opt.name)}</div>
+          ${opt.desc ? `<div class="opt-desc">${escHtml(opt.desc)}</div>` : ''}
+        </div>
+        <div class="opt-price">
+          ${isFree ? '<span class="free-tag">ฟรี</span>' : `+ ฿ ${fmt(opt.price)}`}
+        </div>
+      </div>`;
+  }).join('');
+  selectShipping(0); // auto-select ตัวแรก
+}
+
+function selectShipping(idx) {
+  selectedShip = idx;
+  document.querySelectorAll('.shipping-option').forEach((el, i) =>
+    el.classList.toggle('selected', i === idx)
+  );
+  updateTotal();
+  checkSubmitReady();
+}
+
+function updateTotal() {
+  const subtotal  = calcSubtotal();
+  const ship      = shippingOpts[selectedShip];
+  const shipCost  = ship?.price || 0;
+  document.getElementById('shipping-price-text').textContent = shipCost === 0 ? 'ฟรี' : `+ ฿ ${fmt(shipCost)}`;
+  document.getElementById('total-text').textContent          = `฿ ${fmt(subtotal + shipCost)}`;
+}
+
+function calcSubtotal() {
+  return wonLots.reduce((s, l) => s + (l.currentPrice ?? l.startingPrice ?? 0), 0);
+}
+
+// ── Slip ──
+function handleSlipSelect(input) {
+  Array.from(input.files).forEach(f => {
+    if (f.size > 5 * 1024 * 1024) { showMsg(`${f.name}: ไฟล์ใหญ่เกิน 5MB`, 'err'); return; }
+    const idx = slipFiles.length;
+    slipFiles.push(f);
+    const reader = new FileReader();
+    reader.onload = e => {
+      const thumb = document.createElement('div');
+      thumb.className = 'slip-thumb';
+      thumb.id = `slip-thumb-${idx}`;
+      thumb.innerHTML = `
+        <img src="${e.target.result}" alt="สลิป ${idx+1}">
+        <div class="thumb-remove" onclick="removeSlip(${idx})">✕</div>`;
+      const addBtn = document.querySelector('.slip-add-btn');
+      document.getElementById('slip-thumbs').insertBefore(thumb, addBtn);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value = '';
+  setTimeout(() => { updateSlipCount(); checkSubmitReady(); }, 100);
+}
+
+function removeSlip(idx) {
+  slipFiles[idx] = null;
+  document.getElementById(`slip-thumb-${idx}`)?.remove();
+  updateSlipCount();
+  checkSubmitReady();
+}
+
+function updateSlipCount() {
+  document.getElementById('slip-count-badge').textContent =
+    `${slipFiles.filter(Boolean).length} รูป`;
+}
+
+function checkSubmitReady() {
+  const hasSlip = slipFiles.filter(Boolean).length > 0;
+  document.getElementById('submit-btn').disabled = !(selectedShip !== null && hasSlip);
+}
+
+// ── Submit  →  POST /api/payments ──
+async function submitPayment() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...';
+
+  try {
+    // 1) อัปโหลดสลิปทุกรูป  →  POST /api/upload  (ใช้ endpoint เดียวกับ create-room)
+    showMsg('กำลังอัปโหลดสลิป...', 'ok');
+    const slipUrls = [];
+    for (const file of slipFiles.filter(Boolean)) {
+      const fd = new FormData();
+      fd.append('image', file);
+      const r = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd,
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'อัปโหลดสลิปไม่สำเร็จ');
+      slipUrls.push(d.url);
+    }
+
+    // 2) บันทึก payment  →  POST /api/payments
+    showMsg('กำลังบันทึก...', 'ok');
+    const ship    = shippingOpts[selectedShip];
+    const total   = calcSubtotal() + (ship?.price || 0);
+    const payload = {
+      roomId,
+      lotIds:         wonLots.map(l => l._id || l.id),
+      shippingOption: { name: ship?.name, price: ship?.price || 0 },
+      slipUrls,
+      totalAmount:    total,
+    };
+
+    const r = await fetch('/api/payments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'บันทึกไม่สำเร็จ');
+
+    showMsg('ส่งสลิปสำเร็จ! รอผู้ขายยืนยัน 🎉', 'ok');
+    btn.textContent = '✅ ส่งแล้ว';
+    setTimeout(() => { location.href = `/room.html?id=${roomId}`; }, 2000);
+
+  } catch(e) {
+    showMsg(e.message || 'เกิดข้อผิดพลาด', 'err');
+    btn.disabled = false; btn.textContent = '✅ ยืนยันการชำระเงิน';
+  }
+}
+
+// ── Utils ──
+function fmt(n)     { return Number(n).toLocaleString('th-TH'); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text; el.className = 'msg ' + type;
+}
+</script>
+</body>
+</html>
