@@ -325,7 +325,9 @@ async function loadData() {
     if (!wonRes.ok) throw new Error('โหลดรายการไม่สำเร็จ');
     const wonData = await wonRes.json();
     // รองรับทั้ง { lots: [...] } และ [...]
-    wonLots = Array.isArray(wonData) ? wonData : (wonData.lots || []);
+    const allWon = Array.isArray(wonData) ? wonData : (wonData.lots || []);
+    // กรองเฉพาะ lot ที่จบประมูลแล้ว (!isActive) เท่านั้น
+    wonLots = allWon.filter(l => l.isActive === false || l.isActive === undefined && l.currentPrice);
 
     if (!wonLots.length) {
       document.getElementById('loading-state').innerHTML =
@@ -509,7 +511,7 @@ async function submitPayment() {
 
     showMsg('ส่งสลิปสำเร็จ! รอผู้ขายยืนยัน 🎉', 'ok');
     btn.textContent = '✅ ส่งแล้ว';
-    setTimeout(() => { location.href = `/room.html?id=${roomId}`; }, 2000);
+    setTimeout(() => { location.href = '/orders.html'; }, 2000);
 
   } catch(e) {
     showMsg(e.message || 'เกิดข้อผิดพลาด', 'err');

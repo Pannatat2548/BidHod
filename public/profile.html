@@ -854,9 +854,6 @@
             <div class="credit-stat-value" style="color:var(--red)" id="buy-total-unpaid">0</div>
           </div>
         </div>
-        <div class="lots-list" id="buy-lots-list">
-          <div class="empty-credit">ยังไม่มีประวัติการประมูล</div>
-        </div>
       </div>
 
       <!-- Sell Block -->
@@ -886,9 +883,6 @@
             <div class="credit-stat-label">ผู้ซื้อรับแล้ว</div>
             <div class="credit-stat-value green" id="sell-total-received">0</div>
           </div>
-        </div>
-        <div class="lots-list" id="sell-lots-list">
-          <div class="empty-credit">ยังไม่มีประวัติการขาย</div>
         </div>
       </div>
 
@@ -1250,10 +1244,10 @@
       document.getElementById('buy-total-paid').textContent = stats.buy.totalPaid;
       document.getElementById('buy-total-unpaid').textContent = stats.buy.totalUnpaid;
 
-      const buyList = document.getElementById('buy-lots-list');
-      if (stats.buy.lots.length === 0) {
-        buyList.innerHTML = '<div class="empty-credit">ยังไม่มีประวัติการประมูล</div>';
-      } else {
+      const buyList = null; // ซ่อน lot list — แสดงแค่ stats
+      if (false && stats.buy.lots.length === 0) {
+        // removed
+      } else if (false) {
         buyList.innerHTML = stats.buy.lots.map(l => {
           // แสดง slip rejected reason ถ้ามี
           const rejectedHtml = l.slipRejected
@@ -1303,10 +1297,10 @@
       document.getElementById('sell-total-delivered').textContent = stats.sell.totalDelivered;
       document.getElementById('sell-total-received').textContent = stats.sell.totalReceived;
 
-      const sellList = document.getElementById('sell-lots-list');
-      if (stats.sell.lots.length === 0) {
-        sellList.innerHTML = '<div class="empty-credit">ยังไม่มีประวัติการขาย</div>';
-      } else {
+      const sellList = null; // ซ่อน lot list
+      if (false && stats.sell.lots.length === 0) {
+        // removed
+      } else if (false) {
         sellList.innerHTML = stats.sell.lots.map(l => {
           let statusHtml = '';
           let slipViewerHtml = '';

@@ -32,15 +32,27 @@ router.get("/:userId", async (req, res) => {
         }
 
         // ========== PUBLIC STATS (ทุกคนดูได้) ==========
-        const wonLots = await find("lots", { highestBidderId: userId });
+        const wonLots = await find("lots", { highestBidderId: userId, roomDeleted: { $ne: true } });
         const paidLots = wonLots.filter(l => l.paid === true);
 
+        // query ทั้ง rooms ที่ยังอยู่ และ lots ตรงๆ (รองรับกรณีห้องถูกลบแต่ lots ยัง soft-delete ไว้)
         const sellerRooms = await find("rooms", { sellerId: userId }, { createdAt: -1 });
+        const roomMap = {};
+        for (const r of sellerRooms) roomMap[String(r._id)] = r;
+
+        // lots จาก rooms ที่ยังอยู่
         const sellerLots = [];
         for (const room of sellerRooms) {
             const lots = await find("lots", { roomId: room._id });
             sellerLots.push(...lots.map(l => ({ ...l, roomTitle: room.title, roomId: room._id })));
         }
+
+        // lots จาก rooms ที่ถูกลบแล้ว (roomDeleted: true) — เพื่อรักษา credit stats
+        const deletedRoomLots = await find("lots", { sellerId: userId, roomDeleted: true });
+        for (const l of deletedRoomLots) {
+            sellerLots.push({ ...l, roomTitle: l.roomTitle || 'ห้องที่ถูกลบ' });
+        }
+
         const receivedLots = sellerLots.filter(l => l.received === true);
 
         // ห้องที่เปิดอยู่ตอนนี้ (สำหรับหน้า public) — ไม่เปิดเผยราคาประมูล

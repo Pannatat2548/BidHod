@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { find, findOne, insert, update, remove } = require("../db");
-const { requireAuth, requireSeller, requireAdmin } = require("../middleware/auth");
+const { requireAuth, requireSeller, requireAdmin, requireNotBlacklisted } = require("../middleware/auth");
 
 // GET /api/rooms
 router.get("/", async (req, res) => {
@@ -68,7 +68,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/rooms — seller/admin สร้างห้อง
-router.post("/", requireSeller, async (req, res) => {
+router.post("/", requireSeller, requireNotBlacklisted, async (req, res) => {
   const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0, endsAt, tags = [] } = req.body;
   if (!title || !house) return res.status(400).json({ error: "กรุณากรอก title และ house" });
 
@@ -90,6 +90,7 @@ router.post("/", requireSeller, async (req, res) => {
   if (lotsData?.length) {
     await Promise.all(lotsData.map((l, i) => insert("lots", {
       roomId: room._id,
+      sellerId: room.sellerId,
       num: i + 1,
       name: l.name,
       desc: l.desc || "",
@@ -137,7 +138,7 @@ router.delete("/:id", requireSeller, async (req, res) => {
   if (req.user.role !== "admin" && room.sellerId !== req.user.id)
     return res.status(403).json({ error: "ไม่มีสิทธิ์ลบ" });
   await remove("rooms", { _id: req.params.id });
-  await remove("lots", { roomId: req.params.id }, { multi: true });
+  await update("lots", { roomId: req.params.id }, { $set: { roomDeleted: true } }, { multi: true });
   res.json({ ok: true });
 });
 

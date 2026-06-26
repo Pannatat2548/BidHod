@@ -208,9 +208,9 @@ body { background: var(--bg2); }
 .modal-overlay.show { display: flex; }
 .modal-box {
   background: var(--bg); border-radius: var(--radius); padding: 28px;
-  width: 100%; max-width: 420px; margin: 20px;
+  width: 100%; max-width: 480px; margin: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  animation: fadeUp .2s ease;
+  animation: fadeUp .2s ease; max-height: 90vh; overflow-y: auto;
 }
 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
@@ -428,6 +428,16 @@ body { background: var(--bg2); }
   <img id="slip-fs-img" src="" alt="slip">
 </div>
 
+<!-- ── Success overlay (ใช้หลัง report / rating) ── -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal-box" style="text-align:center;max-width:320px">
+    <div style="font-size:48px;margin-bottom:10px" id="success-icon">✅</div>
+    <div class="modal-title" id="success-title">สำเร็จ</div>
+    <div class="modal-sub" id="success-sub"></div>
+    <button class="btn primary" style="width:100%;margin-top:8px" onclick="closeSuccessModal()">ตกลง</button>
+  </div>
+</div>
+
 <script>
 const token = localStorage.getItem('token');
 const user  = JSON.parse(localStorage.getItem('user') || 'null');
@@ -529,6 +539,12 @@ async function loadSellerOrders() {
       const slips = l.paymentSlips?.length ? l.paymentSlips : (l.paymentSlip ? [l.paymentSlip] : []);
 
       // status
+      // จัดกลุ่มผู้ซื้อที่รอตรวจสลิป เพื่อ confirm ทีเดียว
+      const samePayerPendingLots = endedLots.filter(ol =>
+        ol.highestBidderId === l.highestBidderId &&
+        ol.paid && !ol.slipRejected && !ol.slipConfirmed &&
+        (ol.paymentSlips?.length || ol.paymentSlip)
+      );
       let statusHtml = '', actionHtml = '';
       if (l.received) {
         statusHtml = `<span class="status-pill received">✓ ผู้ซื้อรับแล้ว</span>`;
@@ -544,9 +560,19 @@ async function loadSellerOrders() {
         statusHtml = `<span class="status-pill rejected">✕ ปฏิเสธสลิปแล้ว</span>`;
       } else if (l.paid && slips.length) {
         statusHtml = `<span class="status-pill pending">⏳ รอตรวจสลิป</span>`;
-        actionHtml = `
-          <button class="btn-confirm" onclick="confirmSlip('${l._id}')">✓ ยืนยันรับเงิน</button>
-          <button class="btn-reject" onclick="openRejectModal('${l._id}')">✕ ปฏิเสธ</button>`;
+        // ถ้า buyer คนนี้มีหลาย lot รอ confirm → แสดงปุ่ม confirm ทีเดียว
+        if (samePayerPendingLots.length > 1) {
+          const lotIdsJson = JSON.stringify(samePayerPendingLots.map(ol => ol._id));
+          actionHtml = `
+            <button class="btn-confirm" onclick="confirmSlipBulk(${lotIdsJson.replace(/"/g,'&quot;')})">
+              ✓ ยืนยัน ${samePayerPendingLots.length} lot ของ ${esc(l.highestBidder)}
+            </button>
+            <button class="btn-reject" onclick="openRejectModal('${l._id}')">✕ ปฏิเสธ</button>`;
+        } else {
+          actionHtml = `
+            <button class="btn-confirm" onclick="confirmSlip('${l._id}')">✓ ยืนยันรับเงิน</button>
+            <button class="btn-reject" onclick="openRejectModal('${l._id}')">✕ ปฏิเสธ</button>`;
+        }
       } else {
         statusHtml = `<span class="status-pill rejected">⏳ ยังไม่ชำระเงิน</span>`;
       }
@@ -649,7 +675,28 @@ async function loadBuyerOrders() {
       return;
     }
 
-    wrap.innerHTML = lots.map(l => {
+    // lot ที่รอรับของ แยกตามห้อง
+    const pendingReceiveLots = lots.filter(l => l.delivered && !l.received);
+    // จัดกลุ่มตาม roomId
+    const pendingByRoom = {};
+    for (const l of pendingReceiveLots) {
+      const rid = getRoomId(l);
+      const rTitle = l.roomTitle || rid || 'ห้องไม่ระบุ';
+      if (!pendingByRoom[rid]) pendingByRoom[rid] = { title: rTitle, lots: [] };
+      pendingByRoom[rid].lots.push(l);
+    }
+    const roomGroups = Object.values(pendingByRoom).filter(g => g.lots.length > 1);
+    const bulkReceiveHtml = roomGroups.length
+      ? `<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:8px">
+           ${roomGroups.map(g => `
+             <button class="btn-confirm" style="width:100%;padding:12px;font-size:13px;font-weight:700;text-align:left"
+               onclick="markReceivedBulk(${JSON.stringify(g.lots.map(l=>l._id)).replace(/"/g,'&quot;')})">
+               ✓ ยืนยันรับของครบทั้ง ${g.lots.length} lot — ${g.title}
+             </button>`).join('')}
+         </div>`
+      : '';
+
+    wrap.innerHTML = bulkReceiveHtml + lots.map(l => {
       const roomId = getRoomId(l); // ← ใช้ helper function
       
       // สร้าง timeline steps
@@ -696,10 +743,15 @@ async function loadBuyerOrders() {
       const receiveBtn = (l.delivered && !l.received)
         ? `<button class="btn-confirm" onclick="markReceived('${l._id}')">✓ ยืนยันรับของแล้ว</button>` : '';
 
+      // ปุ่ม report แสดงตั้งแต่ตอน delivered (ก่อนกดยืนยัน) และหลังรับของแล้วด้วย
+      const reportBtn = (l.delivered || l.received)
+        ? `<button class="btn-flag" onclick="openReportModal('${l.sellerId}','${esc(l.sellerName)}','${l._id}','${l.roomId}')">🚩 รายงาน</button>`
+        : '';
+
       const rateReportBtns = l.received
         ? `<button class="btn-rate" onclick="openRateModal('${l._id}','${l.sellerId}','${esc(l.sellerName)}')">⭐ ให้คะแนนผู้ขาย</button>
-           <button class="btn-flag" onclick="openReportModal('${l.sellerId}','${esc(l.sellerName)}','${l._id}','${l.roomId}')">🚩 รายงาน</button>`
-        : '';
+           ${reportBtn}`
+        : reportBtn;
 
       return `
         <div class="order-card">
@@ -735,6 +787,22 @@ async function confirmSlip(lotId) {
       method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
     });
     if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+    loadSellerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+async function confirmSlipBulk(lotIds) {
+  const count = lotIds.length;
+  if (!confirm(`ยืนยันรับเงินจาก ${count} lot พร้อมกันเลย?`)) return;
+  try {
+    let failed = 0;
+    for (const id of lotIds) {
+      const r = await fetch(`/api/profile/lots/${id}/confirm-slip`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+      });
+      if (!r.ok) failed++;
+    }
+    if (failed) alert(`ยืนยันสำเร็จ ${count - failed}/${count} lot`);
     loadSellerOrders();
   } catch(e) { alert(e.message); }
 }
@@ -786,6 +854,22 @@ async function submitTracking() {
     });
     if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
     closeTrackModal(); loadSellerOrders();
+  } catch(e) { alert(e.message); }
+}
+
+async function markReceivedBulk(lotIds) {
+  const count = lotIds.length;
+  if (!confirm(`ยืนยันว่าได้รับของครบทั้ง ${count} lot แล้ว?`)) return;
+  try {
+    let failed = 0;
+    for (const id of lotIds) {
+      const r = await fetch(`/api/profile/lots/${id}/receive`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+      });
+      if (!r.ok) failed++;
+    }
+    showSuccessModal('✅', `ยืนยันรับของสำเร็จ ${count - failed}/${count} lot`, 'ขอบคุณที่ยืนยัน');
+    loadBuyerOrders();
   } catch(e) { alert(e.message); }
 }
 
@@ -848,7 +932,7 @@ async function submitRating() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.error);
     closeRateModal();
-    alert('ขอบคุณสำหรับคำแนะนำ');
+    showSuccessModal('⭐', 'ขอบคุณสำหรับคะแนน!', 'รีวิวของคุณช่วยให้ชุมชนดีขึ้น');
     if (currentView === 'seller') loadSellerOrders(); else loadBuyerOrders();
   } catch (e) { alert(e.message); }
 }
@@ -927,7 +1011,7 @@ async function submitReport() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.error);
     closeReportModal();
-    alert('ขอบคุณสำหรับคำแนะนำ');
+    showSuccessModal('🚩', 'ส่งรายงานสำเร็จ', 'ขอบคุณที่แจ้งปัญหา Admin จะตรวจสอบโดยเร็ว');
   } catch (e) { alert(e.message); }
   finally { btn.disabled = false; btn.textContent = '🚩 ส่งรายงาน'; }
 }
@@ -946,6 +1030,20 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeTrack
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ── Success Modal ──
+function showSuccessModal(icon, title, sub) {
+  document.getElementById('success-icon').textContent = icon;
+  document.getElementById('success-title').textContent = title;
+  document.getElementById('success-sub').textContent = sub;
+  document.getElementById('success-modal').classList.add('show');
+}
+function closeSuccessModal() {
+  document.getElementById('success-modal').classList.remove('show');
+}
+document.getElementById('success-modal').addEventListener('click', e => {
+  if (e.target.id === 'success-modal') closeSuccessModal();
+});
 
 // ── Init ──
 loadSellerRooms();

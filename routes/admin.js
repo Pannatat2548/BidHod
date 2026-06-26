@@ -42,7 +42,8 @@ router.get("/rooms", requireAdmin, async (req, res) => {
 // DELETE /api/admin/rooms/:id
 router.delete("/rooms/:id", requireAdmin, async (req, res) => {
   await remove("rooms", { _id: req.params.id });
-  await remove("lots", { roomId: req.params.id }, { multi: true });
+  // soft delete lots เพื่อไม่ให้เครดิตบน profile หาย
+  await update("lots", { roomId: req.params.id }, { $set: { roomDeleted: true } }, { multi: true });
   res.json({ ok: true });
 });
 
