@@ -2,3 +2,5 @@ node_modules
 data
 .env
 /public/uploads
+CHANGELOG.md
+Update.md
