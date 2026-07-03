@@ -2,6 +2,71 @@ const router = require("express").Router();
 const { find, findOne, update } = require("../db");
 const { requireAuth } = require("../middleware/auth");
 
+// GET /api/profile/seller-rooms — ต้องอยู่ก่อน /:userId เสมอ
+router.get("/seller-rooms", requireAuth, async (req, res) => {
+    try {
+        const sellerId = req.user.id;
+
+        const activeRooms = await find("rooms", { sellerId }, { createdAt: -1 });
+
+        const deletedLots = await find("lots", { sellerId, roomDeleted: true });
+        const deletedRoomMap = {};
+        for (const l of deletedLots) {
+            const key = String(l.roomId);
+            if (!deletedRoomMap[key]) {
+                deletedRoomMap[key] = {
+                    _id: key,
+                    title: l.roomTitle || 'ห้องที่ถูกลบ',
+                    sellerId,
+                    deleted: true,
+                    totalLots: 0,
+                };
+            }
+            deletedRoomMap[key].totalLots++;
+        }
+
+        const activeRoomIds = new Set(activeRooms.map(r => String(r._id)));
+        const deletedRooms = Object.values(deletedRoomMap).filter(r => !activeRoomIds.has(r._id));
+
+        res.json([
+            ...activeRooms.map(r => ({ ...r, deleted: false })),
+            ...deletedRooms,
+        ]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/profile/seller-lots/:roomId — ต้องอยู่ก่อน /:userId เสมอ
+router.get("/seller-lots/:roomId", requireAuth, async (req, res) => {
+    try {
+        const sellerId = req.user.id;
+        const roomId = req.params.roomId;
+
+        const room = await findOne("rooms", { _id: roomId });
+
+        let lots, roomTitle, isDeleted = false;
+
+        if (room) {
+            if (room.sellerId !== sellerId && req.user.role !== "admin")
+                return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+            lots = await find("lots", { roomId }, { num: 1 });
+            roomTitle = room.title;
+        } else {
+            lots = await find("lots", { roomId, sellerId, roomDeleted: true }, { num: 1 });
+            if (!lots.length) return res.status(404).json({ error: "ไม่พบห้องหรือ lot" });
+            if (lots[0].sellerId !== sellerId && req.user.role !== "admin")
+                return res.status(403).json({ error: "ไม่มีสิทธิ์" });
+            roomTitle = lots[0].roomTitle || 'ห้องที่ถูกลบ';
+            isDeleted = true;
+        }
+
+        res.json({ roomId, roomTitle, isDeleted, lots });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET /api/profile/:userId — ดึงข้อมูลโปรไฟล์
 // - ถ้าเป็นเจ้าของ (isSelf) → ส่งข้อมูลครบ รวม lots, ราคา, สลิป
 // - ถ้าเป็นคนอื่น (public) → ส่งเฉพาะ ชื่อ/avatar/social + publicStats เท่านั้น
@@ -32,7 +97,7 @@ router.get("/:userId", async (req, res) => {
         }
 
         // ========== PUBLIC STATS (ทุกคนดูได้) ==========
-        const wonLots = await find("lots", { highestBidderId: userId, roomDeleted: { $ne: true } });
+        const wonLots = await find("lots", { highestBidderId: userId });
         const paidLots = wonLots.filter(l => l.paid === true);
 
         // query ทั้ง rooms ที่ยังอยู่ และ lots ตรงๆ (รองรับกรณีห้องถูกลบแต่ lots ยัง soft-delete ไว้)
@@ -109,9 +174,9 @@ router.get("/:userId", async (req, res) => {
             return {
                 _id: l._id,
                 lotName: l.name,
-                roomId: room ? room._id : null,  // ← เพิ่มบรรทัดนี้
-                roomTitle: room ? room.title : "ไม่ระบุห้อง",
-                sellerId: room ? room.sellerId : null,
+                roomId: room ? room._id : (l.roomId || null),
+                roomTitle: room ? room.title : (l.roomTitle || 'ห้องที่ถูกลบ'),
+                sellerId: room ? room.sellerId : (l.sellerId || null),
                 sellerName: room ? room.sellerName : null,
                 price: l.currentPrice,
                 paid: l.paid || false,
@@ -309,13 +374,24 @@ router.patch("/lots/:id/reject-slip", requireAuth, async (req, res) => {
 // แต่ยังไม่ส่ง ของห้องนี้ จัดกลุ่มตาม buyer คนเดียวกัน เพื่อกรอก tracking ทีเดียว
 router.get("/rooms/:roomId/pending-delivery", requireAuth, async (req, res) => {
     try {
-        const room = await findOne("rooms", { _id: req.params.roomId });
-        if (!room) return res.status(404).json({ error: "ไม่พบห้อง" });
-        if (room.sellerId !== req.user.id && req.user.role !== "admin") {
+        const roomId = req.params.roomId;
+        let sellerId;
+
+        const room = await findOne("rooms", { _id: roomId });
+        if (room) {
+            sellerId = room.sellerId;
+        } else {
+            // ห้องถูกลบ — หา sellerId จาก lot
+            const anyLot = await findOne("lots", { roomId, roomDeleted: true });
+            if (!anyLot) return res.status(404).json({ error: "ไม่พบห้อง" });
+            sellerId = anyLot.sellerId;
+        }
+
+        if (sellerId !== req.user.id && req.user.role !== "admin") {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
         }
 
-        const lots = await find("lots", { roomId: req.params.roomId });
+        const lots = await find("lots", { roomId });
         const eligible = lots.filter(l =>
             !l.isActive && l.slipConfirmed === true && l.delivered !== true && l.highestBidderId
         );
@@ -418,6 +494,7 @@ router.patch("/lots/:id/receive", requireAuth, async (req, res) => {
     }
 });
 
+// GET /api/profile/seller-rooms — คืนทุกห้องของ seller รวมห้องที่ถูกลบแล้ว
 // GET /api/profile/lots/:id
 router.get("/lots/:id", requireAuth, async (req, res) => {
     try {

@@ -474,14 +474,16 @@ function switchView(v) {
 // ─────────────────────────────────────────
 async function loadSellerRooms() {
   try {
-    const r = await fetch('/api/rooms', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await fetch('/api/profile/seller-rooms', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) throw new Error((await r.json()).error || 'โหลดห้องไม่ได้');
     const rooms = await r.json();
-    // กรองเฉพาะห้องที่ user เป็น seller
-    const uid = user.id || user._id;
-    sellerRooms = rooms.filter(rm => rm.sellerId === uid);
+    sellerRooms = Array.isArray(rooms) ? rooms : [];
     const sel = document.getElementById('seller-room-select');
     sel.innerHTML = '<option value="">— เลือกห้องที่ต้องการดู —</option>' +
-      sellerRooms.map(rm => `<option value="${rm._id}">${rm.title} (${rm.totalLots} lots)</option>`).join('');
+      sellerRooms.map(rm => {
+        const label = rm.deleted ? `🗑 ${rm.title} (${rm.totalLots} lots) — ลบแล้ว` : `${rm.title} (${rm.totalLots} lots)`;
+        return `<option value="${rm._id}">${label}</option>`;
+      }).join('');
   } catch(e) { console.error(e); }
 }
 
@@ -494,14 +496,14 @@ async function loadSellerOrders() {
   document.getElementById('seller-stats').style.display = 'none';
 
   try {
-    // ดึง lots ทุกตัวในห้อง + payments ในห้อง
-    const [roomRes, paymentsRes] = await Promise.all([
-      fetch(`/api/rooms/${roomId}`, { headers: { 'Authorization': 'Bearer ' + token } }),
+    // ใช้ endpoint ใหม่ที่รองรับห้องที่ถูกลบแล้ว
+    const [lotsRes, paymentsRes] = await Promise.all([
+      fetch(`/api/profile/seller-lots/${roomId}`, { headers: { 'Authorization': 'Bearer ' + token } }),
       fetch(`/api/payments/room/${roomId}`, { headers: { 'Authorization': 'Bearer ' + token } }),
     ]);
-    const roomData = await roomRes.json();
+    if (!lotsRes.ok) throw new Error((await lotsRes.json()).error || 'โหลดข้อมูลไม่ได้');
+    const { lots, roomTitle, isDeleted } = await lotsRes.json();
     const payments = paymentsRes.ok ? await paymentsRes.json() : [];
-    const lots = roomData.lots || [];
 
     // lots ที่จบแล้ว (isActive = false) และมี winner
     const endedLots = lots.filter(l => !l.isActive && l.highestBidderId);
@@ -534,7 +536,12 @@ async function loadSellerOrders() {
       return;
     }
 
-    wrap.innerHTML = endedLots.map(l => {
+    const deletedBanner = isDeleted
+      ? `<div style="background:#fffbeb;border:1px solid rgba(217,119,6,0.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#92400e">
+           🗑 ห้องนี้ถูกลบแล้ว — แสดงข้อมูล lot ที่ยังค้างอยู่เพื่อติดตามสถานะ
+         </div>` : '';
+
+    wrap.innerHTML = deletedBanner + endedLots.map(l => {
       const payment = paymentByLot[l._id];
       const slips = l.paymentSlips?.length ? l.paymentSlips : (l.paymentSlip ? [l.paymentSlip] : []);
 

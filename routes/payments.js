@@ -151,13 +151,23 @@ router.post("/", requireAuth, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────
 router.get("/room/:roomId", requireAuth, async (req, res) => {
   try {
-    const room = await findOne("rooms", { _id: req.params.roomId });
-    if (!room) return res.status(404).json({ error: "ไม่พบห้อง" });
+    const roomId = req.params.roomId;
+    let sellerId;
 
-    if (room.sellerId !== req.user.id && req.user.role !== "admin")
+    const room = await findOne("rooms", { _id: roomId });
+    if (room) {
+      sellerId = room.sellerId;
+    } else {
+      // ห้องถูกลบ — หา sellerId จาก lot ที่มี roomDeleted: true
+      const anyLot = await findOne("lots", { roomId, roomDeleted: true });
+      if (!anyLot) return res.status(404).json({ error: "ไม่พบห้อง" });
+      sellerId = anyLot.sellerId;
+    }
+
+    if (sellerId !== req.user.id && req.user.role !== "admin")
       return res.status(403).json({ error: "ไม่มีสิทธิ์" });
 
-    const payments = await find("payments", { roomId: req.params.roomId }, { createdAt: -1 });
+    const payments = await find("payments", { roomId }, { createdAt: -1 });
     res.json(payments);
   } catch (err) {
     res.status(500).json({ error: err.message });

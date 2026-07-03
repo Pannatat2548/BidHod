@@ -796,6 +796,7 @@
         <div class="rating-list" id="rating-list"></div>
       </div>
       <button class="btn-report" id="report-btn" onclick="openReportModal()" style="display:none">🚩 รายงานผู้ใช้นี้</button>
+      <button class="btn-report" id="rate-btn" onclick="checkAndOpenRateModal()" style="display:none;background:var(--bg2);color:var(--ink2);border-color:var(--line2);margin-top:6px">⭐ ให้คะแนน</button>
 
       <div class="profile-social">
         <div class="profile-social-label">
@@ -994,6 +995,38 @@
     </div>
   </div>
 
+  <!-- ── Rating Modal ── -->
+  <div class="modal-overlay" id="rate-modal">
+    <div class="modal-box" style="max-width:400px">
+      <div class="modal-title">⭐ ให้คะแนน</div>
+      <div class="modal-sub" id="rate-modal-sub"></div>
+      <div class="star-picker" id="star-picker">
+        <span onclick="setRatingStar(1)">★</span>
+        <span onclick="setRatingStar(2)">★</span>
+        <span onclick="setRatingStar(3)">★</span>
+        <span onclick="setRatingStar(4)">★</span>
+        <span onclick="setRatingStar(5)">★</span>
+      </div>
+      <textarea class="reject-reason-input" id="rate-comment" placeholder="ความคิดเห็น (ไม่บังคับ)" style="min-height:70px"></textarea>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeRateModal()">ยกเลิก</button>
+        <button class="btn primary" id="rate-submit-btn" onclick="submitRating()">⭐ ส่งคะแนน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Success Modal ── -->
+  <div class="modal-overlay" id="success-modal" onclick="closeSuccessModal()">
+    <div class="modal-box" style="text-align:center;max-width:360px" onclick="event.stopPropagation()">
+      <div style="font-size:48px;margin-bottom:12px" id="success-modal-icon">✅</div>
+      <div class="modal-title" id="success-modal-title">สำเร็จ</div>
+      <div class="modal-sub" id="success-modal-msg"></div>
+      <div class="modal-actions" style="justify-content:center;margin-top:20px">
+        <button class="btn primary" onclick="closeSuccessModal()">ตกลง</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Slip Fullscreen Viewer ── -->
   <div class="slip-fullscreen" id="slip-fullscreen" onclick="closeFullscreen()">
     <div class="slip-fullscreen-close">✕</div>
@@ -1035,6 +1068,7 @@
         renderRating();
         // ปุ่มรายงานแสดงเมื่อ login แล้วและไม่ใช่โปรไฟล์ตัวเอง
         document.getElementById('report-btn').style.display = (token && !isSelf) ? '' : 'none';
+        document.getElementById('rate-btn').style.display = (token && !isSelf) ? '' : 'none';
       } catch (err) { alert(err.message); }
     }
 
@@ -1213,7 +1247,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         closeReportModal();
-        alert('ขอบคุณสำหรับคำแนะนำ');
+        showSuccessModal('ส่งรายงานเรียบร้อยแล้ว admin จะตรวจสอบโดยเร็ว', '🚩', 'ส่งรายงานสำเร็จ');
       } catch (e) { alert(e.message); }
       finally { btn.disabled = false; btn.textContent = '🚩 ส่งรายงาน'; }
     }
@@ -1607,11 +1641,84 @@
       } catch (err) { alert(err.message); }
     }
 
+    // ── Rating Modal ──────────────────────────
+    let currentRatingStar = 0;
+    let ratingLotId = null;
+
+    async function checkAndOpenRateModal() {
+      if (!token || isSelf) return;
+      try {
+        const res = await fetch(`/api/ratings/user/${userId}/can-rate`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.canRate) {
+          showSuccessModal(data.reason || 'คุณยังไม่สามารถให้คะแนนได้', 'ℹ️', 'ไม่สามารถให้คะแนน');
+          return;
+        }
+        ratingLotId = data.lotId || null;
+        document.getElementById('rate-modal-sub').textContent = `ให้คะแนน ${profileData?.user?.name || 'ผู้ใช้นี้'}`;
+        currentRatingStar = 0;
+        document.getElementById('rate-comment').value = '';
+        updateStarPicker();
+        document.getElementById('rate-modal').classList.add('show');
+      } catch (e) { alert(e.message); }
+    }
+
+    function setRatingStar(n) {
+      currentRatingStar = n;
+      updateStarPicker();
+    }
+
+    function updateStarPicker() {
+      document.querySelectorAll('#star-picker span').forEach((el, i) => {
+        el.classList.toggle('on', i < currentRatingStar);
+      });
+    }
+
+    function closeRateModal() {
+      document.getElementById('rate-modal').classList.remove('show');
+      ratingLotId = null;
+      currentRatingStar = 0;
+    }
+
+    async function submitRating() {
+      if (!currentRatingStar) { alert('กรุณาเลือกจำนวนดาว'); return; }
+      const comment = document.getElementById('rate-comment').value.trim();
+      const btn = document.getElementById('rate-submit-btn');
+      btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...';
+      try {
+        const res = await fetch('/api/ratings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ targetId: userId, lotId: ratingLotId, score: currentRatingStar, comment })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeRateModal();
+        await loadProfile();
+        showSuccessModal('ให้คะแนนเรียบร้อยแล้ว ขอบคุณสำหรับรีวิว', '⭐', 'ให้คะแนนสำเร็จ');
+      } catch (e) { alert(e.message); }
+      finally { btn.disabled = false; btn.textContent = '⭐ ส่งคะแนน'; }
+    }
+
+    // ── Success Modal ─────────────────────────
+    function showSuccessModal(msg, icon = '✅', title = 'สำเร็จ') {
+      document.getElementById('success-modal-icon').textContent = icon;
+      document.getElementById('success-modal-title').textContent = title;
+      document.getElementById('success-modal-msg').textContent = msg;
+      document.getElementById('success-modal').classList.add('show');
+    }
+    function closeSuccessModal() {
+      document.getElementById('success-modal').classList.remove('show');
+    }
+
     // ── Close overlays ────────────────────────
     document.getElementById('slip-modal').addEventListener('click', e => { if (e.target.id === 'slip-modal') closeSlipModal(); });
     document.getElementById('tracking-modal').addEventListener('click', e => { if (e.target.id === 'tracking-modal') closeTrackingModal(); });
     document.getElementById('reject-modal').addEventListener('click', e => { if (e.target.id === 'reject-modal') closeRejectModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSlipModal(); closeTrackingModal(); closeRejectModal(); closeFullscreen(); } });
+    document.getElementById('rate-modal').addEventListener('click', e => { if (e.target.id === 'rate-modal') closeRateModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSlipModal(); closeTrackingModal(); closeRejectModal(); closeRateModal(); closeSuccessModal(); closeFullscreen(); } });
 
     loadProfile();
   </script>
