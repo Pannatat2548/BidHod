@@ -6,6 +6,7 @@
 <title>Bidmai — Orders</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
+<script src="/js/pagination.js"></script>
 <style>
 body { background: var(--bg2); }
 
@@ -311,6 +312,7 @@ body { background: var(--bg2); }
         <div class="empty-text">เลือกห้องประมูลที่ต้องการดู</div>
       </div>
     </div>
+    <div id="seller-orders-pagination"></div>
   </div>
 
   <!-- ── BUYER VIEW ── -->
@@ -532,6 +534,7 @@ async function loadSellerOrders() {
     document.getElementById('seller-stats').style.display = '';
 
     if (!endedLots.length) {
+      document.getElementById('seller-orders-pagination').innerHTML = '';
       wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">🎉</div><div class="empty-text">ยังไม่มี lot ที่จบการประมูล</div></div>`;
       return;
     }
@@ -541,13 +544,44 @@ async function loadSellerOrders() {
            🗑 ห้องนี้ถูกลบแล้ว — แสดงข้อมูล lot ที่ยังค้างอยู่เพื่อติดตามสถานะ
          </div>` : '';
 
-    wrap.innerHTML = deletedBanner + endedLots.map(l => {
+    // เก็บ context ไว้ให้ paginator เรียก render ใหม่ตอนเปลี่ยนหน้า
+    // (stats คำนวณจาก endedLots ทั้งหมดไปแล้วด้านบน — pagination มีผลแค่กับการ์ดที่แสดง)
+    sellerOrdersPageState = { allEndedLots: endedLots, paymentByLot, deletedBanner, roomId };
+    if (!sellerOrdersPager) {
+      sellerOrdersPager = createPaginator({
+        containerId: 'seller-orders-pagination',
+        pageSize: 10,
+        onPageChange: (page) => renderSellerOrdersCards(page),
+      });
+    }
+    sellerOrdersPager.reset();
+    sellerOrdersPager.render(endedLots.length);
+    renderSellerOrdersCards(1);
+    updateMergedDeliverLink(roomId);
+
+  } catch(e) {
+    wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">❌</div><div class="empty-text">${e.message}</div></div>`;
+  }
+}
+
+let sellerOrdersPager = null;
+let sellerOrdersPageState = null;
+
+function renderSellerOrdersCards(page) {
+  const wrap = document.getElementById('seller-orders-wrap');
+  if (!sellerOrdersPageState) return;
+  const { allEndedLots, paymentByLot, deletedBanner, roomId } = sellerOrdersPageState;
+  const pageSize = sellerOrdersPager ? sellerOrdersPager.pageSize : 10;
+  const start = (page - 1) * pageSize;
+  const pageLots = allEndedLots.slice(start, start + pageSize);
+
+  wrap.innerHTML = deletedBanner + pageLots.map(l => {
       const payment = paymentByLot[l._id];
       const slips = l.paymentSlips?.length ? l.paymentSlips : (l.paymentSlip ? [l.paymentSlip] : []);
 
       // status
       // จัดกลุ่มผู้ซื้อที่รอตรวจสลิป เพื่อ confirm ทีเดียว
-      const samePayerPendingLots = endedLots.filter(ol =>
+      const samePayerPendingLots = allEndedLots.filter(ol =>
         ol.highestBidderId === l.highestBidderId &&
         ol.paid && !ol.slipRejected && !ol.slipConfirmed &&
         (ol.paymentSlips?.length || ol.paymentSlip)
@@ -626,12 +660,6 @@ async function loadSellerOrders() {
           </div>
         </div>`;
     }).join('');
-
-    updateMergedDeliverLink(roomId);
-
-  } catch(e) {
-    wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">❌</div><div class="empty-text">${e.message}</div></div>`;
-  }
 }
 
 // แสดงลิงก์ "กรอก Tracking ทีเดียวหลาย Lot" เมื่อห้องนี้มี lot ที่จ่าย+ยืนยันสลิปแล้วแต่ยังไม่ส่ง

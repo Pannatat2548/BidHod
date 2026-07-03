@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/auctionToast.js"></script>
   <style>
     .room-header {
       padding: 14px 20px 0;
@@ -473,6 +474,7 @@
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user) document.getElementById('nav-user').textContent = user.name;
     const socket = io({ auth: { token: token || '' } });
+    initAuctionToast(socket); // แสดง toast เตือนก่อนประมูลปิด (30m/10m/5m/2m/1m/30s)
     let roomData = null, activeLotId = null;
     const LOT_DUR = 30 * 60 * 1000;
     socket.on('connect', () => socket.emit('room:join', ROOM_ID));

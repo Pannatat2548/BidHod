@@ -543,36 +543,11 @@ router.get('/seller-rooms', requireAuth, async (req, res) => {
     }
 });
 
-// ── GET /api/profile/seller-lots/:roomId ───────────────────────────────────
-// คืน lots ของห้อง + รองรับห้องที่ถูกลบ + pagination
-router.get('/seller-lots/:roomId', requireAuth, async (req, res) => {
-    try {
-        const { roomId } = req.params;
-        const { page, limit } = parsePage(req, 20);
-
-        // ตรวจสิทธิ์: ห้องยังอยู่
-        let room = await findOne('rooms', { _id: roomId });
-
-        // ถ้าห้องถูกลบแล้ว ตรวจจาก lot
-        if (!room) {
-            const sample = await findOne('lots', { roomId, roomDeleted: true });
-            if (!sample) return res.status(404).json({ error: 'ไม่พบห้อง' });
-            if (sample.sellerId !== req.user.id && req.user.role !== 'admin') {
-                return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
-            }
-        } else {
-            if (room.sellerId !== req.user.id && req.user.role !== 'admin') {
-                return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
-            }
-        }
-
-        const allLots = await find('lots', { roomId }, { num: 1 });
-        res.json(paginateArray(allLots, page, limit));
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+// (หมายเหตุ: เดิมมี route GET /seller-lots/:roomId ซ้ำกับตัวที่บรรทัด ~42 ด้านบน —
+//  ตัวนั้นเป็น route ที่ Express ใช้จริง (ตัวแรกที่ match เสมอ) ส่วนตัวซ้ำนี้ไม่เคยถูกเรียกเลย
+//  (dead code) และ shape response ก็ไม่ตรงกับที่ orders.html ต้องการ (roomTitle/isDeleted/lots)
+//  เลยลบออก — ถ้าจะ paginate seller-lots จริงๆ ควรทำฝั่ง client เพราะ orders.html ต้องใช้ lots
+//  ทั้งหมดของห้องมาคำนวณ stats (paid/pending/unpaid/shipped) ก่อน ไม่ใช่แค่หน้าที่กำลังโชว์)
 
 // ── GET /api/profile/won-lots ──────────────────────────────────────────────
 // Buyer ดู lots ที่ตัวเองชนะ + pagination (สำหรับ profile credit ฝั่ง buyer)
