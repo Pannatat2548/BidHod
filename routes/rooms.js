@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { find, findOne, insert, update, remove } = require("../db");
 const { requireAuth, requireSeller, requireAdmin, requireNotBlacklisted } = require("../middleware/auth");
+const { scheduleRoomNotifications, cancelRoomNotifications } = require('../utils/auctionNotifier');
 
 // GET /api/rooms
 router.get("/", async (req, res) => {
@@ -87,6 +88,8 @@ router.post("/", requireSeller, requireNotBlacklisted, async (req, res) => {
     createdAt: new Date(),
   });
 
+  scheduleRoomNotifications(room);
+
   if (lotsData?.length) {
     await Promise.all(lotsData.map((l, i) => insert("lots", {
       roomId: room._id,
@@ -139,6 +142,7 @@ router.delete("/:id", requireSeller, async (req, res) => {
     return res.status(403).json({ error: "ไม่มีสิทธิ์ลบ" });
   await remove("rooms", { _id: req.params.id });
   await update("lots", { roomId: req.params.id }, { $set: { roomDeleted: true } }, { multi: true });
+  cancelRoomNotifications(req.params.id);
   res.json({ ok: true });
 });
 

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { find, findOne, update } = require("../db");
 const { requireAuth } = require("../middleware/auth");
+const { parsePage, paginateArray } = require('../utils/pagination');
 
 // GET /api/profile/seller-rooms — ต้องอยู่ก่อน /:userId เสมอ
 router.get("/seller-rooms", requireAuth, async (req, res) => {
@@ -501,6 +502,101 @@ router.get("/lots/:id", requireAuth, async (req, res) => {
         const lot = await findOne("lots", { _id: req.params.id });
         if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
         res.json(lot);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── GET /api/profile/seller-rooms ──────────────────────────────────────────
+// คืนทุกห้องของ seller รวมห้องที่ถูกลบแล้ว (reconstruct จาก lots ที่มี roomDeleted:true)
+router.get('/seller-rooms', requireAuth, async (req, res) => {
+    try {
+        const sellerId = req.user.id;
+
+        // ห้องที่ยังอยู่
+        const activeRooms = await find('rooms', { sellerId }, { createdAt: -1 });
+        const activeIds   = new Set(activeRooms.map(r => String(r._id)));
+
+        // lots ของห้องที่ถูกลบ → reconstruct room stub
+        const deletedLots = await find('lots', { sellerId, roomDeleted: true });
+        const deletedStubs = {};
+        for (const l of deletedLots) {
+            const key = String(l.roomId);
+            if (activeIds.has(key) || deletedStubs[key]) continue;
+            deletedStubs[key] = {
+                _id:       l.roomId,
+                title:     l.roomTitle || 'ห้องที่ถูกลบ',
+                sellerId,
+                isDeleted: true,
+                createdAt: l.createdAt,
+            };
+        }
+
+        const all = [
+            ...activeRooms.map(r => ({ ...r, isDeleted: false })),
+            ...Object.values(deletedStubs),
+        ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        res.json(all);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── GET /api/profile/seller-lots/:roomId ───────────────────────────────────
+// คืน lots ของห้อง + รองรับห้องที่ถูกลบ + pagination
+router.get('/seller-lots/:roomId', requireAuth, async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const { page, limit } = parsePage(req, 20);
+
+        // ตรวจสิทธิ์: ห้องยังอยู่
+        let room = await findOne('rooms', { _id: roomId });
+
+        // ถ้าห้องถูกลบแล้ว ตรวจจาก lot
+        if (!room) {
+            const sample = await findOne('lots', { roomId, roomDeleted: true });
+            if (!sample) return res.status(404).json({ error: 'ไม่พบห้อง' });
+            if (sample.sellerId !== req.user.id && req.user.role !== 'admin') {
+                return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+            }
+        } else {
+            if (room.sellerId !== req.user.id && req.user.role !== 'admin') {
+                return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+            }
+        }
+
+        const allLots = await find('lots', { roomId }, { num: 1 });
+        res.json(paginateArray(allLots, page, limit));
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── GET /api/profile/won-lots ──────────────────────────────────────────────
+// Buyer ดู lots ที่ตัวเองชนะ + pagination (สำหรับ profile credit ฝั่ง buyer)
+router.get('/won-lots', requireAuth, async (req, res) => {
+    try {
+        const { page, limit } = parsePage(req, 20);
+        const userId = req.user.id;
+
+        const all = await find('lots', {
+            highestBidderId: userId,
+            isActive: false,
+        }, { createdAt: -1 });
+
+        // แนบชื่อห้อง
+        const enriched = await Promise.all(all.map(async l => {
+            let roomTitle = l.roomTitle || null;
+            if (!roomTitle) {
+                const room = await findOne('rooms', { _id: l.roomId });
+                roomTitle = room ? room.title : 'ไม่ระบุห้อง';
+            }
+            return { ...l, roomTitle };
+        }));
+
+        res.json(paginateArray(enriched, page, limit));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

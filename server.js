@@ -10,11 +10,12 @@ fs.mkdirSync(path.join(__dirname, "public/uploads"), { recursive: true });
 
 const { find, findOne, insert, update } = require("./db");
 const { authSocket, isBlacklisted } = require("./middleware/auth");
-
+const { initAuctionNotifier, scheduleRoomNotifications, cancelRoomNotifications } = require('./utils/auctionNotifier');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+initAuctionNotifier(io);
 app.set('io', io);
 
 app.use(express.json());
@@ -249,6 +250,7 @@ setInterval(async () => {
     const timeLeft = endsAt - Date.now();
     if (timeLeft <= 0) {
       await update("lots", { _id: lot._id }, { $set: { isActive: false } });
+      cancelRoomNotifications(lot.roomId);   // ← เพิ่มบรรทัดนี้
       io.to(lot.roomId).emit("lot:ended", {
         lotId: lot._id,
         winner: lot.highestBidder,

@@ -517,6 +517,7 @@ const picker = flatpickr('#end-datetime', {
   minDate: new Date(Date.now() + 15 * 60 * 1000), // min 15 นาทีจากนี้
   time_24hr: true,
   minuteIncrement: 5,
+  disableMobile: true,
   onChange(selectedDates) {
     selectedEndDate = selectedDates[0] || null;
     updateEndTimePreview();
