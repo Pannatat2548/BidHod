@@ -269,6 +269,12 @@ body { background: var(--bg2); }
       <div id="shipping-options-wrap"></div>
     </div>
 
+    <!-- ช่องทางโอนเงินของผู้ขาย (ใหม่) -->
+    <div class="section-card" id="seller-payment-card" style="display:none">
+      <div class="section-head"><span class="icon">💰</span> ช่องทางโอนเงิน</div>
+      <div id="seller-payment-info"></div>
+    </div>
+
     <!-- แนบสลิป -->
     <div class="section-card">
       <div class="section-head"><span class="icon">📎</span> แนบสลิปโอนเงิน</div>
@@ -346,6 +352,17 @@ async function loadData() {
     shippingOpts = (roomData.shippingOptions || roomData.shipping_options || [])
       .filter(o => o.enabled !== false); // เอาเฉพาะที่ enabled
 
+    // 3) ดึงข้อมูลผู้ขาย (QR/บัญชีรับเงิน อยู่ใน profile ของ seller ไม่ใช่ใน room)
+    if (roomData.sellerId) {
+      try {
+        const sellerRes = await fetch(`/api/profile/${roomData.sellerId}`);
+        if (sellerRes.ok) {
+          const sellerData = await sellerRes.json();
+          renderSellerPaymentInfo(sellerData.user || {});
+        }
+      } catch (e) { /* ไม่มีข้อมูลผู้ขายก็ไม่เป็นไร แค่ไม่แสดง section นี้ */ }
+    }
+
     renderPage(roomData);
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('main-content').style.display  = 'block';
@@ -354,6 +371,28 @@ async function loadData() {
     document.getElementById('loading-state').innerHTML =
       `<div class="hint-box">❌ ${escHtml(e.message)}</div>`;
   }
+}
+
+// ── ช่องทางโอนเงินของผู้ขาย (QR + เลขบัญชีสำรอง) ──
+function renderSellerPaymentInfo(seller) {
+  const card = document.getElementById('seller-payment-card');
+  const wrap = document.getElementById('seller-payment-info');
+  const hasInfo = seller.paymentQr || seller.bankAccountNumber;
+  if (!hasInfo) {
+    card.style.display = '';
+    wrap.innerHTML = `<div class="hint-box">⚠️ ผู้ขายยังไม่ได้ตั้งค่าช่องทางรับเงิน กรุณาติดต่อผู้ขายโดยตรงเพื่อสอบถามวิธีโอนเงิน</div>`;
+    return;
+  }
+  card.style.display = '';
+  wrap.innerHTML = `
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+      ${seller.paymentQr ? `<img src="${escHtml(seller.paymentQr)}" style="width:140px;height:140px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#fff">` : ''}
+      <div style="font-size:13px;color:var(--ink2);line-height:1.8">
+        ${seller.bankName ? `<div><b>ธนาคาร:</b> ${escHtml(seller.bankName)}</div>` : ''}
+        ${seller.bankAccountNumber ? `<div><b>เลขบัญชี:</b> ${escHtml(seller.bankAccountNumber)}</div>` : ''}
+        ${seller.bankAccountName ? `<div><b>ชื่อบัญชี:</b> ${escHtml(seller.bankAccountName)}</div>` : ''}
+      </div>
+    </div>`;
 }
 
 // ── Render ──

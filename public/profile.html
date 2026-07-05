@@ -822,6 +822,31 @@
           </div>
         </div>
       </div>
+      <div class="profile-social" id="payment-info-block" style="display:none">
+        <div class="profile-social-label">
+          <span>ช่องทางรับเงิน (สำหรับผู้ขาย)</span>
+          <button class="add-social-btn" onclick="togglePaymentForm()">✏️ แก้ไข</button>
+        </div>
+        <div id="payment-info-view">
+          <div style="font-size:12px;color:var(--ink4)">ยังไม่ได้ตั้งค่า — buyer จะไม่เห็นช่องทางโอนเงินตอน checkout</div>
+        </div>
+        <div class="add-social-form" id="payment-info-form">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <img id="payment-qr-preview" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:none">
+            <div style="flex:1">
+              <input type="file" id="payment-qr-input" accept="image/*" onchange="handlePaymentQrSelect(this)">
+              <small style="display:block;margin-top:4px;color:var(--ink4)">อัปโหลดรูป QR พร้อมเพย์ / QR ธนาคาร</small>
+            </div>
+          </div>
+          <input type="text" id="payment-bank-name" placeholder="ธนาคาร เช่น กสิกรไทย">
+          <input type="text" id="payment-account-number" placeholder="เลขบัญชี (สำรอง เผื่อ QR ใช้ไม่ได้)">
+          <input type="text" id="payment-account-name" placeholder="ชื่อบัญชี">
+          <div class="add-social-actions">
+            <button class="btn" onclick="togglePaymentForm()">ยกเลิก</button>
+            <button class="btn primary" onclick="savePaymentInfo()">บันทึก</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Right: Credit Section -->
@@ -1272,6 +1297,15 @@
       if (u.otherSocial) socials.push({ type: 'other', value: u.otherSocial, customLabel: u.otherSocialLabel });
       renderSocials();
 
+      // ── ช่องทางรับเงิน: เฉพาะ seller/admin เท่านั้นที่ต้องตั้งค่า ──
+      const paymentBlock = document.getElementById('payment-info-block');
+      if (u.role === 'seller' || u.role === 'admin') {
+        paymentBlock.style.display = '';
+        renderPaymentInfoView();
+      } else {
+        paymentBlock.style.display = 'none';
+      }
+
       // Buy stats
       document.getElementById('buy-total-bids').textContent = stats.buy.totalBids;
       document.getElementById('buy-total-won').textContent = stats.buy.totalWon;
@@ -1572,6 +1606,78 @@
           <button class="social-delete-btn" onclick="deleteSocial(${i})">✕</button>
         </div>
       `).join('');
+    }
+
+    let pendingPaymentQrUrl = null; // ตั้งหลังอัปโหลดสำเร็จ ก่อนกด "บันทึก"
+
+    function togglePaymentForm() {
+      const form = document.getElementById('payment-info-form');
+      form.classList.toggle('show');
+      if (form.classList.contains('show')) {
+        // เติมค่าปัจจุบันลงฟอร์มตอนเปิด
+        const u = profileData.user || {};
+        document.getElementById('payment-bank-name').value = u.bankName || '';
+        document.getElementById('payment-account-number').value = u.bankAccountNumber || '';
+        document.getElementById('payment-account-name').value = u.bankAccountName || '';
+        pendingPaymentQrUrl = u.paymentQr || null;
+        const preview = document.getElementById('payment-qr-preview');
+        if (pendingPaymentQrUrl) { preview.src = pendingPaymentQrUrl; preview.style.display = ''; }
+        else { preview.style.display = 'none'; }
+      }
+    }
+
+    async function handlePaymentQrSelect(input) {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const fd = new FormData();
+        fd.append('image', file);
+        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'อัปโหลดรูปไม่สำเร็จ');
+        pendingPaymentQrUrl = data.url;
+        const preview = document.getElementById('payment-qr-preview');
+        preview.src = data.url;
+        preview.style.display = '';
+      } catch (err) { alert(err.message); }
+    }
+
+    async function savePaymentInfo() {
+      try {
+        const payload = {
+          paymentQr: pendingPaymentQrUrl || '',
+          bankName: document.getElementById('payment-bank-name').value.trim(),
+          bankAccountNumber: document.getElementById('payment-account-number').value.trim(),
+          bankAccountName: document.getElementById('payment-account-name').value.trim(),
+        };
+        const res = await fetch(`/api/profile/${userId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
+        togglePaymentForm();
+        loadProfile();
+      } catch (err) { alert(err.message); }
+    }
+
+    function renderPaymentInfoView() {
+      const u = profileData.user || {};
+      const hasInfo = u.paymentQr || u.bankAccountNumber;
+      const el = document.getElementById('payment-info-view');
+      if (!hasInfo) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--ink4)">ยังไม่ได้ตั้งค่า — buyer จะไม่เห็นช่องทางโอนเงินตอน checkout</div>';
+        return;
+      }
+      el.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center">
+          ${u.paymentQr ? `<img src="${esc(u.paymentQr)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">` : ''}
+          <div style="font-size:12px;color:var(--ink2)">
+            ${u.bankName ? `<div>${esc(u.bankName)}</div>` : ''}
+            ${u.bankAccountNumber ? `<div>เลขบัญชี: ${esc(u.bankAccountNumber)}</div>` : ''}
+            ${u.bankAccountName ? `<div>ชื่อบัญชี: ${esc(u.bankAccountName)}</div>` : ''}
+          </div>
+        </div>`;
     }
 
     function toggleAddForm() {

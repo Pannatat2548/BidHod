@@ -1,7 +1,33 @@
 const router = require("express").Router();
-const { find, findOne, update } = require("../db");
+const { find, findOne, insert, update } = require("../db");
 const { requireAuth } = require("../middleware/auth");
 const { parsePage, paginateArray } = require('../utils/pagination');
+
+// ── helper: ส่ง notification หา buyer/seller ผ่านช่องแชทเดิม (เหมือน routes/payments.js) ──
+// ใช้ตอน status ของ lot เปลี่ยน เช่น slip confirmed, shipped
+async function notifyUser(req, toUserId, text) {
+    try {
+        const io = req.app.get("io");
+        if (!toUserId || toUserId === req.user.id) return; // ไม่ต้องแจ้งตัวเอง
+        const msg = {
+            senderId: "system",
+            receiverId: toUserId,
+            text,
+            createdAt: Date.now(),
+        };
+        const saved = await insert("messages", msg);
+        if (io) {
+            const chatRoom = ["system", toUserId].sort().join("_");
+            io.to(`chat:${chatRoom}`).emit("chat:message", saved);
+            io.to(`user:${toUserId}`).emit("chat:notification", {
+                fromId: "system",
+                preview: text.substring(0, 80),
+            });
+        }
+    } catch (err) {
+        console.error("notifyUser error:", err.message);
+    }
+}
 
 // GET /api/profile/seller-rooms — ต้องอยู่ก่อน /:userId เสมอ
 router.get("/seller-rooms", requireAuth, async (req, res) => {
@@ -252,7 +278,8 @@ router.patch("/:userId", requireAuth, async (req, res) => {
         if (req.user.id !== req.params.userId && req.user.role !== "admin") {
             return res.status(403).json({ error: "ไม่มีสิทธิ์แก้ไข" });
         }
-        const { facebook, instagram, discord, reddit, phone, otherSocial, otherSocialLabel } = req.body;
+        const { facebook, instagram, discord, reddit, phone, otherSocial, otherSocialLabel,
+                paymentQr, bankName, bankAccountNumber, bankAccountName } = req.body;
         const setObj = {};
         if (facebook !== undefined) setObj.facebook = facebook;
         if (instagram !== undefined) setObj.instagram = instagram;
@@ -261,6 +288,11 @@ router.patch("/:userId", requireAuth, async (req, res) => {
         if (phone !== undefined) setObj.phone = phone;
         if (otherSocial !== undefined) setObj.otherSocial = otherSocial;
         if (otherSocialLabel !== undefined) setObj.otherSocialLabel = otherSocialLabel;
+        // ── ข้อมูลรับเงินของผู้ขาย (QR + เลขบัญชีสำรอง) ตั้งครั้งเดียวใช้ได้ทุกห้อง ──
+        if (paymentQr !== undefined) setObj.paymentQr = paymentQr;
+        if (bankName !== undefined) setObj.bankName = bankName;
+        if (bankAccountNumber !== undefined) setObj.bankAccountNumber = bankAccountNumber;
+        if (bankAccountName !== undefined) setObj.bankAccountName = bankAccountName;
 
         if (Object.keys(setObj).length === 0) {
             return res.status(400).json({ error: "ไม่มีข้อมูลที่จะอัปเดต" });
@@ -333,6 +365,9 @@ router.patch("/lots/:id/confirm-slip", requireAuth, async (req, res) => {
             }
         });
 
+        notifyUser(req, lot.highestBidderId,
+            `✅ ผู้ขายยืนยันการชำระเงินสำหรับ "${lot.name}" แล้ว รอการจัดส่งครับ/ค่ะ`);
+
         res.json({ ok: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -364,6 +399,9 @@ router.patch("/lots/:id/reject-slip", requireAuth, async (req, res) => {
                 paymentSlip: null,
             }
         });
+
+        notifyUser(req, lot.highestBidderId,
+            `❌ ผู้ขายปฏิเสธสลิปสำหรับ "${lot.name}" — เหตุผล: ${reason || "กรุณาส่งสลิปใหม่"}`);
 
         res.json({ ok: true });
     } catch (err) {
@@ -445,6 +483,13 @@ router.patch("/lots/deliver-merged", requireAuth, async (req, res) => {
             });
         }
 
+        // ทุก lot ในกลุ่มนี้เป็นของ buyer คนเดียวกันเสมอ (merged deliver ทำงานแบบนี้) — แจ้งครั้งเดียวพอ
+        const buyerId = lots[0].highestBidderId;
+        const lotNames = lots.map(l => `"${l.name}"`).join(", ");
+        notifyUser(req, buyerId,
+            `🚚 ผู้ขายจัดส่งของแล้ว (${lots.length} lot: ${lotNames}) ` +
+            `${shippingProvider ? shippingProvider + " " : ""}เลขพัสดุ: ${trackingNumber}`);
+
         res.json({ ok: true, count: lots.length });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -469,6 +514,10 @@ router.patch("/lots/:id/deliver", requireAuth, async (req, res) => {
             $set: { delivered: true, deliveredAt: new Date(), trackingNumber, shippingProvider: shippingProvider || "" }
         });
 
+        notifyUser(req, lot.highestBidderId,
+            `🚚 ผู้ขายจัดส่งของแล้วสำหรับ "${lot.name}" ` +
+            `${shippingProvider ? shippingProvider + " " : ""}เลขพัสดุ: ${trackingNumber}`);
+
         res.json({ ok: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -488,6 +537,11 @@ router.patch("/lots/:id/receive", requireAuth, async (req, res) => {
         await update("lots", { _id: req.params.id }, {
             $set: { received: true, receivedAt: new Date() }
         });
+
+        const room = await findOne("rooms", { _id: lot.roomId });
+        const sellerId = room ? room.sellerId : lot.sellerId;
+        notifyUser(req, sellerId,
+            `📦 ${req.user.name || "ผู้ซื้อ"} ยืนยันรับของสำหรับ "${lot.name}" แล้ว ตอนนี้ให้คะแนนกันได้เลย`);
 
         res.json({ ok: true });
     } catch (err) {

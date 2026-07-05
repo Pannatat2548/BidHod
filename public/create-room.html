@@ -104,6 +104,34 @@ body { background: var(--bg2); }
   font-size: 11px;
   color: var(--ink4);
 }
+.ship-opt-row input, .ship-opt-row select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.ship-opt-row input:focus, .ship-opt-row select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.btn {
+  padding: 9px 14px;
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--ink2);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--primary); background: var(--primary-light); }
 
 /* ── Grid layouts ── */
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
@@ -396,7 +424,31 @@ table.lot-table tr:hover td { background: var(--primary-light); }
     </div>
   </div>
 
-  <!-- ── ส่วนที่ 2: วันเวลาปิดประมูล (ใหม่) ── -->
+  <!-- ── ส่วนที่ 1.5: วิธีจัดส่ง (ใหม่) — ผู้ขายเลือก นัดรับ/ส่ง/อื่นๆ ให้ buyer เลือกตอน checkout ── -->
+  <div class="section-card">
+    <div class="section-head"><span class="icon">🚚</span> วิธีจัดส่ง / รับของ</div>
+    <small style="display:block;margin-bottom:10px;color:var(--ink4)">
+      ตั้งวิธีที่ buyer เลือกได้ตอนจ่ายเงิน เพิ่มได้หลายวิธี เช่น "นัดรับ" + "ส่ง EMS" ถ้าไม่ตั้งเลยระบบจะใช้ค่าเริ่มต้นให้
+    </small>
+    <div id="ship-opts-list"></div>
+    <button type="button" class="btn" onclick="addShipOption()" style="margin-top:8px">+ เพิ่มวิธีจัดส่ง</button>
+  </div>
+
+  <template id="ship-opt-template">
+    <div class="ship-opt-row" style="display:grid;grid-template-columns:110px 1fr 100px auto;gap:8px;margin-bottom:8px;align-items:start">
+      <select class="ship-opt-type" onchange="onShipTypeChange(this)">
+        <option value="pickup">🤝 นัดรับ</option>
+        <option value="ship">📦 ส่ง</option>
+        <option value="other">✨ อื่นๆ</option>
+      </select>
+      <div>
+        <input type="text" class="ship-opt-name" placeholder="ชื่อวิธี เช่น นัดรับที่ BTS อโศก">
+        <input type="text" class="ship-opt-desc" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ) เช่น วันเวลา/เงื่อนไข" style="margin-top:6px">
+      </div>
+      <input type="number" class="ship-opt-price" placeholder="ค่าใช้จ่าย" min="0" value="0">
+      <button type="button" class="btn" onclick="this.closest('.ship-opt-row').remove()">✕</button>
+    </div>
+  </template>
   <div class="datetime-section section-card">
     <div class="section-head"><span class="icon">📅</span> วันและเวลาปิดประมูล</div>
     <div class="field" style="margin:0">
@@ -688,6 +740,46 @@ function clearAllPrices() {
 // ── Hashtag input ─────────────────────────────
 let tags = [];
 
+// ── วิธีจัดส่ง (นัดรับ/ส่ง/อื่นๆ) ──
+const shipTypeDefaultName = { pickup: 'นัดรับ', ship: 'ส่งพัสดุ', other: 'อื่นๆ' };
+
+function addShipOption() {
+  const list = document.getElementById('ship-opts-list');
+  if (list.children.length >= 10) { showMsg('เพิ่มวิธีจัดส่งได้สูงสุด 10 วิธี', 'err'); return; }
+  const tpl = document.getElementById('ship-opt-template');
+  const node = tpl.content.cloneNode(true);
+  list.appendChild(node);
+  // auto-fill ชื่อเริ่มต้นตามประเภทที่เลือก (แก้ได้ทีหลัง)
+  const row = list.lastElementChild;
+  const typeSel = row.querySelector('.ship-opt-type');
+  const nameInput = row.querySelector('.ship-opt-name');
+  nameInput.value = shipTypeDefaultName[typeSel.value] || '';
+}
+
+function onShipTypeChange(selectEl) {
+  const row = selectEl.closest('.ship-opt-row');
+  const nameInput = row.querySelector('.ship-opt-name');
+  // เติมให้เฉพาะตอนที่ยังไม่ได้แก้ชื่อเอง (ยังเป็นค่า default เดิม)
+  const wasDefault = Object.values(shipTypeDefaultName).includes(nameInput.value.trim());
+  if (wasDefault || !nameInput.value.trim()) {
+    nameInput.value = shipTypeDefaultName[selectEl.value] || '';
+  }
+}
+
+function collectShippingOptions() {
+  return [...document.querySelectorAll('#ship-opts-list .ship-opt-row')].map(row => ({
+    type: row.querySelector('.ship-opt-type').value,
+    name: row.querySelector('.ship-opt-name').value.trim(),
+    desc: row.querySelector('.ship-opt-desc').value.trim(),
+    price: parseInt(row.querySelector('.ship-opt-price').value) || 0,
+  })).filter(o => o.name);
+}
+
+// เริ่มต้นมี 1 แถวให้เลย (นัดรับ) กันหน้าดูว่างเปล่า
+document.addEventListener('DOMContentLoaded', () => {
+  addShipOption();
+});
+
 function handleTagKey(e) {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
@@ -766,13 +858,14 @@ async function createRoom() {
 
   const snipeExt = parseInt(document.getElementById('snipe-ext').value) || 0;
   const snipeTrigger = snipeExt;
+  const shippingOptions = collectShippingOptions();
 
   try {
     showMsg('กำลังสร้างห้อง...', 'ok');
     const r = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ title, house, lots, snipeExt, snipeTrigger, endsAt: endAt, tags })
+      body: JSON.stringify({ title, house, lots, snipeExt, snipeTrigger, endsAt: endAt, tags, shippingOptions })
     });
     const d = await r.json();
     if (!r.ok) return showMsg(d.error, 'err');

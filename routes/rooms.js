@@ -70,13 +70,27 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/rooms — seller/admin สร้างห้อง
 router.post("/", requireSeller, requireNotBlacklisted, async (req, res) => {
-  const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0, endsAt, tags = [] } = req.body;
+  const { title, house, lots: lotsData, snipeExt = 0, snipeTrigger = 0, endsAt, tags = [], shippingOptions = [] } = req.body;
   if (!title || !house) return res.status(400).json({ error: "กรุณากรอก title และ house" });
 
   // sanitize tags
   const cleanTags = [...new Set(
     tags.map(t => t.toString().toLowerCase().replace(/^#+/, '').trim()).filter(Boolean)
   )].slice(0, 10);
+
+  // sanitize shippingOptions — { type: 'pickup'|'ship'|'other', name, price, desc }
+  const allowedShipTypes = ["pickup", "ship", "other"];
+  const cleanShippingOptions = Array.isArray(shippingOptions)
+    ? shippingOptions
+        .filter(o => o && o.name && o.name.toString().trim())
+        .slice(0, 10)
+        .map(o => ({
+          type: allowedShipTypes.includes(o.type) ? o.type : "other",
+          name: o.name.toString().trim().slice(0, 60),
+          price: Math.max(0, Number(o.price) || 0),
+          desc: (o.desc || "").toString().trim().slice(0, 200),
+        }))
+    : [];
 
   const room = await insert("rooms", {
     title, house,
@@ -85,6 +99,7 @@ router.post("/", requireSeller, requireNotBlacklisted, async (req, res) => {
     snipeExt,
     snipeTrigger,
     tags: cleanTags,
+    shippingOptions: cleanShippingOptions,
     createdAt: new Date(),
   });
 
