@@ -198,6 +198,13 @@
       background: var(--bg);
       outline: none;
       transition: border-color 0.15s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .add-social-form input[type="file"] {
+      padding: 8px;
+      font-size: 12px;
     }
 
     .add-social-form select:focus,
@@ -833,7 +840,7 @@
         <div class="add-social-form" id="payment-info-form">
           <div style="display:flex;gap:10px;align-items:flex-start">
             <img id="payment-qr-preview" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:none">
-            <div style="flex:1">
+            <div style="flex:1;min-width:0">
               <input type="file" id="payment-qr-input" accept="image/*" onchange="handlePaymentQrSelect(this)">
               <small style="display:block;margin-top:4px;color:var(--ink4)">อัปโหลดรูป QR พร้อมเพย์ / QR ธนาคาร</small>
             </div>

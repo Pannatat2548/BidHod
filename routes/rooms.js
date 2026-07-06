@@ -58,9 +58,20 @@ router.get("/tags", async (req, res) => {
 
 // GET /api/rooms/:id
 router.get("/:id", async (req, res) => {
-  const room = await findOne("rooms", { _id: req.params.id });
-  if (!room) return res.status(404).json({ error: "ไม่พบห้องนี้" });
+  let room = await findOne("rooms", { _id: req.params.id });
   const lots = await find("lots", { roomId: req.params.id }, { num: 1 });
+  if (!room) {
+    // ห้องอาจถูกลบไปแล้ว — ถ้ายังมี lot ที่อ้างอิงห้องนี้อยู่ (roomDeleted:true)
+    // reconstruct ข้อมูลขั้นต่ำจาก lot เพื่อให้ผู้ชนะประมูลยังชำระเงิน/ดูสถานะได้ต่อ
+    if (!lots.length) return res.status(404).json({ error: "ไม่พบห้องนี้" });
+    room = {
+      _id: req.params.id,
+      title: lots[0].roomTitle || "ห้องที่ถูกลบ",
+      sellerId: lots[0].sellerId || null,
+      isDeleted: true,
+      shippingOptions: [],
+    };
+  }
   const lotsWithBids = await Promise.all(lots.map(async l => {
     const bids = await find("bids", { lotId: l._id }, { createdAt: -1 });
     return { ...l, bids: bids.slice(0, 20) };
@@ -166,14 +177,25 @@ router.get("/:id/my-wins", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
     const roomId = req.params.id;
-    const room = await findOne("rooms", { _id: roomId });
-    if (!room) return res.status(404).json({ error: "ไม่พบห้องนี้" });
+    let room = await findOne("rooms", { _id: roomId });
     const lots = await find("lots", {
       roomId,
       highestBidderId: userId,
       isActive: false,
       paid: { $ne: true },
     });
+    if (!room) {
+      // ห้องถูกลบไปแล้ว — เช็คว่าเคยมีห้องนี้จริง (lot cache ไว้ว่า roomDeleted) เพื่อไม่ให้ผู้ชนะประมูลติดค้าง จ่ายเงินไม่ได้
+      const anyLot = await findOne("lots", { roomId, roomDeleted: true });
+      if (!anyLot) return res.status(404).json({ error: "ไม่พบห้องนี้" });
+      room = {
+        _id: roomId,
+        title: anyLot.roomTitle || "ห้องที่ถูกลบ",
+        sellerId: anyLot.sellerId || null,
+        isDeleted: true,
+        shippingOptions: [],
+      };
+    }
     res.json({ lots, room });
   } catch (err) {
     res.status(500).json({ error: err.message });

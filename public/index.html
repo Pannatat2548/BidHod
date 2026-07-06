@@ -303,7 +303,7 @@
           <a href="/orders.html" class="dropdown-item" id="orders-link">
             <span class="dropdown-icon">📦</span> คำสั่งซื้อ
           </a>
-          <a href="/messages.html?admin=1" class="dropdown-item">
+          <a href="/messages.html?with=admin" class="dropdown-item">
             <span class="dropdown-icon">🛡️</span> ติดต่อ Admin
           </a>
           <a href="/admin.html" class="dropdown-item" id="admin-panel-link" style="display:none">
@@ -537,9 +537,8 @@
 
         // Badge ค้างชำระ (แสดงเฉพาะห้องที่จบแล้ว + มี lot ค้าง)
         const unpaidBadge = (!isLive && unpaid > 0 && token)
-          ? `<span style="position:absolute;top:12px;right:12px;" 
-           class="badge" 
-           style="background:#ef4444;color:#fff;border-color:rgba(239,68,68,0.3);">
+          ? `<span class="badge"
+           style="position:absolute;top:12px;right:12px;background:#ef4444;color:#fff;border:1px solid rgba(255,255,255,0.6);box-shadow:0 2px 8px rgba(0,0,0,0.25);">
            💳 ค้างชำระ ${unpaid} รายการ
          </span>`
           : '';

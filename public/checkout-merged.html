@@ -203,6 +203,20 @@ body { background: var(--bg2); }
   .page-hero h1 { font-size: 18px; }
   .section-card { padding: 16px; }
 }
+
+/* payment QR fullscreen */
+.slip-fs {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92);
+  z-index: 2000; align-items: center; justify-content: center;
+}
+.slip-fs.show { display: flex; }
+.slip-fs img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; }
+.slip-fs-close {
+  position: absolute; top: 20px; right: 20px; color: #fff;
+  font-size: 24px; cursor: pointer; background: rgba(0,0,0,.5);
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
 </style>
 </head>
 <body>
@@ -302,6 +316,12 @@ body { background: var(--bg2); }
   </div>
 </div>
 
+<!-- ── QR / payment image fullscreen ── -->
+<div class="slip-fs" id="slip-fs" onclick="closeFs()">
+  <div class="slip-fs-close">✕</div>
+  <img id="slip-fs-img" src="" alt="รูปขยาย">
+</div>
+
 <script>
 // ── Auth guard (ใช้ pattern เดียวกับ create-room.html) ──
 const user  = JSON.parse(localStorage.getItem('user') || 'null');
@@ -386,7 +406,7 @@ function renderSellerPaymentInfo(seller) {
   card.style.display = '';
   wrap.innerHTML = `
     <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-      ${seller.paymentQr ? `<img src="${escHtml(seller.paymentQr)}" style="width:140px;height:140px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#fff">` : ''}
+      ${seller.paymentQr ? `<img src="${escHtml(seller.paymentQr)}" onclick="openFs('${escHtml(seller.paymentQr)}')" style="width:140px;height:140px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:zoom-in" title="คลิกเพื่อดูรูปเต็ม">` : ''}
       <div style="font-size:13px;color:var(--ink2);line-height:1.8">
         ${seller.bankName ? `<div><b>ธนาคาร:</b> ${escHtml(seller.bankName)}</div>` : ''}
         ${seller.bankAccountNumber ? `<div><b>เลขบัญชี:</b> ${escHtml(seller.bankAccountNumber)}</div>` : ''}
@@ -568,6 +588,11 @@ function showMsg(text, type) {
   const el = document.getElementById('msg');
   el.textContent = text; el.className = 'msg ' + type;
 }
+
+// ── QR / payment image fullscreen ──
+function openFs(url) { document.getElementById('slip-fs-img').src = url; document.getElementById('slip-fs').classList.add('show'); }
+function closeFs() { document.getElementById('slip-fs').classList.remove('show'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFs(); });
 </script>
 </body>
 </html>

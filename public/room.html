@@ -56,6 +56,38 @@
       overflow: hidden
     }
 
+    .lot-thumb.has-img { cursor: zoom-in; }
+    .lot-thumb img { width: 100%; height: 100%; object-fit: contain; background: var(--bg2); }
+
+    .lot-thumb-strip {
+      display: flex;
+      gap: 8px;
+      margin: -10px 0 16px;
+      overflow-x: auto;
+    }
+    .lot-thumb-strip .strip-item {
+      width: 56px; height: 56px; flex-shrink: 0;
+      border-radius: 8px; overflow: hidden; cursor: pointer;
+      border: 2px solid var(--line);
+      opacity: .7; transition: all .15s;
+    }
+    .lot-thumb-strip .strip-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lot-thumb-strip .strip-item.active { border-color: var(--primary); opacity: 1; }
+    .lot-thumb-strip .strip-item:hover { opacity: 1; }
+
+    .lot-fs {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92);
+      z-index: 2000; align-items: center; justify-content: center;
+    }
+    .lot-fs.show { display: flex; }
+    .lot-fs img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 12px; }
+    .lot-fs-close {
+      position: absolute; top: 20px; right: 20px; color: #fff;
+      font-size: 24px; cursor: pointer; background: rgba(0,0,0,.5);
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     .lot-badge-row {
       display: flex;
       align-items: center;
@@ -529,10 +561,28 @@
           </a>
         </div>` : '';
 
+      const lotImages = Array.isArray(lot.images) && lot.images.length
+        ? lot.images
+        : (lot.image ? [lot.image] : []);
+      window.__currentLotImages = lotImages;
+
+      const mainImgHTML = lotImages.length
+        ? `<img id="lot-main-img" src="${lotImages[0]}" alt="${lot.name}" onclick="openLotFs(this.src)">`
+        : lotIcon(lot.name);
+
+      const stripHTML = lotImages.length > 1 ? `
+        <div class="lot-thumb-strip" id="lot-thumb-strip">
+          ${lotImages.map((url, idx) => `
+            <div class="strip-item${idx === 0 ? ' active' : ''}" onclick="switchLotImage('${url}', this)">
+              <img src="${url}" alt="รูปที่ ${idx + 1}">
+            </div>`).join('')}
+        </div>` : '';
+
       document.getElementById('main').innerHTML = `
-        <div class="lot-thumb">
-          ${lot.image ? `<img src="${lot.image}" alt="${lot.name}">` : lotIcon(lot.name)}
+        <div class="lot-thumb${lotImages.length ? ' has-img' : ''}" onclick="${lotImages.length ? `openLotFs(document.getElementById('lot-main-img').src)` : ''}">
+          ${mainImgHTML}
         </div>
+        ${stripHTML}
         <div class="lot-badge-row">
           <span class="lot-num-label">LOT ${String(lot.num).padStart(3, '0')}</span>
           <span class="badge ${lot.isActive ? 'badge-live' : 'badge-ended'}">
@@ -670,6 +720,21 @@
       if (n.includes('hoodie') || n.includes('supreme')) return '👕';
       return '📦';
     }
+
+    // ── รูปสินค้าหลายรูป: สลับรูปหลัก + เปิดดูเต็มจอ ──
+    function switchLotImage(url, el) {
+      const mainImg = document.getElementById('lot-main-img');
+      if (mainImg) mainImg.src = url;
+      document.querySelectorAll('#lot-thumb-strip .strip-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function openLotFs(url) {
+      document.getElementById('lot-fs-img').src = url;
+      document.getElementById('lot-fs').classList.add('show');
+    }
+    function closeLotFs() { document.getElementById('lot-fs').classList.remove('show'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLotFs(); });
 
     // ── จุดที่ 2: history item — ชื่อ bidder คลิกส่องโปรไฟล์ได้ ──
     // bids จาก server มี bidderId ด้วย ถ้าไม่มีก็ fallback เป็นชื่อ mask ธรรมดา
@@ -953,6 +1018,12 @@
         <button class="btn primary" onclick="confirmRoomDelivered()" style="flex:1;">📦 ยืนยันจัดส่ง</button>
       </div>
     </div>
+  </div>
+
+  <!-- Lot image fullscreen viewer -->
+  <div class="lot-fs" id="lot-fs" onclick="closeLotFs()">
+    <div class="lot-fs-close">✕</div>
+    <img id="lot-fs-img" src="" alt="รูปขยาย">
   </div>
 </body>
 

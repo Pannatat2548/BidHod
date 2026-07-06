@@ -238,6 +238,47 @@ span.flatpickr-weekday {
 .spinner { display: none; font-size: 11px; color: var(--ink4); margin-top: 8px; }
 .spinner.show { display: block; }
 
+/* ── Cover grid (multi-image) ── */
+.cover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+.cover-slot {
+  position: relative;
+  aspect-ratio: 1/1;
+  border-radius: var(--radius-sm, 10px);
+  overflow: hidden;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+}
+.cover-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover-slot .cover-remove-btn {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+}
+.cover-slot .cover-remove-btn:hover { background: rgba(0,0,0,.8); }
+.cover-slot .cover-main-badge {
+  position: absolute; bottom: 4px; left: 4px;
+  font-size: 10px; padding: 2px 6px; border-radius: 6px;
+  background: rgba(0,0,0,.55); color: #fff;
+}
+.cover-add-slot {
+  aspect-ratio: 1/1;
+  border: 2px dashed var(--line2);
+  border-radius: var(--radius-sm, 10px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer; color: var(--ink4);
+  font-size: 11px; text-align: center; padding: 6px;
+  transition: all .15s;
+  background: var(--bg2);
+}
+.cover-add-slot:hover { border-color: var(--primary); background: var(--primary-light); }
+.cover-add-slot .plus { font-size: 22px; line-height: 1; }
+
 /* ── Price groups ── */
 .group-section {
   background: var(--bg2);
@@ -465,13 +506,16 @@ table.lot-table tr:hover td { background: var(--primary-light); }
   <!-- ส่วนที่ 3: รูปสินค้า -->
   <div class="section-card">
     <div class="section-head"><span class="icon">🖼️</span> รูปสินค้า</div>
-    <div class="cover-upload" id="cover-upload" onclick="document.getElementById('cover-input').click()">
-      <div class="cover-upload-icon">🖼</div>
-      <div class="cover-upload-label">คลิกเพื่ออัปโหลดรูป</div>
-      <div class="cover-upload-hint">JPG, PNG, WEBP ขนาดไม่เกิน 5MB<br>ใช้รูปที่มีทุกชิ้นอยู่ในรูปเดียว</div>
+    <small style="display:block;margin-bottom:10px;color:var(--ink4)">ใส่ได้สูงสุด 5 รูป — รูปแรกจะถูกใช้เป็นรูปหน้าปกของห้อง</small>
+    <div class="cover-grid" id="cover-grid">
+      <div class="cover-add-slot" id="cover-add-slot" onclick="document.getElementById('cover-input').click()">
+        <div class="plus">＋</div>
+        <div>เพิ่มรูป</div>
+      </div>
     </div>
-    <input type="file" id="cover-input" accept="image/*" style="display:none" onchange="uploadCover(this)">
+    <input type="file" id="cover-input" accept="image/*" multiple style="display:none" onchange="uploadCover(this)">
     <div class="spinner" id="cover-spinner">⏳ กำลังอัปโหลด...</div>
+    <div class="cover-upload-hint" style="margin-top:8px">JPG, PNG, WEBP ขนาดไม่เกิน 5MB ต่อรูป</div>
     <input type="hidden" id="cover-img">
   </div>
 
@@ -555,7 +599,8 @@ const token = localStorage.getItem('token');
 if (!token || !user || !['admin','seller'].includes(user.role))
   location.href = '/login.html?redirect=/create-room.html';
 
-let coverUrl = '';
+let coverImages = [];
+const MAX_COVER_IMAGES = 5;
 let tableGenerated = false;
 let selectedEndDate = null; // เก็บ Date object ที่เลือก
 
@@ -600,38 +645,69 @@ function updateEndTimePreview() {
 // อัปเดต preview เมื่อเปลี่ยนจำนวน lot
 document.getElementById('lot-count').addEventListener('input', updateEndTimePreview);
 
-// ── Upload cover ──────────────────────────────
+// ── Upload cover (รองรับหลายรูป สูงสุด MAX_COVER_IMAGES) ──────────────────────────────
 async function uploadCover(input) {
-  const file = input.files[0];
-  if (!file) return;
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+
+  const remaining = MAX_COVER_IMAGES - coverImages.length;
+  if (remaining <= 0) {
+    showMsg(`ใส่รูปได้สูงสุด ${MAX_COVER_IMAGES} รูป`, 'err');
+    input.value = '';
+    return;
+  }
+  const toUpload = files.slice(0, remaining);
+  if (files.length > remaining) {
+    showMsg(`เพิ่มได้อีกแค่ ${remaining} รูป (สูงสุด ${MAX_COVER_IMAGES} รูป) — อัปโหลดเฉพาะ ${remaining} รูปแรก`, 'err');
+  }
+
   const spinner = document.getElementById('cover-spinner');
   spinner.classList.add('show');
   try {
-    const fd = new FormData();
-    fd.append('image', file);
-    const r = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
-      body: fd
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    coverUrl = d.url;
-    document.getElementById('cover-img').value = d.url;
-
-    const area = document.getElementById('cover-upload');
-    area.classList.add('has-img');
-    area.onclick = null;
-    area.innerHTML = `
-      <img src="${d.url}" alt="cover">
-      <div class="cover-change-btn" onclick="document.getElementById('cover-input').click()">
-        🔄 เปลี่ยนรูป
-      </div>`;
+    for (const file of toUpload) {
+      const fd = new FormData();
+      fd.append('image', file);
+      const r = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      coverImages.push(d.url);
+    }
+    document.getElementById('cover-img').value = coverImages[0] || '';
+    renderCoverGrid();
   } catch(e) {
     showMsg(e.message || 'อัปโหลดไม่สำเร็จ', 'err');
   } finally {
     spinner.classList.remove('show');
+    input.value = '';
   }
+}
+
+function removeCoverImage(idx) {
+  coverImages.splice(idx, 1);
+  document.getElementById('cover-img').value = coverImages[0] || '';
+  renderCoverGrid();
+}
+
+function renderCoverGrid() {
+  const grid = document.getElementById('cover-grid');
+  const slots = coverImages.map((url, idx) => `
+    <div class="cover-slot">
+      <img src="${url}" alt="รูปสินค้า ${idx + 1}">
+      ${idx === 0 ? '<div class="cover-main-badge">ปก</div>' : ''}
+      <div class="cover-remove-btn" onclick="removeCoverImage(${idx})">✕</div>
+    </div>`).join('');
+
+  const addSlot = coverImages.length < MAX_COVER_IMAGES ? `
+    <div class="cover-add-slot" id="cover-add-slot" onclick="document.getElementById('cover-input').click()">
+      <div class="plus">＋</div>
+      <div>เพิ่มรูป (${coverImages.length}/${MAX_COVER_IMAGES})</div>
+    </div>` : '';
+
+  grid.innerHTML = slots + addSlot;
 }
 
 // ── Generate lot table ────────────────────────
@@ -835,7 +911,7 @@ async function createRoom() {
 
   const count = parseInt(document.getElementById('lot-count').value) || 0;
   const start = parseInt(document.getElementById('lot-start').value) || 1;
-  const img = document.getElementById('cover-img').value;
+  const img = coverImages[0] || '';
   const endAt = selectedEndDate.toISOString();
 
   const lots = [];
@@ -847,6 +923,7 @@ async function createRoom() {
     lots.push({
       name: String(num),
       desc,
+      images: coverImages,
       image: img,
       startingPrice: price,
       binPrice: bin,

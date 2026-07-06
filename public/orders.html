@@ -49,6 +49,23 @@ body { background: var(--bg2); }
 .stat-pill-val.red { color: var(--red); }
 .stat-pill-val.blue { color: var(--blue); }
 
+/* ── Filter tabs ── */
+.filter-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+}
+.filter-tab {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600;
+  color: var(--ink3); cursor: pointer; transition: all .15s; user-select: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filter-tab:hover { border-color: var(--primary-light); color: var(--ink); }
+.filter-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.filter-tab .count {
+  font-size: 11px; background: rgba(0,0,0,0.08); border-radius: 999px; padding: 1px 7px;
+}
+.filter-tab.active .count { background: rgba(255,255,255,0.25); }
+
 /* ── Order cards ── */
 .orders-grid { display: flex; flex-direction: column; gap: 12px; }
 
@@ -335,6 +352,7 @@ body { background: var(--bg2); }
         <div class="stat-pill-val blue" id="bs-shipped">0</div>
       </div>
     </div>
+    <div class="filter-tabs" id="buyer-filter-tabs"></div>
     <div class="orders-grid" id="buyer-orders-wrap">
       <div class="empty-box"><div style="font-size:28px;margin-bottom:8px">⏳</div><div>กำลังโหลด...</div></div>
     </div>
@@ -679,6 +697,43 @@ async function updateMergedDeliverLink(roomId) {
 // ─────────────────────────────────────────
 // BUYER SIDE
 // ─────────────────────────────────────────
+let allBuyerLots = [];
+let buyerFilter = 'all';
+
+function getBuyerStatus(l) {
+  if (!l.paid) return 'unpaid';
+  if (!l.slipConfirmed) return 'awaiting_confirm';
+  if (!l.delivered) return 'confirmed';
+  if (!l.received) return 'shipped';
+  return 'received';
+}
+
+const BUYER_FILTERS = [
+  { key: 'all',              label: 'ทั้งหมด' },
+  { key: 'unpaid',           label: 'รอชำระเงิน' },
+  { key: 'awaiting_confirm', label: 'รอตรวจสลิป' },
+  { key: 'confirmed',        label: 'ยืนยันแล้ว' },
+  { key: 'shipped',          label: 'กำลังจัดส่ง' },
+  { key: 'received',         label: 'รับของแล้ว' },
+];
+
+function renderBuyerFilterTabs() {
+  const wrap = document.getElementById('buyer-filter-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = BUYER_FILTERS.map(f => {
+    const count = f.key === 'all' ? allBuyerLots.length : allBuyerLots.filter(l => getBuyerStatus(l) === f.key).length;
+    return `<div class="filter-tab${buyerFilter === f.key ? ' active' : ''}" onclick="setBuyerFilter('${f.key}')">
+      ${f.label} <span class="count">${count}</span>
+    </div>`;
+  }).join('');
+}
+
+function setBuyerFilter(key) {
+  buyerFilter = key;
+  renderBuyerFilterTabs();
+  renderBuyerOrdersList();
+}
+
 async function loadBuyerOrders() {
   const wrap = document.getElementById('buyer-orders-wrap');
   wrap.innerHTML = `<div class="skeleton" style="height:120px"></div>`;
@@ -688,10 +743,7 @@ async function loadBuyerOrders() {
     const r = await fetch(`/api/profile/${uid}`, { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
     const lots = data.stats?.buy?.lots || [];
-
-    // Debug: ดูว่า API return อะไรบ้าง
-    console.log('Lots data:', lots);
-    if (lots.length > 0) console.log('First lot:', lots[0]);
+    allBuyerLots = lots;
 
     // stats
     let bWon = lots.length, bPending = 0, bConfirmed = 0, bShipped = 0;
@@ -706,110 +758,124 @@ async function loadBuyerOrders() {
     document.getElementById('bs-shipped').textContent   = bShipped;
 
     if (!lots.length) {
+      document.getElementById('buyer-filter-tabs').innerHTML = '';
       wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">🛒</div><div class="empty-text">ยังไม่มีประวัติการประมูล</div></div>`;
       return;
     }
 
-    // lot ที่รอรับของ แยกตามห้อง
-    const pendingReceiveLots = lots.filter(l => l.delivered && !l.received);
-    // จัดกลุ่มตาม roomId
-    const pendingByRoom = {};
-    for (const l of pendingReceiveLots) {
-      const rid = getRoomId(l);
-      const rTitle = l.roomTitle || rid || 'ห้องไม่ระบุ';
-      if (!pendingByRoom[rid]) pendingByRoom[rid] = { title: rTitle, lots: [] };
-      pendingByRoom[rid].lots.push(l);
-    }
-    const roomGroups = Object.values(pendingByRoom).filter(g => g.lots.length > 1);
-    const bulkReceiveHtml = roomGroups.length
-      ? `<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:8px">
-           ${roomGroups.map(g => `
-             <button class="btn-confirm" style="width:100%;padding:12px;font-size:13px;font-weight:700;text-align:left"
-               onclick="markReceivedBulk(${JSON.stringify(g.lots.map(l=>l._id)).replace(/"/g,'&quot;')})">
-               ✓ ยืนยันรับของครบทั้ง ${g.lots.length} lot — ${g.title}
-             </button>`).join('')}
-         </div>`
-      : '';
-
-    wrap.innerHTML = bulkReceiveHtml + lots.map(l => {
-      const roomId = getRoomId(l); // ← ใช้ helper function
-      
-      // สร้าง timeline steps
-      const steps = [
-        {
-          icon: l.paid ? '✓' : '1',
-          cls: l.paid ? 'done' : (l.slipRejected ? 'err' : 'active'),
-          label: l.slipRejected ? 'สลิปถูกปฏิเสธ' : (l.paid ? 'ชำระเงินแล้ว' : 'รอการชำระเงิน'),
-          sub: l.slipRejected
-            ? `เหตุผล: ${l.slipRejectReason || 'กรุณาส่งสลิปใหม่'} — ${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ส่งสลิปใหม่ →</a>` : 'ไม่พบข้อมูลห้อง'}`
-            : (l.paid ? 'ส่งสลิปให้ seller แล้ว' : `${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ไปชำระเงิน →</a>` : 'ไม่พบข้อมูลห้อง'}`)
-        },
-        {
-          icon: l.slipConfirmed ? '✓' : '2',
-          cls: l.slipConfirmed ? 'done' : (l.paid && !l.slipRejected ? 'active' : ''),
-          label: l.slipConfirmed ? 'Seller ยืนยันรับเงินแล้ว' : 'รอ Seller ตรวจสลิป',
-          sub: l.slipConfirmed ? '' : (l.paid ? 'Seller กำลังตรวจสอบสลิป' : 'ยังไม่ได้ชำระเงิน')
-        },
-        {
-          icon: l.delivered ? '✓' : '3',
-          cls: l.delivered ? 'done' : (l.slipConfirmed && !l.delivered ? 'active' : ''),
-          label: l.delivered ? `จัดส่งแล้ว` : 'รอ Seller จัดส่ง',
-          sub: l.trackingNumber
-            ? `${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}`
-            : (l.slipConfirmed ? 'Seller กำลังเตรียมของ' : '')
-        },
-        {
-          icon: l.received ? '✓' : '4',
-          cls: l.received ? 'done' : (l.delivered && !l.received ? 'active' : ''),
-          label: l.received ? 'รับของแล้ว ✓' : 'ยืนยันรับของ',
-          sub: l.received ? '' : (l.delivered ? 'กดยืนยันเมื่อได้รับของแล้ว' : '')
-        },
-      ];
-
-      const tlHtml = steps.map(s => `
-        <div class="tl-step">
-          <div class="tl-icon ${s.cls}">${s.icon}</div>
-          <div class="tl-content">
-            <div class="tl-label">${s.label}</div>
-            ${s.sub ? `<div class="tl-sub">${s.sub}</div>` : ''}
-          </div>
-        </div>`).join('');
-
-      const receiveBtn = (l.delivered && !l.received)
-        ? `<button class="btn-confirm" onclick="markReceived('${l._id}')">✓ ยืนยันรับของแล้ว</button>` : '';
-
-      // ปุ่ม report แสดงตั้งแต่ตอน delivered (ก่อนกดยืนยัน) และหลังรับของแล้วด้วย
-      const reportBtn = (l.delivered || l.received)
-        ? `<button class="btn-flag" onclick="openReportModal('${l.sellerId}','${esc(l.sellerName)}','${l._id}','${l.roomId}')">🚩 รายงาน</button>`
-        : '';
-
-      const rateReportBtns = l.received
-        ? `<button class="btn-rate" onclick="openRateModal('${l._id}','${l.sellerId}','${esc(l.sellerName)}')">⭐ ให้คะแนนผู้ขาย</button>
-           ${reportBtn}`
-        : reportBtn;
-
-      return `
-        <div class="order-card">
-          <div class="order-card-head">
-            <div class="order-buyer-info">
-              <div class="order-avatar" style="background:var(--blue-bg);color:var(--blue)">🃏</div>
-              <div>
-                <div class="order-buyer-name">${esc(l.lotName)}</div>
-                <div class="order-buyer-sub">${esc(l.roomTitle)}</div>
-              </div>
-            </div>
-            <div class="order-total">฿${Number(l.price).toLocaleString()}</div>
-          </div>
-          <div class="order-card-body">
-            <div class="timeline">${tlHtml}</div>
-          </div>
-          ${(receiveBtn || rateReportBtns) ? `<div class="order-card-foot"><div></div><div class="action-btns">${receiveBtn}${rateReportBtns}</div></div>` : ''}
-        </div>`;
-    }).join('');
+    renderBuyerFilterTabs();
+    renderBuyerOrdersList();
 
   } catch(e) {
     wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">❌</div><div class="empty-text">${e.message}</div></div>`;
   }
+}
+
+function renderBuyerOrdersList() {
+  const wrap = document.getElementById('buyer-orders-wrap');
+  const lots = buyerFilter === 'all' ? allBuyerLots : allBuyerLots.filter(l => getBuyerStatus(l) === buyerFilter);
+
+  if (!lots.length) {
+    wrap.innerHTML = `<div class="empty-box"><div class="empty-icon">🔎</div><div class="empty-text">ไม่พบรายการในหมวดนี้</div></div>`;
+    return;
+  }
+
+  // lot ที่รอรับของ แยกตามห้อง (คำนวณจากรายการทั้งหมด ไม่ขึ้นกับ filter ที่เลือก)
+  const pendingReceiveLots = allBuyerLots.filter(l => l.delivered && !l.received);
+  // จัดกลุ่มตาม roomId
+  const pendingByRoom = {};
+  for (const l of pendingReceiveLots) {
+    const rid = getRoomId(l);
+    const rTitle = l.roomTitle || rid || 'ห้องไม่ระบุ';
+    if (!pendingByRoom[rid]) pendingByRoom[rid] = { title: rTitle, lots: [] };
+    pendingByRoom[rid].lots.push(l);
+  }
+  const roomGroups = Object.values(pendingByRoom).filter(g => g.lots.length > 1);
+  const bulkReceiveHtml = (roomGroups.length && (buyerFilter === 'all' || buyerFilter === 'shipped'))
+    ? `<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:8px">
+         ${roomGroups.map(g => `
+           <button class="btn-confirm" style="width:100%;padding:12px;font-size:13px;font-weight:700;text-align:left"
+             onclick="markReceivedBulk(${JSON.stringify(g.lots.map(l=>l._id)).replace(/"/g,'&quot;')})">
+             ✓ ยืนยันรับของครบทั้ง ${g.lots.length} lot — ${g.title}
+           </button>`).join('')}
+       </div>`
+    : '';
+
+  wrap.innerHTML = bulkReceiveHtml + lots.map(l => {
+    const roomId = getRoomId(l); // ← ใช้ helper function
+    
+    // สร้าง timeline steps
+    const steps = [
+      {
+        icon: l.paid ? '✓' : '1',
+        cls: l.paid ? 'done' : (l.slipRejected ? 'err' : 'active'),
+        label: l.slipRejected ? 'สลิปถูกปฏิเสธ' : (l.paid ? 'ชำระเงินแล้ว' : 'รอการชำระเงิน'),
+        sub: l.slipRejected
+          ? `เหตุผล: ${l.slipRejectReason || 'กรุณาส่งสลิปใหม่'} — ${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ส่งสลิปใหม่ →</a>` : 'ไม่พบข้อมูลห้อง'}`
+          : (l.paid ? 'ส่งสลิปให้ seller แล้ว' : `${roomId ? `<a href="/checkout-merged.html?room=${roomId}" style="color:var(--primary)">ไปชำระเงิน →</a>` : 'ไม่พบข้อมูลห้อง'}`)
+      },
+      {
+        icon: l.slipConfirmed ? '✓' : '2',
+        cls: l.slipConfirmed ? 'done' : (l.paid && !l.slipRejected ? 'active' : ''),
+        label: l.slipConfirmed ? 'Seller ยืนยันรับเงินแล้ว' : 'รอ Seller ตรวจสลิป',
+        sub: l.slipConfirmed ? '' : (l.paid ? 'Seller กำลังตรวจสอบสลิป' : 'ยังไม่ได้ชำระเงิน')
+      },
+      {
+        icon: l.delivered ? '✓' : '3',
+        cls: l.delivered ? 'done' : (l.slipConfirmed && !l.delivered ? 'active' : ''),
+        label: l.delivered ? `จัดส่งแล้ว` : 'รอ Seller จัดส่ง',
+        sub: l.trackingNumber
+          ? `${l.shippingProvider ? l.shippingProvider + ': ' : ''}${l.trackingNumber}`
+          : (l.slipConfirmed ? 'Seller กำลังเตรียมของ' : '')
+      },
+      {
+        icon: l.received ? '✓' : '4',
+        cls: l.received ? 'done' : (l.delivered && !l.received ? 'active' : ''),
+        label: l.received ? 'รับของแล้ว ✓' : 'ยืนยันรับของ',
+        sub: l.received ? '' : (l.delivered ? 'กดยืนยันเมื่อได้รับของแล้ว' : '')
+      },
+    ];
+
+    const tlHtml = steps.map(s => `
+      <div class="tl-step">
+        <div class="tl-icon ${s.cls}">${s.icon}</div>
+        <div class="tl-content">
+          <div class="tl-label">${s.label}</div>
+          ${s.sub ? `<div class="tl-sub">${s.sub}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    const receiveBtn = (l.delivered && !l.received)
+      ? `<button class="btn-confirm" onclick="markReceived('${l._id}')">✓ ยืนยันรับของแล้ว</button>` : '';
+
+    // ปุ่ม report แสดงตั้งแต่ตอน delivered (ก่อนกดยืนยัน) และหลังรับของแล้วด้วย
+    const reportBtn = (l.delivered || l.received)
+      ? `<button class="btn-flag" onclick="openReportModal('${l.sellerId}','${esc(l.sellerName)}','${l._id}','${l.roomId}')">🚩 รายงาน</button>`
+      : '';
+
+    const rateReportBtns = l.received
+      ? `<button class="btn-rate" onclick="openRateModal('${l._id}','${l.sellerId}','${esc(l.sellerName)}')">⭐ ให้คะแนนผู้ขาย</button>
+         ${reportBtn}`
+      : reportBtn;
+
+    return `
+      <div class="order-card">
+        <div class="order-card-head">
+          <div class="order-buyer-info">
+            <div class="order-avatar" style="background:var(--blue-bg);color:var(--blue)">🃏</div>
+            <div>
+              <div class="order-buyer-name">${esc(l.lotName)}</div>
+              <div class="order-buyer-sub">${esc(l.roomTitle)}</div>
+            </div>
+          </div>
+          <div class="order-total">฿${Number(l.price).toLocaleString()}</div>
+        </div>
+        <div class="order-card-body">
+          <div class="timeline">${tlHtml}</div>
+        </div>
+        ${(receiveBtn || rateReportBtns) ? `<div class="order-card-foot"><div></div><div class="action-btns">${receiveBtn}${rateReportBtns}</div></div>` : ''}
+      </div>`;
+  }).join('');
 }
 
 // ─────────────────────────────────────────
