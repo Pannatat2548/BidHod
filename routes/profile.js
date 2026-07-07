@@ -346,9 +346,10 @@ router.patch("/lots/:id/confirm-slip", requireAuth, async (req, res) => {
         const lot = await findOne("lots", { _id: req.params.id });
         if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
 
-        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น
+        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น (รองรับกรณีห้องถูกลบไปแล้ว — ใช้ sellerId ที่ cache ไว้ใน lot แทน)
         const room = await findOne("rooms", { _id: lot.roomId });
-        if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+        const sellerId = room ? room.sellerId : lot.sellerId;
+        if (req.user.role !== "admin" && sellerId !== req.user.id) {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
         }
 
@@ -380,9 +381,10 @@ router.patch("/lots/:id/reject-slip", requireAuth, async (req, res) => {
         const lot = await findOne("lots", { _id: req.params.id });
         if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
 
-        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น
+        // เฉพาะ seller เจ้าของห้องหรือ admin เท่านั้น (รองรับกรณีห้องถูกลบไปแล้ว — ใช้ sellerId ที่ cache ไว้ใน lot แทน)
         const room = await findOne("rooms", { _id: lot.roomId });
-        if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+        const sellerId = room ? room.sellerId : lot.sellerId;
+        if (req.user.role !== "admin" && sellerId !== req.user.id) {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
         }
 
@@ -467,7 +469,8 @@ router.patch("/lots/deliver-merged", requireAuth, async (req, res) => {
             const lot = await findOne("lots", { _id: id });
             if (!lot) return res.status(404).json({ error: `ไม่พบ lot: ${id}` });
             const room = await findOne("rooms", { _id: lot.roomId });
-            if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+            const sellerId = room ? room.sellerId : lot.sellerId;
+            if (req.user.role !== "admin" && sellerId !== req.user.id) {
                 return res.status(403).json({ error: "ไม่มีสิทธิ์กับ lot บางรายการ" });
             }
             if (!lot.slipConfirmed) {
@@ -503,7 +506,8 @@ router.patch("/lots/:id/deliver", requireAuth, async (req, res) => {
         if (!lot) return res.status(404).json({ error: "ไม่พบ lot" });
 
         const room = await findOne("rooms", { _id: lot.roomId });
-        if (!room || (room.sellerId !== req.user.id && req.user.role !== "admin")) {
+        const sellerId = room ? room.sellerId : lot.sellerId;
+        if (req.user.role !== "admin" && sellerId !== req.user.id) {
             return res.status(403).json({ error: "ไม่มีสิทธิ์" });
         }
 

@@ -8,8 +8,10 @@ async function resolveLotParties(lotId) {
   const lot = await findOne("lots", { _id: lotId });
   if (!lot) return null;
   const room = await findOne("rooms", { _id: lot.roomId });
-  if (!room) return null;
-  return { lot, room, buyerId: lot.highestBidderId, sellerId: room.sellerId };
+  // ห้องอาจถูกลบไปแล้ว — ใช้ sellerId ที่ cache ไว้ใน lot แทน เพื่อให้ยังให้คะแนน/รายงานกันได้ตามปกติ
+  const sellerId = room ? room.sellerId : lot.sellerId;
+  if (!sellerId) return null;
+  return { lot, room, buyerId: lot.highestBidderId, sellerId };
 }
 
 // GET /api/ratings/user/:userId — ดู rating ทั้งหมดของ user (public)
